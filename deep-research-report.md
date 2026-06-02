@@ -531,7 +531,4 @@ flowchart LR
   5. OANDA (教育资料) – *Chandelier Stop*: 介绍了基于ATR的跟踪止损策略，以及合理的ATR倍数范围（2.5–4）【28†L39-L43】。  
   6. Campbell et al. (CAIA, 2016) – *Quantifying CTA Risk Management (AIAR)*：与Greyserman类似的多因子风险模型，对CTA组合的风险管理进行了定量分析【12†L186-L194】【12†L195-L203】。  
 
-以上文献从CTA策略的角度对多因子、风险管理和趋势跟踪等方面提供了坚实的理论和实证支持。引用它们使本策略设计更加科学严谨。 git_reason
-
-git_stage
-
+以上文献从CTA策略的角度对多因子、风险管理和趋势跟踪等方面提供了坚实的理论和实证支持。引用它们使本策略设计更加科学严谨。
