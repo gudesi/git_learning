@@ -21,10 +21,15 @@ Description:
 Dependencies:
 None
 
-Deliverable:
+Deliverable
 
-* ETF_UNIVERSE
-* ETF_CATEGORY_MAP
+- CASH_ETF
+- RISK_ETFS
+- ETF_UNIVERSE
+- ETF_CATEGORY_MAP
+- ETF_NAME_MAP
+- ASSET_CLASS_MAP
+- validate_universe()
 
 Definition of Done:
 
@@ -34,7 +39,7 @@ Definition of Done:
 * 单元测试通过
 
 Status:
-NOT STARTED
+DONE
 
 ---
 

@@ -11,6 +11,22 @@ Format:
 
 ---
 
+Added
+
+DATA-001 Asset Definition Layer
+
+Components:
+- CASH_ETF
+- RISK_ETFS
+- ETF_UNIVERSE
+- ETF_CATEGORY_MAP
+- ETF_NAME_MAP
+- ASSET_CLASS_MAP
+- validate_universe()
+
+Status:
+Completed
+
 # [v4.0] - 2026-06-05
 
 ## Added
