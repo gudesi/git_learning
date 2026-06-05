@@ -140,22 +140,6 @@ Progress:
 | BUG-002 | OPEN   |
 | BUG-003 | OPEN   |
 
----
-
-# Next Action
-
-完成 DATA-001
-
-输出：
-
-* ETF_UNIVERSE
-* ETF_CATEGORY_MAP
-
-然后开始：
-
-DATA-002 Configuration Management
-
----
 
 # Completion Rules
 
@@ -175,14 +159,4 @@ BLOCKED
 
 存在依赖或问题无法继续
 
----
 
-# Notes
-
-当前项目处于初始化阶段。
-
-尚未进入编码阶段。
-
-下一步优先完成：
-
-DATA-001 ETF Universe Definition
