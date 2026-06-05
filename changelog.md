@@ -9,6 +9,29 @@ Format:
 * Removed
 * Fixed
 
+## Added
+
+### DATA-002 Configuration Management
+
+新增统一CONFIG管理系统
+
+包含：
+
+- Data Layer Parameters
+- Market Filter Parameters
+- Momentum Parameters
+- Quality Parameters
+- Liquidity Parameters
+- Portfolio Parameters
+- Risk Parameters
+- Execution Parameters
+
+实现：
+
+Single Source of Truth
+
+所有参数统一由CONFIG管理。
+
 ---
 
 Added

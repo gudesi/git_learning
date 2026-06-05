@@ -62,7 +62,7 @@ Definition of Done:
 * 配置读取正常
 
 Status:
-NOT STARTED
+DONE
 
 ---
 
@@ -489,7 +489,7 @@ Definition of Done:
 全部正常维护
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 
