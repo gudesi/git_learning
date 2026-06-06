@@ -90,7 +90,7 @@ Definition of Done:
 * 异常处理完成
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
@@ -115,7 +115,7 @@ Definition of Done:
 * 回测兼容
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 

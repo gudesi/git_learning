@@ -11,6 +11,25 @@ Format:
 
 [2026-06-06]
 
+DATA-002 Configuration Management
+Implemented configuration management module.
+Added strategy parameter definitions.
+Added configuration validation.
+Refactored configuration architecture from CONFIG dictionary to constant-based configuration model.
+DATA-003 Data Access Layer
+Implemented unified market data access layer.
+Added close/high/low/volume/turnover retrieval functions.
+Added historical data validation utilities.
+Added ETF data availability checks.
+Added valid ETF universe filtering.
+Maintenance
+Updated self-test framework.
+Disabled DATA-003 local validation outside PTrade runtime.
+Verified:
+DATA-001 PASS
+DATA-002 PASS
+STATE-001 PASS
+
 Added
 
 STATE-001 Strategy State Management

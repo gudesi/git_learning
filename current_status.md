@@ -13,7 +13,7 @@ Current Task:
 DATA-003
 
 Overall Progress:
-3 / 23 Tasks Completed
+4 / 23 Tasks Completed
 
 ---
 
@@ -23,11 +23,11 @@ Overall Progress:
 | -------- | ----------- |
 | DATA-001 | DONE |
 | DATA-002 | DONE |
-| DATA-003 | IN PROGRESS |
-| DATA-004 | NOT STARTED |
+| DATA-003 | DONE |
+| DATA-004 | IN PROGRESS |
 
 Progress:
-2 / 4
+3 / 4
 
 ---
 

@@ -260,6 +260,93 @@ def validate_universe():
     return True
 
 # =========================================================
+# DATA-002
+# Configuration Management
+# =========================================================
+
+# ---------------------------------------------------------
+# Data Layer
+# ---------------------------------------------------------
+
+MAX_LOOKBACK = 252
+MIN_HISTORY = 252
+
+# ---------------------------------------------------------
+# Trend Following
+# ---------------------------------------------------------
+
+MOMENTUM_LOOKBACK = 120
+
+# ---------------------------------------------------------
+# Volatility
+# ---------------------------------------------------------
+
+ATR_LOOKBACK = 20
+
+# ---------------------------------------------------------
+# Portfolio Construction
+# ---------------------------------------------------------
+
+MAX_POSITIONS = 5
+
+# ---------------------------------------------------------
+# Risk Management
+# ---------------------------------------------------------
+
+TARGET_PORTFOLIO_RISK = 0.10
+
+MAX_SINGLE_POSITION_WEIGHT = 0.25
+MIN_SINGLE_POSITION_WEIGHT = 0.05
+
+# ---------------------------------------------------------
+# Rebalance
+# ---------------------------------------------------------
+
+REBALANCE_FREQUENCY = "monthly"
+
+# ---------------------------------------------------------
+# Liquidity
+# ---------------------------------------------------------
+
+MIN_DAILY_TURNOVER = 50_000_000
+
+# =========================================================
+# DATA-002 Validation
+# =========================================================
+
+def validate_config():
+
+    assert MAX_LOOKBACK > 0
+    assert MIN_HISTORY > 0
+
+    assert MIN_HISTORY <= MAX_LOOKBACK
+
+    assert MOMENTUM_LOOKBACK > 0
+    assert ATR_LOOKBACK > 0
+
+    assert MAX_POSITIONS > 0
+
+    assert (
+        0 < TARGET_PORTFOLIO_RISK < 1
+    )
+
+    assert (
+        0 < MIN_SINGLE_POSITION_WEIGHT
+        <= MAX_SINGLE_POSITION_WEIGHT
+        <= 1
+    )
+
+    assert REBALANCE_FREQUENCY in {
+        "daily",
+        "weekly",
+        "monthly",
+    }
+
+    assert MIN_DAILY_TURNOVER > 0
+
+    return True
+
+# =========================================================
 # STATE-001
 # Strategy State Management
 # =========================================================
@@ -511,9 +598,281 @@ def _test_state_management():
     return True
 
 # =========================================================
+# DATA-003
+# Data Access Layer
+# =========================================================
+
+# ---------------------------------------------------------
+# Internal History Fetcher
+# ---------------------------------------------------------
+
+def _get_history_field(
+    symbol,
+    field,
+    count=None,
+):
+    """
+    Unified historical data access.
+
+    Parameters
+    ----------
+    symbol : str
+        ETF code.
+
+    field : str
+        close/high/low/volume/amount
+
+    count : int
+        History length.
+
+    Returns
+    -------
+    list[float]
+    """
+
+    if count is None:
+        count = MAX_LOOKBACK
+
+    try:
+
+        data = get_history(
+            security=symbol,
+            field=field,
+            count=count,
+        )
+
+        if data is None:
+            return []
+
+        values = list(data)
+
+        return values
+
+    except Exception as e:
+
+        print(
+            f"[WARNING] History fetch failed: "
+            f"{symbol} {field} {e}"
+        )
+
+        return []
+
+# ---------------------------------------------------------
+# Validation
+# ---------------------------------------------------------
+
+def validate_history(
+    data,
+    min_length=None,
+):
+    """
+    Validate historical data.
+    """
+
+    if min_length is None:
+        min_length = MIN_HISTORY
+
+    if data is None:
+        return False
+
+    if len(data) < min_length:
+        return False
+
+    return True
+
+# ---------------------------------------------------------
+# Close
+# ---------------------------------------------------------
+
+def get_close(
+    symbol,
+    count=None,
+):
+    """
+    Get close prices.
+    """
+
+    return _get_history_field(
+        symbol=symbol,
+        field="close",
+        count=count,
+    )
+
+# ---------------------------------------------------------
+# High
+# ---------------------------------------------------------
+
+def get_high(
+    symbol,
+    count=None,
+):
+    """
+    Get high prices.
+    """
+
+    return _get_history_field(
+        symbol=symbol,
+        field="high",
+        count=count,
+    )
+
+# ---------------------------------------------------------
+# Low
+# ---------------------------------------------------------
+
+def get_low(
+    symbol,
+    count=None,
+):
+    """
+    Get low prices.
+    """
+
+    return _get_history_field(
+        symbol=symbol,
+        field="low",
+        count=count,
+    )
+
+# ---------------------------------------------------------
+# Volume
+# ---------------------------------------------------------
+
+def get_volume(
+    symbol,
+    count=None,
+):
+    """
+    Get volume series.
+    """
+
+    return _get_history_field(
+        symbol=symbol,
+        field="volume",
+        count=count,
+    )
+
+# ---------------------------------------------------------
+# Turnover
+# ---------------------------------------------------------
+
+def get_turnover(
+    symbol,
+    count=None,
+):
+    """
+    Get turnover(amount) series.
+    """
+
+    return _get_history_field(
+        symbol=symbol,
+        field="amount",
+        count=count,
+    )
+
+# ---------------------------------------------------------
+# Data Bundle
+# ---------------------------------------------------------
+
+def get_price_bundle(
+    symbol,
+    count=None,
+):
+    """
+    Fetch all required fields once.
+
+    Returns
+    -------
+    dict
+    """
+
+    return {
+        "close": get_close(symbol, count),
+        "high": get_high(symbol, count),
+        "low": get_low(symbol, count),
+        "volume": get_volume(symbol, count),
+        "amount": get_turnover(symbol, count),
+    }
+
+# ---------------------------------------------------------
+# ETF Eligibility Check
+# ---------------------------------------------------------
+
+def is_data_available(
+    symbol,
+):
+    """
+    Check whether ETF has enough history.
+
+    Returns
+    -------
+    bool
+    """
+
+    close = get_close(
+        symbol,
+        MAX_LOOKBACK,
+    )
+
+    return validate_history(close)
+
+# ---------------------------------------------------------
+# Universe Filter
+# ---------------------------------------------------------
+
+def get_valid_etfs():
+    """
+    Return ETFs with sufficient history.
+    """
+
+    valid_symbols = []
+
+    for symbol in RISK_ETFS:
+
+        if is_data_available(symbol):
+            valid_symbols.append(symbol)
+
+    return valid_symbols
+
+# =========================================================
+# DATA-003 Self Test
+# =========================================================
+
+def _test_data_layer():
+
+    sample_symbol = ETF_UNIVERSE[0]
+
+    close = get_close(sample_symbol)
+    high = get_high(sample_symbol)
+    low = get_low(sample_symbol)
+    volume = get_volume(sample_symbol)
+    amount = get_turnover(sample_symbol)
+
+    assert isinstance(close, list)
+    assert isinstance(high, list)
+    assert isinstance(low, list)
+    assert isinstance(volume, list)
+    assert isinstance(amount, list)
+
+    return True
+
+# =========================================================
 # Self Test
 # =========================================================
 
 if __name__ == "__main__":
     validate_universe()
     print("DATA-001 validation passed.")
+
+    validate_config()
+    print("DATA-002 validation passed.")
+
+    _test_state_management()
+    print("STATE-001 validation passed.")
+
+    # _test_data_layer()
+    # print("DATA-003 validation passed.")
+    print(
+        "DATA-003 validation skipped "
+        "(requires PTrade runtime)."
+    )
