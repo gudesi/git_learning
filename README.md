@@ -32,10 +32,10 @@ changelog.md
 ## Current Progress
 
 Current Phase:
-Phase 1
+Phase 2
 
 Current Task:
-DATA-001
+IND-001
 
 ---
 
