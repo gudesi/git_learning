@@ -11,6 +11,65 @@ Format:
 
 [2026-06-06]
 
+## [DATA-004] Portfolio Access Layer
+
+### Added
+
+Implemented DATA-004 Portfolio Access Layer.
+
+Provides a unified interface for accessing portfolio and position information from the PTrade runtime environment.
+
+### Features
+
+Added portfolio-level access functions:
+
+* `get_total_equity()`
+* `get_available_cash()`
+* `get_position_value()`
+
+Added position-level access functions:
+
+* `get_positions()`
+* `get_position()`
+* `has_position()`
+* `get_position_amount()`
+* `get_available_amount()`
+* `get_position_cost()`
+* `get_position_price()`
+* `get_position_market_value()`
+
+Added validation function:
+
+* `validate_portfolio_access_layer()`
+
+### Architecture
+
+The layer abstracts direct access to:
+
+* `context.portfolio`
+* `context.portfolio.positions`
+* PTrade `Position` objects
+
+This prevents upper layers from depending on PTrade-specific APIs.
+
+### Dependencies
+
+Requires:
+
+* DATA-003 Data Access Layer
+* STATE-001 Strategy State
+
+### Enables
+
+Provides required infrastructure for:
+
+* RISK-001 Portfolio Risk Engine
+* RISK-002 Position Sizing Engine
+* EXEC-001 Rebalance Engine
+* EXEC-002 Order Execution Layer
+
+Added
+
 DATA-002 Configuration Management
 Implemented configuration management module.
 Added strategy parameter definitions.
@@ -29,8 +88,6 @@ Verified:
 DATA-001 PASS
 DATA-002 PASS
 STATE-001 PASS
-
-Added
 
 STATE-001 Strategy State Management
 

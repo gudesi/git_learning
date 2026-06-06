@@ -94,13 +94,23 @@ DONE
 
 ---
 
-## DATA-004 Account Access Layer
+## DATA-004 Portfolio Access Layer
 
 Description:
-建立账户信息接口。
+建立Portfolio信息接口。
+
+Purpose:
+Provide unified access to
+context.portfolio
+and Position objects.
 
 Dependencies:
-DATA-002
+DATA-003
+STATE-001
+
+Required By:
+RISK-001
+EXEC-001
 
 Deliverable:
 
@@ -115,7 +125,7 @@ Definition of Done:
 * 回测兼容
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
@@ -141,7 +151,7 @@ Definition of Done:
 * 支持250日收益率
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 

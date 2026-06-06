@@ -857,6 +857,346 @@ def _test_data_layer():
     return True
 
 # =========================================================
+# DATA-004
+# Portfolio Access Layer
+# =========================================================
+
+def get_total_equity(context):
+    """
+    Get total portfolio equity.
+
+    Returns
+    -------
+    float
+    """
+
+    try:
+
+        return float(
+            context.portfolio.portfolio_value
+        )
+
+    except Exception as e:
+
+        log_error(
+            "GET_TOTAL_EQUITY_FAILED",
+            str(e)
+        )
+
+        return 0.0
+
+
+def get_available_cash(context):
+    """
+    Get available cash.
+
+    Returns
+    -------
+    float
+    """
+
+    try:
+
+        return float(
+            context.portfolio.cash
+        )
+
+    except Exception as e:
+
+        log_error(
+            "GET_AVAILABLE_CASH_FAILED",
+            str(e)
+        )
+
+        return 0.0
+
+
+def get_position_value(context):
+    """
+    Get total market value
+    of all positions.
+
+    Returns
+    -------
+    float
+    """
+
+    try:
+
+        return float(
+            context.portfolio.positions_value
+        )
+
+    except Exception as e:
+
+        log_error(
+            "GET_POSITION_VALUE_FAILED",
+            str(e)
+        )
+
+        return 0.0
+
+
+def get_positions(context):
+    """
+    Get all positions.
+
+    Returns
+    -------
+    dict
+        symbol -> Position
+    """
+
+    try:
+
+        return (
+            context.portfolio.positions
+            or {}
+        )
+
+    except Exception as e:
+
+        log_error(
+            "GET_POSITIONS_FAILED",
+            str(e)
+        )
+
+        return {}
+
+
+def get_position(context, symbol):
+    """
+    Get single position.
+
+    Parameters
+    ----------
+    symbol : str
+
+    Returns
+    -------
+    Position | None
+    """
+
+    positions = get_positions(context)
+
+    return positions.get(symbol)
+
+
+def has_position(context, symbol):
+    """
+    Check whether
+    position exists.
+
+    Returns
+    -------
+    bool
+    """
+
+    position = get_position(
+        context,
+        symbol
+    )
+
+    if position is None:
+        return False
+
+    try:
+
+        return (
+            position.amount > 0
+        )
+
+    except Exception:
+
+        return False
+
+
+def get_position_amount(
+    context,
+    symbol
+):
+    """
+    Get position quantity.
+
+    Returns
+    -------
+    int
+    """
+
+    position = get_position(
+        context,
+        symbol
+    )
+
+    if position is None:
+        return 0
+
+    try:
+
+        return int(
+            position.amount
+        )
+
+    except Exception:
+
+        return 0
+
+
+def get_available_amount(
+    context,
+    symbol
+):
+    """
+    Get sellable quantity.
+
+    Returns
+    -------
+    int
+    """
+
+    position = get_position(
+        context,
+        symbol
+    )
+
+    if position is None:
+        return 0
+
+    try:
+
+        return int(
+            position.enable_amount
+        )
+
+    except Exception:
+
+        return 0
+
+
+def get_position_cost(
+    context,
+    symbol
+):
+    """
+    Get average cost price.
+
+    Returns
+    -------
+    float
+    """
+
+    position = get_position(
+        context,
+        symbol
+    )
+
+    if position is None:
+        return 0.0
+
+    try:
+
+        return float(
+            position.cost_basis
+        )
+
+    except Exception:
+
+        return 0.0
+
+
+def get_position_price(
+    context,
+    symbol
+):
+    """
+    Get latest market price.
+
+    Returns
+    -------
+    float
+    """
+
+    position = get_position(
+        context,
+        symbol
+    )
+
+    if position is None:
+        return 0.0
+
+    try:
+
+        return float(
+            position.last_sale_price
+        )
+
+    except Exception:
+
+        return 0.0
+
+
+def get_position_market_value(
+    context,
+    symbol
+):
+    """
+    Get position market value.
+
+    Returns
+    -------
+    float
+    """
+
+    amount = get_position_amount(
+        context,
+        symbol
+    )
+
+    price = get_position_price(
+        context,
+        symbol
+    )
+
+    return amount * price
+
+
+def validate_portfolio_access_layer(
+    context
+):
+    """
+    DATA-004 self validation.
+    """
+
+    equity = get_total_equity(
+        context
+    )
+
+    cash = get_available_cash(
+        context
+    )
+
+    positions = get_positions(
+        context
+    )
+
+    assert isinstance(
+        equity,
+        float
+    )
+
+    assert isinstance(
+        cash,
+        float
+    )
+
+    assert isinstance(
+        positions,
+        dict
+    )
+
+    return True
+
+# =========================================================
 # Self Test
 # =========================================================
 
@@ -874,5 +1214,12 @@ if __name__ == "__main__":
     # print("DATA-003 validation passed.")
     print(
         "DATA-003 validation skipped "
+        "(requires PTrade runtime)."
+    )
+
+    # validate_portfolio_access_layer(context)
+    # print("DATA-004 validation passed.")
+    print(
+        "DATA-004 validation skipped "
         "(requires PTrade runtime)."
     )
