@@ -90,7 +90,7 @@ Definition of Done:
 * 异常处理完成
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 
@@ -489,7 +489,7 @@ Definition of Done:
 全部正常维护
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 

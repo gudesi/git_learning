@@ -9,6 +9,53 @@ Format:
 * Removed
 * Fixed
 
+[2026-06-06]
+
+Added
+
+STATE-001 Strategy State Management
+
+Implemented strategy state management framework:
+
+entry_price tracking
+entry_date tracking
+stop_price tracking
+highest_close tracking
+state initialization
+state validation
+state cleanup after exit
+PROJECT_RULES.md
+
+Added project-level architecture constraints:
+
+Single File Architecture
+No package structure
+No multi-file design
+No cross-file imports
+All implementations must reside in china_etf_trend_strategy.py
+
+Changed
+task_list.md
+
+Updated task status:
+
+STATE-001 → DONE
+current_status.md
+
+Updated project progress:
+
+STATE-001 completed
+
+Notes
+
+Current architecture constraint:
+
+PTrade platform requires Single File Architecture.
+
+All future implementations must be integrated into:
+
+china_etf_trend_strategy.py
+
 ## Added
 
 ### DATA-002 Configuration Management
