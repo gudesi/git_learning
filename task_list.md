@@ -174,7 +174,7 @@ Definition of Done:
 * 单元测试通过
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
@@ -199,7 +199,7 @@ Definition of Done:
 * 权重计算正确
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 

@@ -1332,6 +1332,66 @@ def _test_return_calculation():
     return True
 
 # =========================================================
+# IND-002
+# Volatility Calculation
+# =========================================================
+
+import math
+
+
+def calc_volatility(symbol, lookback=60):
+
+    close = get_close(symbol, lookback + 1)
+
+    if len(close) < lookback + 1:
+        return None
+
+    returns = []
+
+    for i in range(1, len(close)):
+
+        returns.append(
+            close[i] / close[i - 1] - 1.0
+        )
+
+    mean_return = (
+        sum(returns) / len(returns)
+    )
+
+    variance = sum(
+        (r - mean_return) ** 2
+        for r in returns
+    ) / (len(returns) - 1)
+
+    return (
+        math.sqrt(variance)
+        * math.sqrt(252)
+    )
+
+# =========================================================
+# IND-002 Self Test
+# =========================================================
+
+def _test_volatility():
+
+    sample_symbol = ETF_UNIVERSE[0]
+
+    vol = calc_volatility(
+        sample_symbol
+    )
+
+    if vol is not None:
+
+        assert isinstance(
+            vol,
+            float
+        )
+
+        assert vol >= 0
+
+    return True
+
+# =========================================================
 # Self Test
 # =========================================================
 
@@ -1363,5 +1423,13 @@ if __name__ == "__main__":
     # print("IND-001 validation passed.")
     print(
         "IND-001 validation skipped "
+        "(requires PTrade runtime)."
+    )
+
+    # _test_volatility()
+    # print("IND-002 validation passed.")
+
+    print(
+        "IND-002 validation skipped "
         "(requires PTrade runtime)."
     )

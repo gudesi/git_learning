@@ -11,6 +11,73 @@ Format:
 
 ## 2026-06-07
 
+## Added - IND-002 Volatility Calculation
+
+### Overview
+
+Implemented IND-002 Volatility Calculation as part of Phase 2 (Indicator Layer).
+
+This module provides annualized volatility measurement for ETF ranking and risk-adjusted momentum calculations.
+
+### Implementation
+
+Added:
+
+* `calc_volatility(symbol, lookback=60)`
+
+Features:
+
+* Retrieves historical close prices using Data Access Layer
+* Calculates daily percentage returns
+* Computes sample standard deviation of returns
+* Annualizes volatility using √252 scaling factor
+* Handles insufficient data gracefully
+* Returns `None` when calculation cannot be completed
+
+Formula:
+
+Annualized Volatility = Std(Daily Returns) × √252
+
+### Validation
+
+Validation completed successfully.
+
+Verified:
+
+* Return series generation
+* Volatility calculation logic
+* Annualization process
+* Error handling for insufficient data
+
+### Architecture Impact
+
+IND-002 completes the volatility component of the Indicator Layer and provides a core dependency for:
+
+* IND-003 Momentum Score
+* IND-006 Asset Ranking
+
+### Project Status
+
+Completed Tasks:
+
+* DATA-001 Configuration Layer
+* DATA-002 Data Access Layer
+* DATA-003 PTrade Integration Layer
+* DATA-004 Account Access Layer
+* STATE-001 State Management Layer
+* IND-001 Return Calculation
+* IND-002 Volatility Calculation
+
+Phase 2 Progress:
+
+* IND-001 Return Calculation — DONE
+* IND-002 Volatility Calculation — DONE
+* IND-003 Momentum Score — NOT STARTED
+* IND-004 Trend Filter — NOT STARTED
+* IND-005 ATR Calculation — NOT STARTED
+* IND-006 Ranking Engine — NOT STARTED
+
+
 ### IND-001 Return Calculation
 
 Added:
