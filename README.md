@@ -27,6 +27,8 @@ current_status.md
 changelog.md
 项目变更历史
 
+PROJECT_RULES.md
+项目规则
 ---
 
 ## Current Progress
@@ -35,7 +37,7 @@ Current Phase:
 Phase 2
 
 Current Task:
-IND-001
+IND-002
 
 ---
 

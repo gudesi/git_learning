@@ -9,6 +9,40 @@ Format:
 * Removed
 * Fixed
 
+## 2026-06-07
+
+### IND-001 Return Calculation
+
+Added:
+
+* `calc_return()`
+* `return_20()`
+* `return_60()`
+* `return_120()`
+* `return_250()`
+
+Implemented:
+
+* 20-day return calculation
+* 60-day return calculation
+* 120-day return calculation
+* 250-day return calculation
+
+Configuration update:
+
+* Removed `MOMENTUM_LOOKBACK`
+* Added `RETURN_LOOKBACKS`
+
+Validation update:
+
+* Added return lookback validation
+* Added lookback ordering validation
+
+Status:
+
+* IND-001 completed
+
+
 [2026-06-06]
 
 ## [DATA-004] Portfolio Access Layer

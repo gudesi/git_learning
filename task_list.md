@@ -151,7 +151,7 @@ Definition of Done:
 * 支持250日收益率
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
@@ -174,7 +174,7 @@ Definition of Done:
 * 单元测试通过
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 

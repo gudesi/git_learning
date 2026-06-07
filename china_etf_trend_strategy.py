@@ -275,7 +275,12 @@ MIN_HISTORY = 252
 # Trend Following
 # ---------------------------------------------------------
 
-MOMENTUM_LOOKBACK = 120
+RETURN_LOOKBACKS = (
+    20,
+    60,
+    120,
+    250,
+)
 
 # ---------------------------------------------------------
 # Volatility
@@ -321,7 +326,15 @@ def validate_config():
 
     assert MIN_HISTORY <= MAX_LOOKBACK
 
-    assert MOMENTUM_LOOKBACK > 0
+    assert len(RETURN_LOOKBACKS) > 0
+
+    for lookback in RETURN_LOOKBACKS:
+        assert lookback > 0
+
+    assert RETURN_LOOKBACKS == tuple(
+        sorted(RETURN_LOOKBACKS)
+    )
+    
     assert ATR_LOOKBACK > 0
 
     assert MAX_POSITIONS > 0
@@ -1197,6 +1210,128 @@ def validate_portfolio_access_layer(
     return True
 
 # =========================================================
+# IND-001
+# Return Calculation
+# =========================================================
+
+RETURN_WINDOWS = {
+    20,
+    60,
+    120,
+    250,
+}
+
+
+def calc_return(
+    symbol,
+    lookback,
+):
+    """
+    Calculate simple return.
+
+    Parameters
+    ----------
+    symbol : str
+
+    lookback : int
+        20 / 60 / 120 / 250
+
+    Returns
+    -------
+    float
+    """
+
+    if lookback not in RETURN_WINDOWS:
+
+        raise ValueError(
+            f"Unsupported lookback: {lookback}"
+        )
+
+    close = get_close(
+        symbol,
+        lookback + 1,
+    )
+
+    if len(close) < lookback + 1:
+
+        return None
+
+    start_price = close[0]
+    end_price = close[-1]
+
+    if start_price <= 0:
+
+        return None
+
+    return (
+        end_price / start_price
+        - 1.0
+    )
+
+
+# ---------------------------------------------------------
+# Convenience Wrappers
+# ---------------------------------------------------------
+
+def return_20(symbol):
+
+    return calc_return(
+        symbol,
+        20,
+    )
+
+
+def return_60(symbol):
+
+    return calc_return(
+        symbol,
+        60,
+    )
+
+
+def return_120(symbol):
+
+    return calc_return(
+        symbol,
+        120,
+    )
+
+
+def return_250(symbol):
+
+    return calc_return(
+        symbol,
+        250,
+    )
+
+# =========================================================
+# IND-001 Self Test
+# =========================================================
+
+def _test_return_calculation():
+
+    sample_symbol = ETF_UNIVERSE[0]
+
+    r20 = return_20(sample_symbol)
+    r60 = return_60(sample_symbol)
+    r120 = return_120(sample_symbol)
+    r250 = return_250(sample_symbol)
+
+    if r20 is not None:
+        assert isinstance(r20, float)
+
+    if r60 is not None:
+        assert isinstance(r60, float)
+
+    if r120 is not None:
+        assert isinstance(r120, float)
+
+    if r250 is not None:
+        assert isinstance(r250, float)
+
+    return True
+
+# =========================================================
 # Self Test
 # =========================================================
 
@@ -1221,5 +1356,12 @@ if __name__ == "__main__":
     # print("DATA-004 validation passed.")
     print(
         "DATA-004 validation skipped "
+        "(requires PTrade runtime)."
+    )
+
+    # _test_return_calculation()
+    # print("IND-001 validation passed.")
+    print(
+        "IND-001 validation skipped "
         "(requires PTrade runtime)."
     )
