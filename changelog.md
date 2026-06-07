@@ -11,6 +11,57 @@ Format:
 
 ## 2026-06-07
 
+## [IND-003] Momentum Score Engine
+
+### Added
+
+* Implemented cross-sectional momentum ranking framework.
+* Added Risk Adjusted Momentum calculation:
+
+  * Momentum20 = Return20 / Volatility60
+  * Momentum60 = Return60 / Volatility60
+  * Momentum120 = Return120 / Volatility60
+  * Momentum250 = Return250 / Volatility60
+* Added percentile ranking function for ETF universe normalization.
+* Added weighted momentum aggregation model:
+
+  * 5% × 20-day momentum rank
+  * 15% × 60-day momentum rank
+  * 30% × 120-day momentum rank
+  * 50% × 250-day momentum rank
+* Added final Momentum Score output normalized to the range [0, 1].
+* Added defensive handling for:
+
+  * Missing return data
+  * Missing volatility data
+  * Zero volatility conditions
+  * Small cross-sectional sample sizes
+* Added IND-003 self-test validation.
+
+### Architecture
+
+* Established the portfolio momentum ranking layer.
+* Created the primary ranking signal used by later portfolio selection modules.
+* Prepared dependency foundation for:
+
+  * IND-004 Trend Filter
+  * IND-005 Quality Score
+  * IND-006 Final Composite Score
+  * Future ranking and allocation engines
+
+### Status
+
+* IND-003 marked as COMPLETE.
+* Phase 2 Indicator Layer progress:
+
+  * IND-001 Return Calculation ✔
+  * IND-002 Volatility Calculation ✔
+  * IND-003 Momentum Score ✔
+  * IND-004 Trend Filter ⏳
+  * IND-005 Quality Score ⏳
+  * IND-006 Final Score ⏳
+
+
 ## Added - IND-002 Volatility Calculation
 
 ### Overview

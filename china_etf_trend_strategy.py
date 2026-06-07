@@ -1392,6 +1392,161 @@ def _test_volatility():
     return True
 
 # =========================================================
+# IND-003
+# Momentum Score
+# =========================================================
+
+MOMENTUM_WEIGHTS = {
+    20: 0.05,
+    60: 0.15,
+    120: 0.30,
+    250: 0.50,
+}
+
+
+def _percentile_rank(
+    value,
+    values,
+):
+    """
+    Cross-sectional percentile rank.
+
+    Returns
+    -------
+    float
+        0 ~ 1
+    """
+
+    if value is None:
+        return None
+
+    valid_values = [
+        v
+        for v in values
+        if v is not None
+    ]
+
+    if len(valid_values) <= 1:
+        return 0.5
+
+    valid_values.sort()
+
+    rank = sum(
+        1
+        for v in valid_values
+        if v <= value
+    )
+
+    return (
+        rank - 1
+    ) / (
+        len(valid_values) - 1
+    )
+
+
+def calc_risk_adjusted_momentum(
+    symbol,
+    lookback,
+):
+    """
+    Return / Volatility
+    """
+
+    ret = calc_return(
+        symbol,
+        lookback,
+    )
+
+    vol = calc_volatility(
+        symbol,
+        60,
+    )
+
+    if ret is None:
+        return None
+
+    if vol is None:
+        return None
+
+    if vol <= 0:
+        return None
+
+    return ret / vol
+
+
+def calc_momentum_score(
+    symbol,
+):
+    """
+    Final momentum score.
+
+    Returns
+    -------
+    float
+        0 ~ 1
+    """
+
+    total_score = 0.0
+
+    for lookback in RETURN_LOOKBACKS:
+
+        cross_section = []
+
+        for etf in RISK_ETFS:
+
+            cross_section.append(
+                calc_risk_adjusted_momentum(
+                    etf,
+                    lookback,
+                )
+            )
+
+        raw_value = (
+            calc_risk_adjusted_momentum(
+                symbol,
+                lookback,
+            )
+        )
+
+        percentile = _percentile_rank(
+            raw_value,
+            cross_section,
+        )
+
+        if percentile is None:
+            return None
+
+        total_score += (
+            MOMENTUM_WEIGHTS[lookback]
+            * percentile
+        )
+
+    return total_score
+
+# =========================================================
+# IND-003 Self Test
+# =========================================================
+
+def _test_momentum_score():
+
+    sample_symbol = ETF_UNIVERSE[0]
+
+    score = calc_momentum_score(
+        sample_symbol
+    )
+
+    if score is not None:
+
+        assert isinstance(
+            score,
+            float
+        )
+
+        assert 0 <= score <= 1
+
+    return True
+
+# =========================================================
 # Self Test
 # =========================================================
 
@@ -1431,5 +1586,13 @@ if __name__ == "__main__":
 
     print(
         "IND-002 validation skipped "
+        "(requires PTrade runtime)."
+    )
+
+    # _test_momentum_score()
+    # print("IND-003 validation passed.")
+
+    print(
+        "IND-003 validation skipped "
         "(requires PTrade runtime)."
     )

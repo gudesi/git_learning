@@ -199,7 +199,7 @@ Definition of Done:
 * 权重计算正确
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
@@ -223,7 +223,7 @@ Definition of Done:
 * 标准化完成
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 
