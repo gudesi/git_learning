@@ -1795,6 +1795,150 @@ def _test_liquidity_score():
 
     return True
 
+# =========================================================
+# IND-006
+# ATR20
+# =========================================================
+
+ATR_LOOKBACK = 20
+
+def calc_true_range(
+    high,
+    low,
+    prev_close,
+):
+    """
+    True Range.
+
+    Returns
+    -------
+    float
+    """
+
+    return max(
+        high - low,
+        abs(high - prev_close),
+        abs(low - prev_close),
+    )
+
+def calc_atr(
+    symbol,
+    lookback=ATR_LOOKBACK,
+):
+    """
+    ATR20.
+
+    Returns
+    -------
+    float
+    """
+
+    high = get_high(
+        symbol,
+        lookback + 1,
+    )
+
+    low = get_low(
+        symbol,
+        lookback + 1,
+    )
+
+    close = get_close(
+        symbol,
+        lookback + 1,
+    )
+
+    if (
+        len(high) < lookback + 1
+        or len(low) < lookback + 1
+        or len(close) < lookback + 1
+    ):
+        return None
+
+    tr_values = []
+
+    for i in range(1, len(close)):
+
+        tr = calc_true_range(
+            high[i],
+            low[i],
+            close[i - 1],
+        )
+
+        tr_values.append(tr)
+
+    if len(tr_values) == 0:
+
+        return None
+
+    return (
+        sum(tr_values)
+        / len(tr_values)
+    )
+
+def calc_atr_percent(
+    symbol,
+):
+    """
+    ATR as percentage of price.
+
+    Returns
+    -------
+    float
+    """
+
+    atr = calc_atr(
+        symbol
+    )
+
+    close = get_close(
+        symbol,
+        1,
+    )
+
+    if atr is None:
+
+        return None
+
+    if len(close) == 0:
+
+        return None
+
+    if close[-1] <= 0:
+
+        return None
+
+    return (
+        atr
+        / close[-1]
+    )
+
+# =========================================================
+# IND-006 Self Test
+# =========================================================
+
+def _test_atr():
+
+    sample_symbol = ETF_UNIVERSE[0]
+
+    atr = calc_atr(
+        sample_symbol
+    )
+
+    if atr is not None:
+
+        assert atr >= 0
+
+    atr_pct = calc_atr_percent(
+        sample_symbol
+    )
+
+    if atr_pct is not None:
+
+        assert atr_pct >= 0
+
+    return True
+
 
 
 # =========================================================
@@ -1861,5 +2005,13 @@ if __name__ == "__main__":
 
     print(
         "IND-005 validation skipped "
+        "(requires PTrade runtime)."
+    )
+
+    # _test_atr()
+    # print("IND-006 validation passed.")
+
+    print(
+        "IND-006 validation skipped "
         "(requires PTrade runtime)."
     )

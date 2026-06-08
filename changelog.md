@@ -11,6 +11,67 @@ Format:
 
 ## 2026-06-08
 
+## [IND-006] ATR20 Indicator
+
+### Added
+
+* Added ATR20 indicator module (IND-006).
+* Added `ATR_LOOKBACK` parameter (20 trading days).
+* Added True Range (TR) calculation framework.
+* Added `calc_true_range()` helper function.
+* Added ATR20 calculation based on 20-day average True Range.
+* Added `calc_atr()` indicator function.
+* Added ATR percentage calculation (`ATR / Close`).
+* Added `calc_atr_percent()` helper function.
+* Added IND-006 validation test.
+* Added runtime validation hook.
+
+### Design Notes
+
+* ATR is calculated using the classic True Range methodology.
+* ATR measures absolute market volatility.
+* ATR Percentage provides a normalized volatility measure across ETFs with different price levels.
+* ATR will be reused by future risk management and execution modules.
+* Implementation follows Institutional China ETF Trend Following Portfolio v4.0 specification.
+
+### Phase 2 Completed
+
+Indicator Layer has been fully implemented.
+
+Completed indicators:
+
+* IND-001 Return Calculation
+* IND-002 Volatility Calculation
+* IND-003 Relative Strength Score
+* IND-004 Trend Quality Score
+* IND-005 Liquidity Score
+* IND-006 ATR20
+
+Indicator Layer now provides:
+
+* Return metrics
+* Volatility metrics
+* Momentum ranking
+* Trend quality ranking
+* Liquidity ranking
+* ATR-based volatility measurement
+
+### Project Status
+
+Completed Phases:
+
+* Phase 1 — Data Layer ✓
+* Phase 2 — Indicator Layer ✓
+
+Next Phase:
+
+* Phase 3 — Risk Layer
+
+Next Task:
+
+* RISK-001 Portfolio Risk Engine
+
+
 ## [IND-005] Liquidity Score
 
 ### Added

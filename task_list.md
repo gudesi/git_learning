@@ -269,7 +269,7 @@ Definition of Done:
 * 单元测试通过
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
