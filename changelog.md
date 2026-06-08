@@ -9,6 +9,62 @@ Format:
 * Removed
 * Fixed
 
+## 2026-06-08
+
+## [IND-004] Trend Quality Indicator
+
+### Added
+
+* Implemented Trend Quality indicator layer (IND-004).
+
+* Added `QUALITY_LOOKBACK = 120` configuration parameter.
+
+* Added `calc_trend_quality_raw()` function.
+
+* Added log-price linear regression based trend quality calculation.
+
+* Added slope estimation from least-squares regression.
+
+* Added R² (coefficient of determination) calculation for trend consistency measurement.
+
+* Added raw quality metric:
+
+  Quality Raw = Slope × R²
+
+* Added `calc_quality_score()` function.
+
+* Added cross-sectional percentile ranking of trend quality across ETF universe.
+
+* Reused IND-003 percentile ranking framework for score normalization.
+
+* Added IND-004 validation test `_test_quality_score()`.
+
+* Added runtime validation hooks in main execution block.
+
+### Design Notes
+
+* Trend Quality evaluates both trend strength and trend smoothness.
+* Positive and persistent trends receive higher scores.
+* Noisy or unstable trends are penalized through lower R² values.
+* Downtrending assets naturally rank lower due to negative regression slope.
+* Implementation follows the Institutional China ETF Trend Following Portfolio v4.0 specification.
+
+### Project Status
+
+* Phase 2 Indicator Layer progress updated.
+
+* Completed indicators:
+
+  * IND-001 Return Calculation
+  * IND-002 Volatility Calculation
+  * IND-003 Relative Strength Score
+  * IND-004 Trend Quality Score
+
+* Next planned task:
+
+  * IND-005 Liquidity Score
+
+
 ## 2026-06-07
 
 ## [IND-003] Momentum Score Engine

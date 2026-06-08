@@ -223,7 +223,7 @@ Definition of Done:
 * 标准化完成
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
@@ -246,7 +246,7 @@ Definition of Done:
 * 排名正确
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 

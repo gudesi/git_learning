@@ -1547,6 +1547,168 @@ def _test_momentum_score():
     return True
 
 # =========================================================
+# IND-004
+# Trend Quality Score
+# =========================================================
+
+QUALITY_LOOKBACK = 120
+
+
+def calc_trend_quality_raw(
+    symbol,
+    lookback=QUALITY_LOOKBACK,
+):
+    """
+    Raw trend quality.
+
+    Quality =
+    Slope × R²
+
+    Uses log-price regression.
+
+    Returns
+    -------
+    float
+    """
+
+    close = get_close(
+        symbol,
+        lookback,
+    )
+
+    if len(close) < lookback:
+
+        return None
+
+    if min(close) <= 0:
+
+        return None
+
+    log_prices = [
+        math.log(price)
+        for price in close
+    ]
+
+    x = list(
+        range(len(log_prices))
+    )
+
+    n = len(x)
+
+    x_mean = sum(x) / n
+    y_mean = sum(log_prices) / n
+
+    numerator = sum(
+        (x[i] - x_mean)
+        * (log_prices[i] - y_mean)
+        for i in range(n)
+    )
+
+    denominator = sum(
+        (x[i] - x_mean) ** 2
+        for i in range(n)
+    )
+
+    if denominator == 0:
+
+        return None
+
+    slope = (
+        numerator
+        / denominator
+    )
+
+    fitted = [
+        y_mean
+        + slope * (xi - x_mean)
+        for xi in x
+    ]
+
+    ss_total = sum(
+        (y - y_mean) ** 2
+        for y in log_prices
+    )
+
+    if ss_total <= 0:
+
+        return None
+
+    ss_residual = sum(
+        (
+            log_prices[i]
+            - fitted[i]
+        ) ** 2
+        for i in range(n)
+    )
+
+    r_squared = (
+        1.0
+        - ss_residual / ss_total
+    )
+
+    return (
+        slope
+        * r_squared
+    )
+
+
+def calc_quality_score(
+    symbol,
+):
+    """
+    Cross-sectional quality score.
+
+    Returns
+    -------
+    float
+        0 ~ 1
+    """
+
+    raw_values = []
+
+    for etf in RISK_ETFS:
+
+        raw_values.append(
+            calc_trend_quality_raw(
+                etf
+            )
+        )
+
+    raw_value = (
+        calc_trend_quality_raw(
+            symbol
+        )
+    )
+
+    return _percentile_rank(
+        raw_value,
+        raw_values,
+    )
+
+# =========================================================
+# IND-004 Self Test
+# =========================================================
+
+def _test_quality_score():
+
+    sample_symbol = ETF_UNIVERSE[0]
+
+    score = calc_quality_score(
+        sample_symbol
+    )
+
+    if score is not None:
+
+        assert isinstance(
+            score,
+            float
+        )
+
+        assert 0 <= score <= 1
+
+    return True
+
+# =========================================================
 # Self Test
 # =========================================================
 
@@ -1594,5 +1756,13 @@ if __name__ == "__main__":
 
     print(
         "IND-003 validation skipped "
+        "(requires PTrade runtime)."
+    )
+
+    # _test_quality_score()
+    # print("IND-004 validation passed.")
+
+    print(
+        "IND-004 validation skipped "
         "(requires PTrade runtime)."
     )
