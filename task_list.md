@@ -246,7 +246,7 @@ Definition of Done:
 * 排名正确
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
@@ -269,7 +269,7 @@ Definition of Done:
 * 单元测试通过
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 

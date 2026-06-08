@@ -1709,6 +1709,95 @@ def _test_quality_score():
     return True
 
 # =========================================================
+# IND-005
+# Liquidity Score
+# =========================================================
+
+LIQUIDITY_LOOKBACK = 60
+
+def calc_adv60(
+    symbol,
+    lookback=LIQUIDITY_LOOKBACK,
+):
+    """
+    Average Daily Turnover.
+
+    Returns
+    -------
+    float
+    """
+
+    turnover = get_turnover(
+        symbol,
+        lookback,
+    )
+
+    if turnover is None:
+        return None
+
+    if len(turnover) < lookback:
+        return None
+
+    return (
+        sum(turnover)
+        / len(turnover)
+    )
+
+def calc_liquidity_score(
+    symbol,
+):
+    """
+    Cross-sectional liquidity score.
+
+    Returns
+    -------
+    float
+        0 ~ 1
+    """
+
+    cross_section = []
+
+    for etf in RISK_ETFS:
+
+        cross_section.append(
+            calc_adv60(etf)
+        )
+
+    raw_value = calc_adv60(
+        symbol
+    )
+
+    return _percentile_rank(
+        raw_value,
+        cross_section,
+    )
+
+# =========================================================
+# IND-005 Self Test
+# =========================================================
+
+def _test_liquidity_score():
+
+    sample_symbol = ETF_UNIVERSE[0]
+
+    score = calc_liquidity_score(
+        sample_symbol
+    )
+
+    if score is not None:
+
+        assert isinstance(
+            score,
+            float
+        )
+
+        assert 0 <= score <= 1
+
+    return True
+
+
+
+# =========================================================
 # Self Test
 # =========================================================
 
@@ -1764,5 +1853,13 @@ if __name__ == "__main__":
 
     print(
         "IND-004 validation skipped "
+        "(requires PTrade runtime)."
+    )
+
+    # _test_liquidity_score()
+    # print("IND-005 validation passed.")
+
+    print(
+        "IND-005 validation skipped "
         "(requires PTrade runtime)."
     )

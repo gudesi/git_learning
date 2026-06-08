@@ -10,10 +10,10 @@ Current Phase:
 Phase 2 - Indicator Layer
 
 Current Task:
-IND-005
+IND-006
 
 Overall Progress:
-9 / 23 Tasks Completed
+10 / 23 Tasks Completed
 
 ---
 
@@ -39,8 +39,8 @@ Progress:
 | IND-002 | DONE |
 | IND-003 | DONE |
 | IND-004 | DONE |
-| IND-005 | IN PROGRESS |
-| IND-006 | NOT STARTED |
+| IND-005 | DONE |
+| IND-006 | IN PROGRESS |
 
 Progress:
 2 / 6

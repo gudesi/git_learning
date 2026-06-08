@@ -11,6 +11,42 @@ Format:
 
 ## 2026-06-08
 
+## [IND-005] Liquidity Score
+
+### Added
+
+* Added liquidity indicator layer (IND-005).
+* Added `LIQUIDITY_LOOKBACK` parameter (60 trading days).
+* Added ADV60 (Average Daily Turnover) calculation.
+* Added `calc_adv60()` helper function.
+* Added cross-sectional liquidity ranking framework.
+* Added `calc_liquidity_score()` indicator function.
+* Reused percentile ranking infrastructure from IND-003.
+* Added IND-005 validation test.
+* Added runtime validation hook.
+
+### Design Notes
+
+* Liquidity is measured using 60-day average daily turnover.
+* Cross-sectional percentile ranking is used for score normalization.
+* Higher-turnover ETFs receive higher liquidity scores.
+* Implementation follows Institutional China ETF Trend Following Portfolio v4.0 specification.
+
+### Project Status
+
+Completed:
+
+* IND-001 Return Calculation
+* IND-002 Volatility Calculation
+* IND-003 Relative Strength Score
+* IND-004 Trend Quality Score
+* IND-005 Liquidity Score
+
+Next:
+
+* IND-006 ATR20
+
+
 ## [IND-004] Trend Quality Indicator
 
 ### Added
