@@ -273,6 +273,15 @@ DONE
 
 ---
 
+FIX-001 Development Infrastructure Cleanup
+
+Definition of Done:
+
+see Development Notes at the bottom
+
+Status:
+DONE
+
 # Phase 3 - Market Filter
 
 ## FILTER-001 Market Breadth
@@ -294,7 +303,7 @@ Definition of Done:
 * 中证1000评分正确
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 
@@ -608,3 +617,16 @@ NOT STARTED
 | BUG-001 | Reserved    | -        | Open   |
 | BUG-002 | Reserved    | -        | Open   |
 | BUG-003 | Reserved    | -        | Open   |
+
+## Development Notes
+
+### FIX-001 Infrastructure Cleanup
+
+Completed before FILTER-001:
+
+- Added PTrade API stubs
+- Added logging interfaces
+- Normalized DATA-004 account API naming
+- Removed VSCode static analysis errors
+
+This change does not introduce new strategy functionality and is not tracked as a standalone milestone.

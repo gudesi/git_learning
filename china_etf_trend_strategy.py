@@ -359,6 +359,51 @@ def validate_config():
 
     return True
 
+# ============================================================
+# FIX-001B：增加日志接口 Logging
+# ============================================================
+
+def log_info(message):
+    """
+    Log info message.
+    """
+
+    print(f"[INFO] {message}")
+
+
+def log_warning(message):
+    """
+    Log warning message.
+    """
+
+    print(f"[WARNING] {message}")
+
+
+def log_error(code, message):
+    """
+    Log error message.
+    """
+
+    print(
+        f"[ERROR] {code}: {message}"
+    )
+
+def _test_logging():
+    """
+    Logging validation.
+    """
+
+    log_info("INFO TEST")
+    log_warning("WARNING TEST")
+    log_error(
+        "TEST",
+        "ERROR TEST"
+    )
+
+    print(
+        "LOGGING validation passed."
+    )
+
 # =========================================================
 # STATE-001
 # Strategy State Management
@@ -610,6 +655,32 @@ def _test_state_management():
 
     return True
 
+# ============================================================
+# FIX-001A：增加 PTrade Stub  PTrade Platform Stubs
+# ============================================================
+
+def get_history(*args, **kwargs):
+    """
+    PTrade API Stub.
+
+    Real implementation is provided by
+    PTrade runtime environment.
+
+    This stub exists only for:
+
+    - VSCode type checking
+    - Local development
+    - Unit testing
+
+    """
+    # TODO:
+    # Replace with real PTrade API
+    # during production deployment.
+
+    raise NotImplementedError(
+        "get_history() requires PTrade runtime."
+    )
+
 # =========================================================
 # DATA-003
 # Data Access Layer
@@ -663,10 +734,7 @@ def _get_history_field(
 
     except Exception as e:
 
-        print(
-            f"[WARNING] History fetch failed: "
-            f"{symbol} {field} {e}"
-        )
+        log_warning("History fetch failed")
 
         return []
 
@@ -1171,6 +1239,22 @@ def get_position_market_value(
     )
 
     return amount * price
+
+# FIX-001C：统一 DATA-004 API
+def get_equity():
+    """
+    Standard account equity API.
+    """
+
+    return get_total_equity()
+
+
+def get_cash():
+    """
+    Standard account cash API.
+    """
+
+    return get_available_cash()
 
 
 def validate_portfolio_access_layer(
@@ -1951,6 +2035,9 @@ if __name__ == "__main__":
 
     validate_config()
     print("DATA-002 validation passed.")
+
+    _test_logging()
+    print("FIX-001B: 增加日志接口 Logging passed")
 
     _test_state_management()
     print("STATE-001 validation passed.")

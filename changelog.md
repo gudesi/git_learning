@@ -11,6 +11,42 @@ Format:
 
 ## 2026-06-08
 
+## [FIX-001] Infrastructure Cleanup
+
+### Added
+
+* Added PTrade API stub:
+
+  * `get_history()`
+
+* Added logging interfaces:
+
+  * `log_info()`
+  * `log_warning()`
+  * `log_error()`
+
+* Added standardized account APIs:
+
+  * `get_equity()`
+  * `get_cash()`
+
+### Changed
+
+* Normalized DATA-004 account access layer interface naming.
+* Unified error handling through logging functions.
+* Improved local development compatibility and static analysis support.
+
+### Fixed
+
+* Resolved undefined symbol warnings for `get_history()`.
+* Resolved undefined symbol warnings for `log_error()`.
+* Removed all known VSCode code-analysis errors.
+
+### Notes
+
+This update introduces no strategy functionality changes and no trading logic modifications. It is a development infrastructure improvement only.
+
+
 ## [IND-006] ATR20 Indicator
 
 ### Added

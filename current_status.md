@@ -45,13 +45,33 @@ Progress:
 Progress:
 6 / 6
 
+### FIX-001 Infrastructure Cleanup
+
+Completed development cleanup prior to Market Filter implementation.
+
+Changes:
+
+- Added get_history() PTrade stub
+- Added log_info(), log_warning(), log_error()
+- Added standardized account APIs:
+  - get_equity()
+  - get_cash()
+- Removed all known VSCode undefined symbol errors
+
+Impact:
+
+- No strategy logic changed
+- No performance impact
+- Improves maintainability and local development experience
+
+Status: Done
 ---
 
 # Phase 3 - Market Filter
 
 | Task ID    | Status      |
 | ---------- | ----------- |
-| FILTER-001 | NOT STARTED |
+| FILTER-001 | IN PROGRESS |
 | FILTER-002 | NOT STARTED |
 
 Progress:
