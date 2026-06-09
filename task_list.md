@@ -355,7 +355,7 @@ Definition of Done:
 * 排序稳定
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
@@ -380,7 +380,7 @@ Definition of Done:
 * 递补机制正确
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 

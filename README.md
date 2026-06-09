@@ -37,7 +37,7 @@ Current Phase:
 Phase 4 - Ranking Layer
 
 Current Task:
-RANK-001
+RANK-002
 
 ---
 

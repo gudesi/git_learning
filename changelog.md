@@ -11,6 +11,45 @@ Format:
 
 ## 2026-06-09
 
+## RANK-001 Final Score
+
+Implemented ETF final ranking score framework.
+
+Added:
+
+* Final score calculation layer.
+* Configurable ranking weights:
+
+  * Momentum Score Weight
+  * Quality Score Weight
+  * Liquidity Score Weight
+* Weighted scoring model:
+
+  * 70% Momentum
+  * 20% Quality
+  * 10% Liquidity
+* `calc_final_score()` function.
+* ETF ranking infrastructure.
+* Ranking validation tests.
+* Integration into project validation pipeline.
+
+Documentation updated:
+
+* task_list.md
+* current_status.md
+* README.md
+
+Notes:
+
+* RANK-001 consumes outputs from:
+
+  * IND-003 Momentum Score
+  * IND-004 Quality Score
+  * IND-005 Liquidity Score
+* Provides unified ETF ranking score for portfolio selection.
+* Establishes the core ranking mechanism used by RANK-002 ETF Selection.
+
+
 ## FILTER-002 Market Exposure
 
 Implemented market exposure control layer.

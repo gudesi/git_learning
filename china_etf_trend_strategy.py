@@ -2193,6 +2193,139 @@ def _test_market_exposure():
         "FILTER-002 validation passed."
     )
 
+# =========================================================
+# RANK-001
+# Final Score
+# =========================================================
+
+MOMENTUM_SCORE_WEIGHT = 0.70
+QUALITY_SCORE_WEIGHT = 0.20
+LIQUIDITY_SCORE_WEIGHT = 0.10
+
+def calc_final_score(
+    symbol,
+):
+    """
+    Final ETF ranking score.
+
+    Returns
+    -------
+    float
+        0 ~ 1
+    """
+
+    momentum_score = (
+        calc_momentum_score(
+            symbol
+        )
+    )
+
+    quality_score = (
+        calc_quality_score(
+            symbol
+        )
+    )
+
+    liquidity_score = (
+        calc_liquidity_score(
+            symbol
+        )
+    )
+
+    if (
+        momentum_score is None
+        or quality_score is None
+        or liquidity_score is None
+    ):
+        return None
+
+    return (
+        MOMENTUM_SCORE_WEIGHT
+        * momentum_score
+        + QUALITY_SCORE_WEIGHT
+        * quality_score
+        + LIQUIDITY_SCORE_WEIGHT
+        * liquidity_score
+    )
+
+def get_ranked_etfs():
+    """
+    Return ETFs sorted by final score.
+    """
+
+    scores = []
+
+    for symbol in RISK_ETFS:
+
+        score = calc_final_score(
+            symbol
+        )
+
+        if score is None:
+            continue
+
+        scores.append(
+            (
+                symbol,
+                score,
+            )
+        )
+
+    scores.sort(
+        key=lambda x: x[1],
+        reverse=True,
+    )
+
+    return scores
+
+# =========================================================
+# RANK-001 Self Test
+# =========================================================
+
+def _test_final_score():
+
+    sample_symbol = RISK_ETFS[0]
+
+    score = calc_final_score(
+        sample_symbol
+    )
+
+    if score is not None:
+
+        assert isinstance(
+            score,
+            float,
+        )
+
+        assert (
+            0.0
+            <= score
+            <= 1.0
+        )
+
+    print(
+        "RANK-001 validation passed."
+    )
+
+    return True
+
+def _test_ranked_etfs():
+
+    ranked = get_ranked_etfs()
+
+    if len(ranked) > 1:
+
+        for i in range(
+            len(ranked) - 1
+        ):
+
+            assert (
+                ranked[i][1]
+                >= ranked[i + 1][1]
+            )
+
+    return True
+
 
 # =========================================================
 # Self Test
@@ -2281,5 +2414,12 @@ if __name__ == "__main__":
     # _test_market_exposure()
     print(
         "FILTER-002 validation skipped "
+        "(requires PTrade runtime)."
+    )
+
+    # _test_final_score()
+    # _test_ranked_etfs()
+    print(
+        "RANK-001 validation skipped "
         "(requires PTrade runtime)."
     )
