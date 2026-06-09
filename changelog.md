@@ -11,6 +11,38 @@ Format:
 
 ## 2026-06-09
 
+## FILTER-002 Market Exposure
+
+Implemented market exposure control layer.
+
+Added:
+
+* Market exposure mapping framework.
+* Exposure adjustment based on market breadth score.
+* Market score to exposure conversion logic:
+
+  * Score 0 → 0.00
+  * Score 1 → 0.50
+  * Score 2 → 0.80
+  * Score 3 → 1.00
+* `MARKET_EXPOSURE_MAP` parameter definition.
+* `calc_market_exposure()` function.
+* FILTER-002 validation tests.
+* Integration into project validation pipeline.
+
+Documentation updated:
+
+* task_list.md
+* current_status.md
+* README.md
+
+Notes:
+
+* FILTER-002 consumes FILTER-001 output.
+* Provides portfolio-level exposure target for future position sizing modules.
+* Completes Phase 3 - Market Filter.
+
+
 ### Added
 
 #### FILTER-001 Market Breadth

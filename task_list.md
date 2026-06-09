@@ -327,7 +327,7 @@ Definition of Done:
 * 3分=100%
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
@@ -355,7 +355,7 @@ Definition of Done:
 * 排序稳定
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 

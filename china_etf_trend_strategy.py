@@ -2145,7 +2145,53 @@ def _test_market_score():
         "FILTER-001 validation passed."
     )
 
+# =========================================================
+# FILTER-002
+# Market Exposure
+# =========================================================
 
+MARKET_EXPOSURE_MAP = {
+    0: 0.00,
+    1: 0.50,
+    2: 0.80,
+    3: 1.00,
+}
+
+def calc_market_exposure():
+    """
+    Convert market score
+    into portfolio exposure.
+    """
+
+    score = calc_market_score()
+
+    return MARKET_EXPOSURE_MAP.get(
+        score,
+        0.0,
+    )
+
+# =========================================================
+# FILTER-002 Self Test
+# =========================================================
+
+def _test_market_exposure():
+
+    exposure = calc_market_exposure()
+
+    assert isinstance(
+        exposure,
+        float,
+    )
+
+    assert (
+        0.0
+        <= exposure
+        <= 1.0
+    )
+
+    print(
+        "FILTER-002 validation passed."
+    )
 
 
 # =========================================================
@@ -2229,5 +2275,11 @@ if __name__ == "__main__":
     # _test_market_score()
     print(
         "FILTER-001 validation skipped "
+        "(requires PTrade runtime)."
+    )
+
+    # _test_market_exposure()
+    print(
+        "FILTER-002 validation skipped "
         "(requires PTrade runtime)."
     )

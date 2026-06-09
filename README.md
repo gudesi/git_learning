@@ -34,10 +34,10 @@ PROJECT_RULES.md
 ## Current Progress
 
 Current Phase:
-Phase 3 - Market Filter
+Phase 4 - Ranking Layer
 
 Current Task:
-FILTER-002
+RANK-001
 
 ---
 
