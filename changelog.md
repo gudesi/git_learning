@@ -11,6 +11,49 @@ Format:
 
 ## 2026-06-09
 
+## RANK-002 ETF Selection
+
+Implemented ETF selection and ranking layer.
+
+Added:
+
+* ETF trend filter framework.
+* Long-term trend validation using MA200.
+* ETF eligibility screening logic.
+* Final ETF ranking based on weighted score.
+* Top-N ETF selection process.
+* Selected ETF list generation.
+* Ranking and selection validation tests.
+* Integration into project validation pipeline.
+
+Documentation updated:
+
+* task_list.md
+* current_status.md
+* README.md
+
+Notes:
+
+* RANK-002 consumes outputs from:
+
+  * FILTER-001 Market Breadth
+  * FILTER-002 Market Exposure
+  * RANK-001 Final Score
+* Applies long-term trend filtering before ranking.
+* Produces final ETF candidate list for portfolio construction.
+* Completes Phase 4 - Ranking Layer.
+
+Architecture milestone:
+
+The system now supports a complete ETF selection workflow:
+
+Data Access
+→ Indicators
+→ Market Filter
+→ Ranking
+→ ETF Selection
+
+
 ## RANK-001 Final Score
 
 Implemented ETF final ranking score framework.

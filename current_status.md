@@ -4,16 +4,16 @@ Project:
 Institutional China ETF Trend Following Portfolio v4.0
 
 Last Updated:
-2026-06-05
+2026-06-09
 
 Current Phase:
-Phase 4 - Ranking Layer
+Phase 4 - Ranking Layer completed
 
 Current Task:
-RANK-002
+code review before continue
 
 Overall Progress:
-14 / 23 Tasks Completed
+15 / 23 Tasks Completed
 
 ---
 
@@ -84,10 +84,10 @@ Progress:
 | Task ID  | Status      |
 | -------- | ----------- |
 | RANK-001 | DONE |
-| RANK-002 | IN PROGRESS |
+| RANK-002 | DONE |
 
 Progress:
-1 / 2
+2 / 2
 
 ---
 

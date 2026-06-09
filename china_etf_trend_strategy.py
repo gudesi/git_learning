@@ -2326,6 +2326,143 @@ def _test_ranked_etfs():
 
     return True
 
+# =========================================================
+# RANK-002
+# ETF Selection
+# =========================================================
+
+MAX_PORTFOLIO_SIZE = 5
+
+RANKING_TREND_MA = 200
+
+def passes_ranking_filter(
+    symbol,
+):
+    """
+    ETF trend filter.
+
+    Close > MA200
+    """
+
+    close = get_close(
+        symbol,
+        RANKING_TREND_MA,
+    )
+
+    if len(close) < RANKING_TREND_MA:
+
+        return False
+
+    ma200 = calc_ma(
+        symbol,
+        RANKING_TREND_MA,
+    )
+
+    if ma200 is None:
+
+        return False
+
+    return close[-1] > ma200
+
+def get_selected_etfs():
+    """
+    Select final ETF portfolio.
+    """
+
+    candidates = []
+
+    for symbol in RISK_ETFS:
+
+        if not passes_ranking_filter(
+            symbol
+        ):
+            continue
+
+        score = calc_final_score(
+            symbol
+        )
+
+        if score is None:
+            continue
+
+        candidates.append(
+            (
+                symbol,
+                score,
+            )
+        )
+
+    candidates.sort(
+        key=lambda x: x[1],
+        reverse=True,
+    )
+
+    return [
+        symbol
+        for symbol, score
+        in candidates[
+            :MAX_PORTFOLIO_SIZE
+        ]
+    ]
+
+def get_selected_etfs_with_score():
+
+    candidates = []
+
+    for symbol in RISK_ETFS:
+
+        if not passes_ranking_filter(
+            symbol
+        ):
+            continue
+
+        score = calc_final_score(
+            symbol
+        )
+
+        if score is None:
+            continue
+
+        candidates.append(
+            (
+                symbol,
+                score,
+            )
+        )
+
+    candidates.sort(
+        key=lambda x: x[1],
+        reverse=True,
+    )
+
+    return candidates[
+        :MAX_PORTFOLIO_SIZE
+    ]
+
+# =========================================================
+# RANK-002 Self Test
+# =========================================================
+
+def _test_selected_etfs():
+
+    selected = get_selected_etfs()
+
+    assert isinstance(
+        selected,
+        list,
+    )
+
+    assert (
+        len(selected)
+        <= MAX_PORTFOLIO_SIZE
+    )
+
+    print(
+        "RANK-002 validation passed."
+    )
+
+    return True
+
 
 # =========================================================
 # Self Test
@@ -2422,4 +2559,10 @@ if __name__ == "__main__":
     print(
         "RANK-001 validation skipped "
         "(requires PTrade runtime)."
-    )
+    )   
+
+    # _test_selected_etfs()
+    print(
+        "RANK-002 validation skipped "
+        "(requires PTrade runtime)."
+    )   

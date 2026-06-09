@@ -380,7 +380,7 @@ Definition of Done:
 * 递补机制正确
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
