@@ -37,7 +37,7 @@ Current Phase:
 Phase 3 - Market Filter
 
 Current Task:
-FILTER-001
+FILTER-002
 
 ---
 

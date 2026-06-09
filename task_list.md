@@ -303,7 +303,7 @@ Definition of Done:
 * 中证1000评分正确
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
@@ -327,7 +327,7 @@ Definition of Done:
 * 3分=100%
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 

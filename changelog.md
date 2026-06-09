@@ -9,6 +9,51 @@ Format:
 * Removed
 * Fixed
 
+## 2026-06-09
+
+### Added
+
+#### FILTER-001 Market Breadth
+
+Implemented institutional market breadth filter layer.
+
+Features added:
+
+* Added market breadth scoring framework.
+* Added configurable market index universe:
+
+  * CSI 300 ETF (510300)
+  * CSI 500 ETF (510500)
+  * CSI 1000 ETF (512100)
+* Added moving average calculation utility:
+
+  * MA50
+  * MA150
+  * MA250
+* Added bull trend detection logic:
+
+  * Close > MA50 > MA150 > MA250
+* Added `calc_market_score()` function.
+* Market score ranges from 0 to 3.
+* Added validation and self-test framework for FILTER-001.
+* Integrated FILTER-001 into project validation sequence.
+
+### Documentation
+
+* Updated task_list.md:
+
+  * FILTER-001 marked as DONE.
+  * FILTER-002 marked as IN PROGRESS.
+* Updated current_status.md:
+
+  * Advanced progress to Phase 3 Market Filter.
+* Updated README.md:
+
+  * Added Market Breadth filter documentation.
+  * Added market regime evaluation workflow.
+  * Added market score description and usage notes.
+
+
 ## 2026-06-08
 
 ## [FIX-001] Infrastructure Cleanup

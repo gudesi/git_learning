@@ -2023,6 +2023,129 @@ def _test_atr():
 
     return True
 
+# =========================================================
+# FILTER-001
+# Market Breadth
+# =========================================================
+
+MARKET_FILTER_INDEXES = (
+    "510300",  # CSI300
+    "510500",  # CSI500
+    "512100",  # CSI1000
+)
+
+MA_SHORT = 50
+MA_MID = 150
+MA_LONG = 250
+
+def calc_ma(
+    symbol,
+    period,
+):
+    """
+    Simple moving average.
+    """
+
+    close = get_close(
+        symbol,
+        period,
+    )
+
+    if len(close) < period:
+
+        return None
+
+    return (
+        sum(close[-period:])
+        / float(period)
+    )
+
+def is_bull_trend(
+    symbol,
+):
+    """
+    Close > MA50 > MA150 > MA250
+    """
+
+    close = get_close(
+        symbol,
+        MA_LONG,
+    )
+
+    if len(close) < MA_LONG:
+
+        return False
+
+    latest_close = close[-1]
+
+    ma50 = calc_ma(
+        symbol,
+        MA_SHORT,
+    )
+
+    ma150 = calc_ma(
+        symbol,
+        MA_MID,
+    )
+
+    ma250 = calc_ma(
+        symbol,
+        MA_LONG,
+    )
+
+    if (
+        ma50 is None
+        or ma150 is None
+        or ma250 is None
+    ):
+        return False
+
+    return (
+        latest_close > ma50
+        and ma50 > ma150
+        and ma150 > ma250
+    )
+
+def calc_market_score():
+    """
+    Market breadth score.
+
+    Returns
+    -------
+    int
+        0 ~ 3
+    """
+
+    score = 0
+
+    for symbol in MARKET_FILTER_INDEXES:
+
+        if is_bull_trend(symbol):
+
+            score += 1
+
+    return score
+
+# =========================================================
+# FILTER-001 Self Test
+# =========================================================
+
+def _test_market_score():
+
+    score = calc_market_score()
+
+    assert isinstance(
+        score,
+        int,
+    )
+
+    assert 0 <= score <= 3
+
+    print(
+        "FILTER-001 validation passed."
+    )
+
+
 
 
 # =========================================================
@@ -2100,5 +2223,11 @@ if __name__ == "__main__":
 
     print(
         "IND-006 validation skipped "
+        "(requires PTrade runtime)."
+    )
+
+    # _test_market_score()
+    print(
+        "FILTER-001 validation skipped "
         "(requires PTrade runtime)."
     )
