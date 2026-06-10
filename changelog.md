@@ -9,6 +9,49 @@ Format:
 * Removed
 * Fixed
 
+## 2026-06-10
+
+## [Architecture Review] - After Phase 4 Completion
+
+### Fixed
+
+- BUG-004:
+  Standardized account equity access interface.
+  Corrected context parameter handling.
+
+- BUG-005:
+  Standardized account cash access interface.
+  Corrected context parameter handling.
+
+### Added
+
+- validate_ranking_pipeline()
+  End-to-end validation for:
+
+  Market Data
+  → Indicators
+  → Market Filters
+  → Final Score
+  → ETF Selection
+
+### Reviewed
+
+- Naming consistency
+- Indicator interface consistency
+- Return value conventions
+- Validation coverage
+- PTrade compatibility
+- Documentation synchronization
+
+### Deferred
+
+- Ranking score cache optimization.
+- Cache implementation postponed until Portfolio Layer development.
+
+### Notes
+
+- Local execution of ranking pipeline validation remains unavailable because required PTrade runtime APIs are not present outside the production environment.
+
 ## 2026-06-09
 
 ## RANK-002 ETF Selection

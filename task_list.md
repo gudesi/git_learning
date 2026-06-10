@@ -382,6 +382,13 @@ Definition of Done:
 Status:
 DONE
 
+Notes:
+- Architecture review completed after implementation.
+- Fixed BUG-004 (account interface context handling).
+- Fixed BUG-005 (cash interface context handling).
+- Added validate_ranking_pipeline().
+- Full ranking pipeline validation currently requires PTrade runtime.
+- Ranking cache optimization deferred until PORT layer.
 ---
 
 # Phase 5 - Portfolio Layer
@@ -406,7 +413,7 @@ Definition of Done:
 * 权重归一化正确
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 

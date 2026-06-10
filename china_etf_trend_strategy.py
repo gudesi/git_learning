@@ -1241,20 +1241,20 @@ def get_position_market_value(
     return amount * price
 
 # FIX-001C：统一 DATA-004 API
-def get_equity():
+def get_equity(context):
     """
     Standard account equity API.
     """
 
-    return get_total_equity()
+    return get_total_equity(context)
 
 
-def get_cash():
+def get_cash(context):
     """
     Standard account cash API.
     """
 
-    return get_available_cash()
+    return get_available_cash(context)
 
 
 def validate_portfolio_access_layer(
@@ -2463,6 +2463,36 @@ def _test_selected_etfs():
 
     return True
 
+def validate_ranking_pipeline():
+    """
+    Validate ranking pipeline.
+    """
+
+    ranked = get_ranked_etfs()
+
+    assert ranked is not None
+
+    assert len(ranked) > 0
+
+    previous_score = 999
+
+    for symbol, score in ranked:
+
+        assert score is not None
+
+        assert 0.0 <= score <= 1.0
+
+        assert score <= previous_score
+
+        previous_score = score
+
+    selected = get_selected_etfs()
+
+    assert selected is not None
+
+    assert len(selected) <= MAX_PORTFOLIO_SIZE
+
+    return True
 
 # =========================================================
 # Self Test
@@ -2562,7 +2592,11 @@ if __name__ == "__main__":
     )   
 
     # _test_selected_etfs()
+    if validate_ranking_pipeline():
+        print("RANK validation passed.")
+
     print(
         "RANK-002 validation skipped "
         "(requires PTrade runtime)."
     )   
+

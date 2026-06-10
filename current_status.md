@@ -7,10 +7,10 @@ Last Updated:
 2026-06-09
 
 Current Phase:
-Phase 4 - Ranking Layer completed
+Phase 5 - Portfolio Layer
 
 Current Task:
-code review before continue
+PORT-001
 
 Overall Progress:
 15 / 23 Tasks Completed
@@ -89,13 +89,45 @@ Progress:
 Progress:
 2 / 2
 
+## Post-Phase-4 Review
+
+Architecture review completed.
+
+Completed:
+- Fixed BUG-004: account equity interface consistency.
+- Fixed BUG-005: account cash interface consistency.
+- Added validate_ranking_pipeline().
+- Verified naming consistency.
+- Verified indicator interface consistency.
+- Verified return value conventions.
+- Verified validation coverage.
+- Verified PTrade compatibility.
+- Verified documentation synchronization.
+
+Deferred:
+- Ranking score cache optimization.
+- Cache design review after PORT-001 completion.
+
+Known Limitation:
+- Ranking pipeline validation cannot execute in local environment because PTrade runtime APIs are unavailable.
+
+System now has its first complete decision pipeline:
+
+Market Data
+→ Indicators
+→ Market Filters
+→ Final Score
+→ ETF Selection
+
+Architecture review completed.
+Ready for PORT-001.
 ---
 
 # Phase 5 - Portfolio Layer
 
 | Task ID  | Status      |
 | -------- | ----------- |
-| PORT-001 | NOT STARTED |
+| PORT-001 | IN PROGRESS |
 | PORT-002 | NOT STARTED |
 
 Progress:
