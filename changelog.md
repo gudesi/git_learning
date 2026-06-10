@@ -11,6 +11,44 @@ Format:
 
 ## 2026-06-10
 
+## RISK-001 - Portfolio Risk Engine
+
+Completed implementation of portfolio risk measurement framework.
+
+Added:
+
+* Portfolio ATR calculation
+* Portfolio volatility calculation
+* Portfolio statistics interface
+* Risk budget usage calculation
+* Risk state classification (LOW / NORMAL / HIGH)
+
+New Functions:
+
+* calc_portfolio_atr()
+* calc_portfolio_volatility()
+* get_portfolio_statistics()
+* calc_risk_budget_usage()
+* get_risk_state()
+
+Validation:
+
+* Portfolio risk metrics generated successfully
+* Risk budget utilization calculated correctly
+* Risk statistics interface validated
+* Risk state classification validated
+
+Architecture:
+
+Portfolio Layer
+→ Risk Measurement (RISK-001)
+→ Risk Control (RISK-002)
+→ Execution Layer
+
+Status: DONE
+Next Task: RISK-002 Portfolio Risk Control
+
+
 ## PORT-002 - Portfolio Constraints
 
 Completed implementation of portfolio constraint management.

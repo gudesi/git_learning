@@ -2773,6 +2773,178 @@ def _test_portfolio_constraints():
     return True
 
 # =========================================================
+# RISK-001
+# Portfolio Risk Engine
+# =========================================================
+
+def calc_portfolio_atr():
+
+    weights = calc_target_weights()
+
+    if len(weights) == 0:
+
+        return None
+
+    total_risk = 0.0
+
+    total_weight = 0.0
+
+    for symbol, weight in weights.items():
+
+        atr_pct = calc_atr_percent(
+            symbol
+        )
+
+        if atr_pct is None:
+            continue
+
+        total_risk += (
+            atr_pct * weight
+        )
+
+        total_weight += weight
+
+    if total_weight <= 0:
+
+        return None
+
+    return (
+        total_risk /
+        total_weight
+    ) 
+
+def calc_portfolio_volatility():
+
+    weights = calc_target_weights()
+
+    if len(weights) == 0:
+
+        return None
+
+    total_vol = 0.0
+
+    total_weight = 0.0
+
+    for symbol, weight in weights.items():
+
+        vol = calc_volatility(
+            symbol
+        )
+
+        if vol is None:
+            continue
+
+        total_vol += (
+            vol * weight
+        )
+
+        total_weight += weight
+
+    if total_weight <= 0:
+
+        return None
+
+    return (
+        total_vol /
+        total_weight
+    )
+
+def get_portfolio_statistics():
+
+    weights = calc_target_weights()
+
+    return {
+
+        "position_count":
+            len(weights),
+
+        "portfolio_atr":
+            calc_portfolio_atr(),
+
+        "portfolio_volatility":
+            calc_portfolio_volatility(),
+    }
+
+def calc_risk_budget_usage():
+
+    stats = (
+        get_portfolio_statistics()
+    )
+
+    portfolio_vol = stats.get(
+        "portfolio_volatility"
+    )
+
+    if portfolio_vol is None:
+
+        return None
+
+    if TARGET_PORTFOLIO_RISK <= 0:
+
+        return None
+
+    return (
+        portfolio_vol /
+        TARGET_PORTFOLIO_RISK
+    )
+
+def get_risk_state():
+
+    usage = (
+        calc_risk_budget_usage()
+    )
+
+    if usage is None:
+
+        return "UNKNOWN"
+
+    if usage < 0.8:
+
+        return "LOW"
+
+    if usage < 1.0:
+
+        return "NORMAL"
+
+    return "HIGH"
+
+# =========================================================
+# RISK-001 Self Test
+# =========================================================
+
+def _test_risk_engine():
+
+    stats = (
+        get_portfolio_statistics()
+    )
+
+    assert isinstance(
+        stats,
+        dict
+    )
+
+    assert (
+        "position_count"
+        in stats
+    )
+
+    assert (
+        "portfolio_atr"
+        in stats
+    )
+
+    assert (
+        "portfolio_volatility"
+        in stats
+    )
+
+    print(
+        "RISK-001 validation passed."
+    )
+
+    return True
+
+# =========================================================
 # Self Test
 # =========================================================
 
@@ -2886,6 +3058,12 @@ if __name__ == "__main__":
     # _test_position_sizing()
     # _test_portfolio_constraints()
     print(
-        "PORT-001 validation skipped "
+        "PORT-002 validation skipped "
+        "(requires PTrade runtime)."
+    )   
+
+    # _test_risk_engine()
+    print(
+        "RISK-001 validation skipped "
         "(requires PTrade runtime)."
     )   

@@ -4,16 +4,16 @@ Project:
 Institutional China ETF Trend Following Portfolio v4.0
 
 Last Updated:
-2026-06-09
+2026-06-10
 
 Current Phase:
 # Phase 6 - Risk Layer
 
 Current Task:
-RISK-001
+RISK-002
 
 Overall Progress:
-17 / 23 Tasks Completed
+18 / 23 Tasks Completed
 
 ---
 
@@ -139,11 +139,11 @@ Progress:
 
 | Task ID  | Status      |
 | -------- | ----------- |
-| RISK-001 | IN PROGRESS |
-| RISK-002 | NOT STARTED |
+| RISK-001 | DONE |
+| RISK-002 | IN PROGRESS |
 
 Progress:
-0 / 2
+1 / 2
 
 ---
 

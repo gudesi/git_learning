@@ -462,7 +462,7 @@ Definition of Done:
 * 更新正确
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
@@ -487,7 +487,7 @@ Definition of Done:
 * 市场退出
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 
