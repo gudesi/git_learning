@@ -2495,6 +2495,109 @@ def validate_ranking_pipeline():
     return True
 
 # =========================================================
+# PORT-001
+# Position Sizing
+# =========================================================
+
+def calc_inverse_volatility_weights(
+    symbols,
+):
+    """
+    Calculate inverse ATR weights.
+
+    Parameters
+    ----------
+    symbols : list[str]
+
+    Returns
+    -------
+    dict
+        symbol -> raw weight
+    """
+
+    risk_values = {}
+
+    for symbol in symbols:
+
+        atr_pct = calc_atr_percent(
+            symbol
+        )
+
+        if atr_pct is None:
+            continue
+
+        if atr_pct <= 0:
+            continue
+
+        risk_values[symbol] = (
+            1.0 / atr_pct
+        )
+
+    if len(risk_values) == 0:
+
+        return {}
+
+    total_risk = sum(
+        risk_values.values()
+    )
+
+    return {
+        symbol: value / total_risk
+        for symbol, value
+        in risk_values.items()
+    }
+
+def calc_weights():
+    """
+    Calculate portfolio target weights.
+
+    Returns
+    -------
+    dict
+        symbol -> weight
+    """
+
+    selected = get_selected_etfs()
+
+    if len(selected) == 0:
+
+        return {}
+
+    return calc_inverse_volatility_weights(
+        selected
+    )
+
+# =========================================================
+# PORT-001 Self Test
+# =========================================================
+
+def _test_position_sizing():
+
+    weights = calc_weights()
+
+    if len(weights) == 0:
+
+        return True
+
+    total_weight = sum(
+        weights.values()
+    )
+
+    assert abs(
+        total_weight - 1.0
+    ) < 0.0001
+
+    for weight in weights.values():
+
+        assert weight > 0
+
+    print(
+        "PORT-001 validation passed."
+    )
+
+    return True
+
+# =========================================================
 # Self Test
 # =========================================================
 

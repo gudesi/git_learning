@@ -11,6 +11,27 @@ Format:
 
 ## 2026-06-10
 
+## PORT-001 - Position Sizing
+
+Completed implementation of portfolio position sizing module.
+
+Added:
+
+* ATR-based inverse volatility weighting
+* Portfolio weight normalization
+* Target weight calculation interface
+* Validation framework
+
+Validation:
+
+* Weights sum to 100%
+* All weights remain positive
+* Empty portfolio handled correctly
+
+Status: DONE
+Next Task: PORT-002 Portfolio Constraints
+
+
 ## [Architecture Review] - After Phase 4 Completion
 
 ### Fixed

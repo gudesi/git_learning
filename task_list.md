@@ -413,7 +413,7 @@ Definition of Done:
 * 权重归一化正确
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
@@ -436,7 +436,7 @@ Definition of Done:
 * 权重归一化
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 
