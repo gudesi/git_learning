@@ -34,10 +34,10 @@ PROJECT_RULES.md
 ## Current Progress
 
 Current Phase:
-Phase 5 - Portfolio Layer
+Phase 6 - Risk Layer
 
 Current Task:
-PORT-002
+RISK-001
 ---
 
 ## Development Rules

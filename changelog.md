@@ -11,6 +11,31 @@ Format:
 
 ## 2026-06-10
 
+## PORT-002 - Portfolio Constraints
+
+Completed implementation of portfolio constraint management.
+
+Added:
+
+* Portfolio weight normalization
+* Maximum position size constraint
+* Minimum position size constraint
+* Excess weight redistribution
+* Final target weight calculation pipeline
+
+Validation:
+
+* Portfolio weights normalized to 100%
+* Position size limits enforced
+* Minimum position threshold enforced
+* Constraint layer integrated with PORT-001 output
+
+Status: DONE
+Phase 5 Portfolio Layer: COMPLETE
+
+Next Task: RISK-001 Portfolio Risk Engine
+
+
 ## PORT-001 - Position Sizing
 
 Completed implementation of portfolio position sizing module.

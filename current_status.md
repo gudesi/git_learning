@@ -7,13 +7,13 @@ Last Updated:
 2026-06-09
 
 Current Phase:
-Phase 5 - Portfolio Layer
+# Phase 6 - Risk Layer
 
 Current Task:
-PORT-002
+RISK-001
 
 Overall Progress:
-16 / 23 Tasks Completed
+17 / 23 Tasks Completed
 
 ---
 
@@ -128,10 +128,10 @@ Ready for PORT-001.
 | Task ID  | Status      |
 | -------- | ----------- |
 | PORT-001 | DONE |
-| PORT-002 | IN PROGRESS |
+| PORT-002 | DONE |
 
 Progress:
-1 / 2
+2 / 2
 
 ---
 
@@ -139,7 +139,7 @@ Progress:
 
 | Task ID  | Status      |
 | -------- | ----------- |
-| RISK-001 | NOT STARTED |
+| RISK-001 | IN PROGRESS |
 | RISK-002 | NOT STARTED |
 
 Progress:

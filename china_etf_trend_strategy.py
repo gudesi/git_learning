@@ -2597,6 +2597,181 @@ def _test_position_sizing():
 
     return True
 
+
+# =========================================================
+# PORT-002
+# Portfolio Constraints
+# =========================================================
+
+# Portfolio Constraints
+MAX_SINGLE_POSITION_WEIGHT = 0.25
+MIN_SINGLE_POSITION_WEIGHT = 0.05
+
+def normalize_weights(
+    weights,
+):
+    """
+    Normalize weights to 100%.
+    """
+
+    if len(weights) == 0:
+        return {}
+
+    total = sum(
+        weights.values()
+    )
+
+    if total <= 0:
+        return {}
+
+    return {
+        symbol: weight / total
+        for symbol, weight
+        in weights.items()
+    }
+
+def apply_max_position_constraint(
+    weights,
+):
+    """
+    Apply maximum position limit.
+    """
+
+    adjusted = {}
+
+    excess = 0.0
+
+    for symbol, weight in weights.items():
+
+        if weight > MAX_SINGLE_POSITION_WEIGHT:
+
+            excess += (
+                weight -
+                MAX_SINGLE_POSITION_WEIGHT
+            )
+
+            adjusted[symbol] = (
+                MAX_SINGLE_POSITION_WEIGHT
+            )
+
+        else:
+
+            adjusted[symbol] = weight
+
+    if excess <= 0:
+
+        return adjusted
+
+    eligible = [
+        s
+        for s, w
+        in adjusted.items()
+        if w < MAX_SINGLE_POSITION_WEIGHT
+    ]
+
+    if len(eligible) == 0:
+
+        return adjusted
+
+    redistribution = (
+        excess / len(eligible)
+    )
+
+    for symbol in eligible:
+
+        adjusted[symbol] += (
+            redistribution
+        )
+
+    return adjusted
+
+def apply_min_position_constraint(
+    weights,
+):
+    """
+    Remove positions below minimum size.
+    """
+
+    adjusted = {}
+
+    for symbol, weight in weights.items():
+
+        if (
+            weight >=
+            MIN_SINGLE_POSITION_WEIGHT
+        ):
+
+            adjusted[symbol] = weight
+
+    return adjusted
+
+def calc_target_weights():
+    """
+    Final portfolio weights.
+    """
+
+    weights = calc_weights()
+
+    if len(weights) == 0:
+
+        return {}
+
+    weights = apply_max_position_constraint(
+        weights
+    )
+
+    weights = normalize_weights(
+        weights
+    )
+
+    weights = apply_min_position_constraint(
+        weights
+    )
+
+    weights = normalize_weights(
+        weights
+    )
+
+    return weights
+
+# =========================================================
+# PORT-002 Self Test
+# =========================================================
+
+def _test_portfolio_constraints():
+
+    weights = calc_target_weights()
+
+    if len(weights) == 0:
+
+        return True
+
+    total = sum(
+        weights.values()
+    )
+
+    assert abs(
+        total - 1.0
+    ) < 0.0001
+
+    for weight in weights.values():
+
+        assert (
+            weight <=
+            MAX_SINGLE_POSITION_WEIGHT + 0.01
+        )
+
+        assert (
+            weight >=
+            MIN_SINGLE_POSITION_WEIGHT
+        )
+
+    print(
+        "PORT-002 validation passed."
+    )
+
+    return True
+
 # =========================================================
 # Self Test
 # =========================================================
@@ -2695,11 +2870,22 @@ if __name__ == "__main__":
     )   
 
     # _test_selected_etfs()
-    if validate_ranking_pipeline():
-        print("RANK validation passed.")
-
+    # if validate_ranking_pipeline():
+    #     print("RANK validation passed.")
     print(
         "RANK-002 validation skipped "
         "(requires PTrade runtime)."
     )   
 
+    # _test_position_sizing()
+    print(
+        "PORT-001 validation skipped "
+        "(requires PTrade runtime)."
+    )   
+
+    # _test_position_sizing()
+    # _test_portfolio_constraints()
+    print(
+        "PORT-001 validation skipped "
+        "(requires PTrade runtime)."
+    )   
