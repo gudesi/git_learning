@@ -540,7 +540,7 @@ Definition of Done:
 * 实盘兼容
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
@@ -565,7 +565,7 @@ Definition of Done:
 * 调仓正确
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 

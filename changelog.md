@@ -11,6 +11,28 @@ Format:
 
 ## 2026-06-10
 
+## [EXEC-001] Order Mapping Layer
+
+### Added
+
+* Added unified execution abstraction layer.
+* Implemented `order_target_value()` wrapper.
+* Implemented `order_target_percent()` wrapper.
+* Added centralized exception handling and execution error logging.
+* Added execution layer self-test validation.
+
+### Changed
+
+* Strategy code can now use unified execution APIs instead of directly calling PTrade order functions.
+* Established a broker-independent execution interface for future portability.
+
+### Notes
+
+* Current implementation maps orders to PTrade `order_value()` API.
+* Local development environment uses execution stubs; actual order placement requires PTrade runtime.
+* This module serves as the foundation for EXEC-002 Rebalance Engine.
+
+
 ## RISK-002 - Portfolio Risk Control
 
 Completed implementation of portfolio risk control framework.

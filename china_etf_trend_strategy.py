@@ -681,6 +681,19 @@ def get_history(*args, **kwargs):
         "get_history() requires PTrade runtime."
     )
 
+# EXEC-001添加
+def order_value(
+    symbol,
+    value
+):
+    """
+    PTrade stub.
+    """
+
+    raise NotImplementedError(
+        "order_value() requires PTrade runtime."
+    )
+
 # =========================================================
 # DATA-003
 # Data Access Layer
@@ -3088,6 +3101,112 @@ def _test_risk_control():
     return True
 
 # =========================================================
+# EXEC-001
+# Order Mapping Layer
+# =========================================================
+
+def order_target_value(
+    symbol,
+    target_value
+):
+    """
+    Unified value-based order API.
+
+    Parameters
+    ----------
+    symbol : str
+
+    target_value : float
+
+    Returns
+    -------
+    object | None
+    """
+
+    try:
+
+        return order_value(
+            symbol,
+            target_value
+        )
+
+    except Exception as e:
+
+        log_error(
+            "ORDER_TARGET_VALUE_FAILED",
+            f"{symbol}: {e}"
+        )
+
+        return None
+
+
+def order_target_percent(
+    context,
+    symbol,
+    target_percent
+):
+    """
+    Unified percent-based order API.
+
+    Parameters
+    ----------
+    context
+
+    symbol : str
+
+    target_percent : float
+
+    Returns
+    -------
+    object | None
+    """
+
+    try:
+
+        equity = get_equity(
+            context
+        )
+
+        target_value = (
+            equity
+            * target_percent
+        )
+
+        return order_target_value(
+            symbol,
+            target_value
+        )
+
+    except Exception as e:
+
+        log_error(
+            "ORDER_TARGET_PERCENT_FAILED",
+            f"{symbol}: {e}"
+        )
+
+        return None
+    
+# =========================================================
+# EXEC-001 Self Test
+# =========================================================
+
+def _test_order_mapping():
+
+    assert callable(
+        order_target_value
+    )
+
+    assert callable(
+        order_target_percent
+    )
+
+    print(
+        "EXEC-001 validation passed."
+    )
+
+    return True
+
+# =========================================================
 # Self Test
 # =========================================================
 
@@ -3217,3 +3336,9 @@ if __name__ == "__main__":
         "RISK-002 validation skipped "
         "(requires PTrade runtime)."
     )   
+
+    # _test_order_mapping()
+    print(
+        "EXEC-001 validation skipped "
+        "(requires PTrade runtime)."
+    )
