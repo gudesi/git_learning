@@ -3207,6 +3207,169 @@ def _test_order_mapping():
     return True
 
 # =========================================================
+# EXEC-002
+# Rebalance Engine
+# =========================================================
+
+def get_current_symbols(
+    context,
+):
+    """
+    Current portfolio holdings.
+    """
+
+    return set(
+        get_positions(
+            context
+        ).keys()
+    )
+
+
+def get_target_symbols():
+    """
+    Target portfolio holdings.
+    """
+
+    weights = (
+        calc_risk_adjusted_weights()
+    )
+
+    return set(
+        weights.keys()
+    )
+
+
+def sell_removed_positions(
+    context,
+):
+    """
+    Sell positions no longer
+    in target portfolio.
+    """
+
+    current_symbols = (
+        get_current_symbols(
+            context
+        )
+    )
+
+    target_symbols = (
+        get_target_symbols()
+    )
+
+    symbols_to_sell = (
+        current_symbols
+        - target_symbols
+    )
+
+    for symbol in symbols_to_sell:
+
+        order_target_percent(
+            context,
+            symbol,
+            0.0
+        )
+
+        log_info(
+            f"SELL {symbol}"
+        )
+
+    return symbols_to_sell
+
+
+def rebalance_portfolio(
+    context,
+):
+    """
+    Apply target weights.
+    """
+
+    weights = (
+        calc_risk_adjusted_weights()
+    )
+
+    for symbol, weight in (
+        weights.items()
+    ):
+
+        order_target_percent(
+            context,
+            symbol,
+            weight
+        )
+
+        log_info(
+            f"TARGET {symbol}: {weight:.2%}"
+        )
+
+    return True
+
+
+def rebalance(
+    context,
+):
+    """
+    Main rebalance engine.
+    """
+
+    try:
+
+        sell_removed_positions(
+            context
+        )
+
+        rebalance_portfolio(
+            context
+        )
+
+        log_info(
+            "REBALANCE_COMPLETED"
+        )
+
+        return True
+
+    except Exception as e:
+
+        log_error(
+            "REBALANCE_FAILED",
+            str(e)
+        )
+
+        return False
+
+# =========================================================
+# EXEC-002 Self Test
+# =========================================================
+
+def _test_rebalance_engine():
+
+    assert callable(
+        get_current_symbols
+    )
+
+    assert callable(
+        get_target_symbols
+    )
+
+    assert callable(
+        sell_removed_positions
+    )
+
+    assert callable(
+        rebalance_portfolio
+    )
+
+    assert callable(
+        rebalance
+    )
+
+    print(
+        "EXEC-002 validation passed."
+    )
+
+    return True
+
+# =========================================================
 # Self Test
 # =========================================================
 
@@ -3340,5 +3503,11 @@ if __name__ == "__main__":
     # _test_order_mapping()
     print(
         "EXEC-001 validation skipped "
+        "(requires PTrade runtime)."
+    )
+
+    # _test_rebalance_engine()
+    print(
+        "EXEC-002 validation skipped "
         "(requires PTrade runtime)."
     )

@@ -11,6 +11,29 @@ Format:
 
 ## 2026-06-10
 
+## [EXEC-002] Rebalance Engine
+
+### Added
+
+* Added `get_current_symbols()` to retrieve current portfolio holdings.
+* Added `get_target_symbols()` to retrieve target portfolio holdings after risk adjustment.
+* Added `sell_removed_positions()` to liquidate positions no longer included in the target portfolio.
+* Added `rebalance_portfolio()` to execute target allocations.
+* Added `rebalance()` as the main portfolio rebalancing workflow.
+* Added EXEC-002 self-test validation.
+
+### Changed
+
+* Integrated ranking, portfolio construction, risk control, and execution layers into a complete rebalance pipeline.
+* Rebalance process now supports automatic portfolio turnover and target-weight adjustment.
+
+### Notes
+
+* Current implementation uses the unified execution APIs introduced in EXEC-001.
+* Cash allocation is handled through risk-adjusted portfolio weights.
+* Actual order execution requires PTrade runtime.
+
+
 ## [EXEC-001] Order Mapping Layer
 
 ### Added

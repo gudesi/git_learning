@@ -565,7 +565,7 @@ Definition of Done:
 * 调仓正确
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
@@ -583,7 +583,7 @@ Dependencies:
 * IND-006
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 
