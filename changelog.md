@@ -11,6 +11,54 @@ Format:
 
 ## 2026-06-10
 
+## RISK-002 - Portfolio Risk Control
+
+Completed implementation of portfolio risk control framework.
+
+Added:
+
+* Risk scaling factor calculation
+* Portfolio exposure adjustment
+* Dynamic risk budget control
+* Risk-adjusted target weights
+* Cash allocation calculation
+* Risk control state classification
+
+New Functions:
+
+* get_risk_scaling_factor()
+* get_risk_control_state()
+* calc_risk_adjusted_weights()
+* get_cash_weight()
+* get_risk_control_summary()
+
+Risk Control Logic:
+
+* Low risk environment → Full exposure
+* Normal risk environment → Slight exposure reduction
+* High risk environment → Defensive scaling
+* Extreme risk environment → Significant cash allocation
+
+Validation:
+
+* Risk scaling factor validated
+* Cash allocation calculation validated
+* Risk-adjusted weights generated successfully
+* Risk control summary interface validated
+
+Architecture:
+
+Portfolio Layer
+→ Risk Measurement (RISK-001)
+→ Risk Control (RISK-002)
+→ Execution Layer
+
+Status: DONE
+Phase 6 Risk Layer: COMPLETE
+
+Next Task: EXEC-001 Order Generation
+
+
 ## RISK-001 - Portfolio Risk Engine
 
 Completed implementation of portfolio risk measurement framework.

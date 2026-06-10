@@ -2945,6 +2945,149 @@ def _test_risk_engine():
     return True
 
 # =========================================================
+# RISK-002
+# Portfolio Risk Control
+# =========================================================
+
+LOW_RISK_THRESHOLD = 0.80
+HIGH_RISK_THRESHOLD = 1.00
+EXTREME_RISK_THRESHOLD = 1.20
+
+LOW_RISK_EXPOSURE = 1.00
+HIGH_RISK_EXPOSURE = 0.90
+EXTREME_RISK_EXPOSURE = 0.75
+DEFENSIVE_EXPOSURE = 0.50
+
+def get_risk_scaling_factor():
+
+    usage = calc_risk_budget_usage()
+
+    if usage is None:
+
+        return 1.0
+
+    if usage < LOW_RISK_THRESHOLD:
+
+        return LOW_RISK_EXPOSURE
+
+    if usage < HIGH_RISK_THRESHOLD:
+
+        return HIGH_RISK_EXPOSURE
+
+    if usage < EXTREME_RISK_THRESHOLD:
+
+        return EXTREME_RISK_EXPOSURE
+
+    return DEFENSIVE_EXPOSURE
+
+def get_risk_control_state():
+
+    factor = get_risk_scaling_factor()
+
+    if factor >= 1.0:
+
+        return "FULL"
+
+    if factor >= 0.90:
+
+        return "REDUCED"
+
+    if factor >= 0.75:
+
+        return "HIGH_RISK"
+
+    return "DEFENSIVE"
+
+def calc_risk_adjusted_weights():
+
+    weights = calc_target_weights()
+
+    if len(weights) == 0:
+
+        return {}
+
+    factor = get_risk_scaling_factor()
+
+    adjusted = {}
+
+    for symbol, weight in weights.items():
+
+        adjusted[symbol] = (
+            weight * factor
+        )
+
+    return adjusted
+
+def get_cash_weight():
+
+    weights = (
+        calc_risk_adjusted_weights()
+    )
+
+    invested = sum(
+        weights.values()
+    )
+
+    return max(
+        0.0,
+        1.0 - invested
+    )
+
+def get_risk_control_summary():
+
+    return {
+
+        "risk_state":
+            get_risk_state(),
+
+        "control_state":
+            get_risk_control_state(),
+
+        "scaling_factor":
+            get_risk_scaling_factor(),
+
+        "cash_weight":
+            get_cash_weight(),
+    }
+
+# =========================================================
+# RISK-002 Self Test
+# =========================================================
+
+def _test_risk_control():
+
+    summary = (
+        get_risk_control_summary()
+    )
+
+    assert isinstance(
+        summary,
+        dict
+    )
+
+    assert (
+        "scaling_factor"
+        in summary
+    )
+
+    assert (
+        "cash_weight"
+        in summary
+    )
+
+    factor = summary[
+        "scaling_factor"
+    ]
+
+    assert factor > 0
+
+    print(
+        "RISK-002 validation passed."
+    )
+
+    return True
+
+# =========================================================
 # Self Test
 # =========================================================
 
@@ -3065,5 +3208,12 @@ if __name__ == "__main__":
     # _test_risk_engine()
     print(
         "RISK-001 validation skipped "
+        "(requires PTrade runtime)."
+    )   
+
+    # _test_risk_engine()
+    # _test_risk_control()
+    print(
+        "RISK-002 validation skipped "
         "(requires PTrade runtime)."
     )   

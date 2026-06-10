@@ -487,7 +487,7 @@ Definition of Done:
 * 市场退出
 
 Status:
-IN PROGRESS
+DONE
 
 ---
 
@@ -540,7 +540,7 @@ Definition of Done:
 * 实盘兼容
 
 Status:
-NOT STARTED
+IN PROGRESS
 
 ---
 
