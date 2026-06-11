@@ -9,6 +9,26 @@ Format:
 * Removed
 * Fixed
 
+## 2026-06-11
+
+### Fixed
+
+#### PORT-002 Portfolio Constraints
+
+- Replaced single-pass maximum position constraint logic with iterative water-filling implementation.
+- Added constraint convergence loop to prevent normalization from reintroducing weight-limit violations.
+- Added protection against redistribution edge cases.
+- Added portfolio constraint validation tests.
+- Improved robustness of portfolio weight normalization workflow.
+
+### Review Findings
+
+Identified additional architecture review items:
+
+- RISK-002 may override portfolio constraints after volatility adjustment.
+- FILTER-002 market exposure is not yet integrated into final portfolio risk scaling.
+- EXEC-002 cash allocation is not currently translated into Cash ETF orders.
+
 ## 2026-06-10
 
 ## [EXEC-002] Rebalance Engine

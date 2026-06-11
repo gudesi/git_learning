@@ -128,11 +128,21 @@ Ready for PORT-001.
 | Task ID  | Status      |
 | -------- | ----------- |
 | PORT-001 | DONE |
-| PORT-002 | DONE |
+| PORT-002 | Functional(Not Yet Production Safe) |
 
 Progress:
 2 / 2
 
+Latest Review Findings
+
+Resolved:
+- PORT-002 weight constraint redistribution bug.
+- Portfolio constraint normalization edge cases.
+
+Pending Review:
+- RISK-002 risk-adjusted weighting may bypass portfolio constraints.
+- FILTER-002 market exposure not yet integrated into risk layer.
+- EXEC-002 cash ETF execution logic.
 ---
 
 # Phase 6 - Risk Layer
@@ -169,6 +179,20 @@ Progress:
 2 / 2
 
 ---
+
+## Validation Phase Review Status
+
+Resolved
+
+- BUG-001 DATA-003 runtime validation issue
+- BUG-002 DATA-004 API naming consistency
+- BUG-003 PORT-002 max-position redistribution bug
+
+Open
+
+- REVIEW-001 RISK-002 may bypass portfolio constraints
+- REVIEW-002 FILTER-002 not connected to risk engine
+- REVIEW-003 EXEC-002 cash ETF execution missing
 
 # Phase 9 - Validation
 

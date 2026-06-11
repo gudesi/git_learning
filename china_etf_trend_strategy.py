@@ -1897,8 +1897,6 @@ def _test_liquidity_score():
 # ATR20
 # =========================================================
 
-ATR_LOOKBACK = 20
-
 def calc_true_range(
     high,
     low,
@@ -2610,15 +2608,10 @@ def _test_position_sizing():
 
     return True
 
-
 # =========================================================
 # PORT-002
 # Portfolio Constraints
 # =========================================================
-
-# Portfolio Constraints
-MAX_SINGLE_POSITION_WEIGHT = 0.25
-MIN_SINGLE_POSITION_WEIGHT = 0.05
 
 def normalize_weights(
     weights,
@@ -2643,60 +2636,116 @@ def normalize_weights(
         in weights.items()
     }
 
+
 def apply_max_position_constraint(
     weights,
 ):
     """
-    Apply maximum position limit.
+    Cap positions at MAX_SINGLE_POSITION_WEIGHT.
+
+    Uses iterative water-filling.
     """
 
-    adjusted = {}
+    if len(weights) == 0:
+        return {}
 
-    excess = 0.0
+    adjusted = weights.copy()
 
-    for symbol, weight in weights.items():
+    max_iterations = 20
 
-        if weight > MAX_SINGLE_POSITION_WEIGHT:
+    for _ in range(max_iterations):
 
-            excess += (
-                weight -
+        excess_weight = 0.0
+
+        # Step 1
+        # Cap overweight positions
+
+        for symbol in adjusted:
+
+            weight = adjusted[symbol]
+
+            if (
+                weight >
                 MAX_SINGLE_POSITION_WEIGHT
+            ):
+
+                excess_weight += (
+                    weight -
+                    MAX_SINGLE_POSITION_WEIGHT
+                )
+
+                adjusted[symbol] = (
+                    MAX_SINGLE_POSITION_WEIGHT
+                )
+
+        # Finished
+        if excess_weight <= 1e-8:
+            break
+
+        # Step 2
+        # Find positions that can absorb weight
+
+        eligible_symbols = []
+
+        for symbol, weight in adjusted.items():
+
+            if (
+                weight <
+                MAX_SINGLE_POSITION_WEIGHT
+            ):
+                eligible_symbols.append(
+                    symbol
+                )
+
+        # Safety check
+
+        if len(eligible_symbols) == 0:
+
+            log_error(
+                "No eligible symbols "
+                "for weight redistribution."
             )
 
-            adjusted[symbol] = (
-                MAX_SINGLE_POSITION_WEIGHT
+            break
+
+        eligible_total = sum(
+            adjusted[symbol]
+            for symbol
+            in eligible_symbols
+        )
+
+        if eligible_total <= 0:
+
+            equal_share = (
+                excess_weight
+                /
+                len(eligible_symbols)
             )
+
+            for symbol in eligible_symbols:
+
+                adjusted[symbol] += (
+                    equal_share
+                )
 
         else:
 
-            adjusted[symbol] = weight
+            for symbol in eligible_symbols:
 
-    if excess <= 0:
+                proportion = (
+                    adjusted[symbol]
+                    /
+                    eligible_total
+                )
 
-        return adjusted
-
-    eligible = [
-        s
-        for s, w
-        in adjusted.items()
-        if w < MAX_SINGLE_POSITION_WEIGHT
-    ]
-
-    if len(eligible) == 0:
-
-        return adjusted
-
-    redistribution = (
-        excess / len(eligible)
-    )
-
-    for symbol in eligible:
-
-        adjusted[symbol] += (
-            redistribution
-        )
+                adjusted[symbol] += (
+                    excess_weight
+                    *
+                    proportion
+                )
 
     return adjusted
+
 
 def apply_min_position_constraint(
     weights,
@@ -2713,10 +2762,61 @@ def apply_min_position_constraint(
             weight >=
             MIN_SINGLE_POSITION_WEIGHT
         ):
-
             adjusted[symbol] = weight
 
     return adjusted
+
+
+def apply_position_constraints(
+    weights,
+):
+    """
+    Apply all portfolio constraints
+    until convergence.
+    """
+
+    if len(weights) == 0:
+        return {}
+
+    adjusted = weights.copy()
+
+    max_iterations = 10
+
+    for _ in range(max_iterations):
+
+        previous = adjusted.copy()
+
+        # Max position constraint
+
+        adjusted = (
+            apply_max_position_constraint(
+                adjusted
+            )
+        )
+
+        adjusted = normalize_weights(
+            adjusted
+        )
+
+        # Min position constraint
+
+        adjusted = (
+            apply_min_position_constraint(
+                adjusted
+            )
+        )
+
+        adjusted = normalize_weights(
+            adjusted
+        )
+
+        # Converged
+
+        if adjusted == previous:
+            break
+
+    return adjusted
+
 
 def calc_target_weights():
     """
@@ -2729,23 +2829,12 @@ def calc_target_weights():
 
         return {}
 
-    weights = apply_max_position_constraint(
-        weights
-    )
-
-    weights = normalize_weights(
-        weights
-    )
-
-    weights = apply_min_position_constraint(
-        weights
-    )
-
-    weights = normalize_weights(
+    weights = apply_position_constraints(
         weights
     )
 
     return weights
+
 
 # =========================================================
 # PORT-002 Self Test
@@ -2755,28 +2844,100 @@ def _test_portfolio_constraints():
 
     weights = calc_target_weights()
 
-    if len(weights) == 0:
+    if len(weights) > 0:
 
-        return True
+        total = sum(
+            weights.values()
+        )
+
+        assert abs(
+            total - 1.0
+        ) < 0.0001
+
+        for weight in weights.values():
+
+            assert (
+                weight <=
+                MAX_SINGLE_POSITION_WEIGHT
+                + 0.0001
+            )
+
+            assert (
+                weight >=
+                MIN_SINGLE_POSITION_WEIGHT
+                - 0.0001
+            )
+
+    # -----------------------------------------------------
+    # Test 1
+    # Simple overweight case
+    # -----------------------------------------------------
+
+    test_weights = {
+        "A": 0.60,
+        "B": 0.20,
+        "C": 0.10,
+        "D": 0.05,
+        "E": 0.05,
+    }
+
+    result = apply_position_constraints(
+        test_weights
+    )
 
     total = sum(
-        weights.values()
+        result.values()
     )
 
     assert abs(
         total - 1.0
     ) < 0.0001
 
-    for weight in weights.values():
+    for weight in result.values():
 
         assert (
             weight <=
-            MAX_SINGLE_POSITION_WEIGHT + 0.01
+            MAX_SINGLE_POSITION_WEIGHT
+            + 0.0001
+        )
+
+    # -----------------------------------------------------
+    # Test 2
+    # Small position removal
+    # -----------------------------------------------------
+
+    test_weights = {
+        "A": 0.40,
+        "B": 0.30,
+        "C": 0.20,
+        "D": 0.08,
+        "E": 0.02,
+    }
+
+    result = apply_position_constraints(
+        test_weights
+    )
+
+    total = sum(
+        result.values()
+    )
+
+    assert abs(
+        total - 1.0
+    ) < 0.0001
+
+    for weight in result.values():
+
+        assert (
+            weight <=
+            MAX_SINGLE_POSITION_WEIGHT
+            + 0.0001
         )
 
         assert (
             weight >=
             MIN_SINGLE_POSITION_WEIGHT
+            - 0.0001
         )
 
     print(

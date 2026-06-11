@@ -438,6 +438,19 @@ Definition of Done:
 Status:
 DONE
 
+notes:
+
+Implemented:
+- Weight normalization
+- Maximum position constraint
+- Minimum position constraint
+- Constraint validation
+
+Post-implementation fixes:
+- Replaced single-pass max position constraint with iterative water-filling algorithm.
+- Added unified constraint convergence loop.
+- Added validation tests for overweight and minimum-position edge cases.
+
 ---
 
 # Phase 6 - Risk Layer
