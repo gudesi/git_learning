@@ -46,3 +46,21 @@ code review before continue
 - 单脚本架构
 - CONFIG统一参数管理
 - 回测与实盘共用代码
+
+### Risk Model Notes
+
+Current implementation uses a simplified portfolio risk model.
+
+Portfolio volatility is estimated as:
+
+weighted average ETF volatility
+
+rather than a covariance-based portfolio volatility model.
+
+This approximation is intentional and sufficient for the current MVP because:
+
+- ETF universe size is small
+- Risk control is used for exposure scaling only
+- Simplicity is preferred for PTrade deployment
+
+Future versions may introduce covariance-based portfolio risk estimation if additional precision is required.

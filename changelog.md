@@ -11,6 +11,25 @@ Format:
 
 ## 2026-06-11
 
+### Review
+
+Performed focused code review on:
+
+- RISK-001 Portfolio Risk Engine
+- RISK-002 Risk Scaling Engine
+
+Verified:
+
+- risk budget calculation flow
+- portfolio state consistency
+- execution integration
+- absence of recursive dependencies
+
+Documented known design limitation:
+
+- portfolio volatility currently uses weighted-average ETF volatility as a proxy risk estimate
+- covariance-based portfolio volatility intentionally deferred for MVP
+
 ### Architecture Review
 
 Reviewed interaction between PORT-002

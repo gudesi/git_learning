@@ -201,6 +201,22 @@ adjustment to ensure enforcement.
 Progress:
 2 / 2
 
+### Risk Layer Review (2026-06-11)
+
+RISK-001 and RISK-002 completed code review.
+
+Review findings:
+
+- No recursive dependency detected.
+- Risk scaling pipeline verified.
+- Portfolio state synchronization verified.
+- PTrade execution flow verified.
+
+Known limitation:
+
+- Portfolio volatility currently uses weighted-average ETF volatility as a proxy estimate.
+- Covariance-based portfolio volatility is intentionally deferred and is not required for current MVP implementation.
+
 ---
 
 # Phase 7 - State Management
