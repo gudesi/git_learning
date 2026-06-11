@@ -12,6 +12,29 @@ Current Phase:
 Current Task:
 code review before continue
 
+## Planned Code Review
+
+Next review target:
+
+RISK-001
+RISK-002
+
+Focus areas:
+
+- calc_portfolio_volatility()
+
+- calc_risk_budget_usage()
+
+- get_risk_scaling_factor()
+
+- calc_risk_adjusted_weights()
+
+Review objective:
+
+Verify consistency between
+pre-adjustment risk estimates
+and final executable portfolio risk.
+
 Overall Progress:
 21 / 23 Tasks Completed
 
@@ -143,6 +166,29 @@ Pending Review:
 - RISK-002 risk-adjusted weighting may bypass portfolio constraints.
 - FILTER-002 market exposure not yet integrated into risk layer.
 - EXEC-002 cash ETF execution logic.
+
+## Architecture Notes
+
+### PORT-002 Constraint Enforcement
+
+A post-implementation architecture review was conducted
+to verify whether PORT-002 position constraints could be
+invalidated by RISK-002 risk scaling.
+
+Current conclusion:
+
+- RISK-002 applies uniform portfolio scaling.
+- Relative position weights remain unchanged.
+- PORT-002 maximum/minimum position constraints remain valid.
+
+No code changes required.
+
+Future warning:
+
+If RISK-002 evolves into per-symbol risk adjustment
+(e.g. ATR targeting, volatility targeting, risk parity),
+position constraints should be re-applied after risk
+adjustment to ensure enforcement.
 ---
 
 # Phase 6 - Risk Layer

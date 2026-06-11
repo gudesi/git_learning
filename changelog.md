@@ -11,6 +11,23 @@ Format:
 
 ## 2026-06-11
 
+### Architecture Review
+
+Reviewed interaction between PORT-002
+(Position Constraints) and RISK-002
+(Risk Scaling).
+
+Findings:
+
+- Current portfolio-level scaling does not
+  violate position constraints.
+
+- No code changes required.
+
+- Future per-symbol risk allocation methods
+  may require a second constraint enforcement
+  pass after risk adjustment.
+
 ### Fixed
 
 #### PORT-002 Portfolio Constraints

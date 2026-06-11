@@ -17,3 +17,31 @@ china_etf_trend_strategy.py
 原因：
 
 PTrade平台限制
+
+## RULE-002(Constraint Enforcement Rule)
+
+Current architecture:
+
+Ranking
+    ↓
+Portfolio Construction
+    ↓
+Risk Adjustment
+    ↓
+Execution
+
+RISK-002 currently performs only
+portfolio-level scaling.
+
+Portfolio constraints remain valid
+after scaling.
+
+If future risk modules introduce
+per-symbol weight modifications
+(volatility targeting, ATR targeting,
+risk parity, etc.), constraint
+enforcement must be executed again
+after risk adjustment.
+
+This requirement has been verified
+during architecture review.
