@@ -3177,17 +3177,28 @@ def calc_risk_adjusted_weights():
     weights = calc_target_weights()
 
     if len(weights) == 0:
-
         return {}
 
-    factor = get_risk_scaling_factor()
+    risk_factor = (
+        get_risk_scaling_factor()
+    )
+
+    market_factor = (
+        calc_market_exposure()
+    )
+
+    final_factor = (
+        risk_factor
+        * market_factor
+    )
 
     adjusted = {}
 
     for symbol, weight in weights.items():
 
         adjusted[symbol] = (
-            weight * factor
+            weight
+            * final_factor
         )
 
     return adjusted
@@ -3387,18 +3398,22 @@ def get_current_symbols(
 
 
 def get_target_symbols():
-    """
-    Target portfolio holdings.
-    """
 
     weights = (
         calc_risk_adjusted_weights()
     )
 
-    return set(
+    symbols = set(
         weights.keys()
     )
 
+    if get_cash_weight() > 0:
+
+        symbols.add(
+            CASH_ETF
+        )
+
+    return symbols
 
 def sell_removed_positions(
     context,
@@ -3441,16 +3456,27 @@ def sell_removed_positions(
 def rebalance_portfolio(
     context,
 ):
-    """
-    Apply target weights.
-    """
 
     weights = (
         calc_risk_adjusted_weights()
     )
 
+    cash_weight = (
+        get_cash_weight()
+    )
+
+    target_weights = (
+        weights.copy()
+    )
+
+    if cash_weight > 0:
+
+        target_weights[
+            CASH_ETF
+        ] = cash_weight
+
     for symbol, weight in (
-        weights.items()
+        target_weights.items()
     ):
 
         order_target_percent(

@@ -217,6 +217,23 @@ Known limitation:
 - Portfolio volatility currently uses weighted-average ETF volatility as a proxy estimate.
 - Covariance-based portfolio volatility is intentionally deferred and is not required for current MVP implementation.
 
+RISK-002 Status
+
+Completed:
+- Portfolio volatility estimation
+- Risk budget usage calculation
+- Risk scaling factor generation
+- Market exposure integration
+
+Final position sizing:
+
+Final Weight
+=
+Target Weight
+× Market Exposure
+× Risk Scaling Factor
+
+This ensures that both market regime risk and portfolio risk constraints participate in allocation decisions.
 ---
 
 # Phase 7 - State Management
@@ -239,6 +256,17 @@ Progress:
 
 Progress:
 2 / 2
+
+EXEC-002 Status
+
+Completed:
+- Target portfolio construction
+- Removed-position liquidation
+- Cash ETF allocation support
+
+Residual cash is automatically allocated to CASH_ETF.
+
+Target symbol universe now includes CASH_ETF when cash allocation exists, preventing unnecessary sell/rebuy operations during rebalancing.
 
 ---
 

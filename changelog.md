@@ -9,6 +9,30 @@ Format:
 * Removed
 * Fixed
 
+## 2026-06-12
+
+### Fixed
+
+RISK-002
+
+- Integrated FILTER-002 market exposure into risk-adjusted portfolio sizing.
+- Final allocation now incorporates:
+  Target Weight × Market Exposure × Risk Scaling Factor.
+- Fixed issue where market regime control was calculated but not applied.
+
+EXEC-002
+
+- Added automatic CASH_ETF allocation for residual cash.
+- Cash weight is now translated into executable portfolio targets.
+- Updated target symbol generation to include CASH_ETF.
+- Eliminated unnecessary sell/rebuy cycles caused by missing CASH_ETF from target universe.
+
+Architecture
+
+- Completed end-to-end linkage:
+  Market Filter → Risk Layer → Execution Layer.
+- Portfolio exposure control now functions as originally designed.
+
 ## 2026-06-11
 
 ### Review

@@ -650,3 +650,13 @@ Completed before FILTER-001:
 - Removed VSCode static analysis errors
 
 This change does not introduce new strategy functionality and is not tracked as a standalone milestone.
+
+[Done] FILTER-002 / RISK-002 Integration
+- Market exposure now participates in final portfolio sizing.
+- Final portfolio allocation:
+  Target Weight × Market Exposure × Risk Scaling.
+
+[Done] EXEC-002 Cash ETF Execution
+- Residual cash allocation is automatically deployed into CASH_ETF.
+- Cash ETF included in rebalance target universe.
+- Prevents unnecessary sell/rebuy cycles during rebalancing.
