@@ -2987,7 +2987,7 @@ def calc_portfolio_atr():
         total_weight
     ) 
 
-def calc_portfolio_volatility():
+def calc_weighted_average_volatility():
 
     weights = calc_target_weights()
 
@@ -3035,8 +3035,8 @@ def get_portfolio_statistics():
         "portfolio_atr":
             calc_portfolio_atr(),
 
-        "portfolio_volatility":
-            calc_portfolio_volatility(),
+        "weighted_average_volatility":
+            calc_weighted_average_volatility(),
     }
 
 def calc_risk_budget_usage():
@@ -3046,7 +3046,7 @@ def calc_risk_budget_usage():
     )
 
     portfolio_vol = stats.get(
-        "portfolio_volatility"
+        "weighted_average_volatility"
     )
 
     if portfolio_vol is None:
@@ -3108,7 +3108,7 @@ def _test_risk_engine():
     )
 
     assert (
-        "portfolio_volatility"
+        "weighted_average_volatility"
         in stats
     )
 
@@ -3213,10 +3213,12 @@ def get_cash_weight():
         weights.values()
     )
 
-    return max(
-        0.0,
-        1.0 - invested
-    )
+    cash = max(0.0, 1.0 - invested)
+
+    if cash < 0.0001:
+        cash = 0.0
+
+    return cash
 
 def get_risk_control_summary():
 

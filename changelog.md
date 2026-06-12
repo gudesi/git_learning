@@ -11,6 +11,30 @@ Format:
 
 ## 2026-06-12
 
+Stability Improvement
+
+- Added floating-point tolerance handling in get_cash_weight()
+- Residual cash allocations below 0.01% are rounded to zero
+- Prevents creation of negligible CASH_ETF target positions caused by floating-point precision errors
+
+Refactor
+
+- Renamed calc_portfolio_volatility() to calc_weighted_average_volatility()
+- Renamed portfolio_volatility variables to weighted_average_volatility
+- Updated terminology to reflect weighted-average risk proxy rather than true covariance-based portfolio volatility
+
+Project Status Update
+
+- Current project focus changed from code review to PTrade migration
+- Validation phase deferred until PTrade runtime becomes available
+
+Documentation Update
+
+- REVIEW-001 marked resolved after portfolio constraint interaction review
+- REVIEW-002 marked resolved after FILTER-002 market exposure integration
+- REVIEW-003 marked resolved after EXEC-002 cash ETF execution completion
+- current_status updated to reflect no open review findings
+
 ### Fixed
 
 RISK-002

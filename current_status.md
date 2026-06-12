@@ -9,31 +9,10 @@ Last Updated:
 Current Phase:
 # Phase 8 completed
 
-Current Task:
-code review before continue
+Current Focus
 
-## Planned Code Review
-
-Next review target:
-
-RISK-001
-RISK-002
-
-Focus areas:
-
-- calc_portfolio_volatility()
-
-- calc_risk_budget_usage()
-
-- get_risk_scaling_factor()
-
-- calc_risk_adjusted_weights()
-
-Review objective:
-
-Verify consistency between
-pre-adjustment risk estimates
-and final executable portfolio risk.
+Migrate strategy to PTrade runtime environment
+before validation phase.
 
 Overall Progress:
 21 / 23 Tasks Completed
@@ -278,11 +257,15 @@ Resolved
 - BUG-002 DATA-004 API naming consistency
 - BUG-003 PORT-002 max-position redistribution bug
 
+Resolved
+
+- REVIEW-001 RISK-002 portfolio constraint interaction reviewed
+- REVIEW-002 FILTER-002 integrated into risk engine
+- REVIEW-003 EXEC-002 cash ETF execution completed
+
 Open
 
-- REVIEW-001 RISK-002 may bypass portfolio constraints
-- REVIEW-002 FILTER-002 not connected to risk engine
-- REVIEW-003 EXEC-002 cash ETF execution missing
+None
 
 # Phase 9 - Validation
 
