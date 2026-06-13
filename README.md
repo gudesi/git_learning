@@ -40,13 +40,12 @@ Current Status
 
 Phase 1-8 Completed
 
+Current Phase:
+# Phase 8.5 - PTrade Migration
+
 Current Focus
 
-PTrade migration and runtime validation
-
-Next Milestone
-
-TEST-001 Indicator Validation
+## MIG-001A PTrade Lifecycle
 ---
 
 ## Development Rules
@@ -118,3 +117,23 @@ This allows the strategy to remain fully invested while maintaining defensive po
 Current implementation uses weighted average ETF volatility
 as a risk proxy and does not estimate covariance-based
 portfolio volatility.
+
+## PTrade Migration Roadmap
+
+Phase 9 introduces runtime integration
+with the PTrade trading platform.
+
+Migration sequence:
+
+MIG-001 Runtime Framework
+MIG-002 Data Interface Migration
+MIG-003 Portfolio Validation
+MIG-004 Execution Migration
+MIG-005 Scheduler Integration
+MIG-006 Backtest Validation
+MIG-007 Simulation Validation
+MIG-008 Production Readiness Review
+
+Core strategy logic remains unchanged.
+Only infrastructure and broker interfaces
+will be adapted.

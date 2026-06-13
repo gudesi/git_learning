@@ -9,6 +9,45 @@ Format:
 * Removed
 * Fixed
 
+## 2026-06-13
+
+## MIG-001A
+
+Completed PTrade lifecycle integration.
+
+Added:
+
+- initialize(context)
+- before_trading_start(context, data)
+- after_trading_end(context, data)
+
+Verified lifecycle callbacks execute correctly
+within Guojin PTrade runtime.
+
+No trading logic changes.
+No data interface changes.
+No execution interface changes.
+
+### Documentation
+
+Added Phase 9 PTrade Migration roadmap.
+
+Introduced MIG-001:
+PTrade Runtime Framework.
+
+Migration review completed.
+
+Identified:
+
+- Functions already compatible with PTrade.
+- Functions requiring future interface migration.
+- Required PTrade lifecycle functions.
+- Runtime integration architecture.
+
+No strategy logic changes.
+No production behavior changes.
+Documentation update only.
+
 ## 2026-06-12
 
 Stability Improvement

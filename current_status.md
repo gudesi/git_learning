@@ -7,15 +7,14 @@ Last Updated:
 2026-06-10
 
 Current Phase:
-# Phase 8 completed
+# Phase 8.5 - PTrade Migration
 
 Current Focus
 
-Migrate strategy to PTrade runtime environment
-before validation phase.
+## MIG-001B Environment Validation
 
 Overall Progress:
-21 / 23 Tasks Completed
+22 / 32 Tasks Completed
 
 ---
 
@@ -267,11 +266,34 @@ Open
 
 None
 
+# Phase 8.5 - PTrade Migration
+
+| Task ID | Status |
+|----------|----------|
+| MIG-001A | DONE |
+| MIG-001B | IN PROGRESS |
+| MIG-001C | NOT STARTED |
+| MIG-002 | NOT STARTED |
+| MIG-003 | NOT STARTED |
+| MIG-004 | NOT STARTED |
+| MIG-005 | NOT STARTED |
+| MIG-006 | NOT STARTED |
+| MIG-007 | NOT STARTED |
+| MIG-008 | NOT STARTED |
+
+Progress:
+0 / 10
+
+Objective:
+
+Integrate strategy engine into PTrade lifecycle
+without modifying strategy logic.
+
 # Phase 9 - Validation
 
 | Task ID  | Status      |
 | -------- | ----------- |
-| TEST-001 | IN PROGRESS |
+| TEST-001 | NOT STARTED |
 | TEST-002 | NOT STARTED |
 | TEST-003 | NOT STARTED |
 | TEST-004 | NOT STARTED |

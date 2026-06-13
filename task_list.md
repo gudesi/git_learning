@@ -582,6 +582,308 @@ DONE
 
 ---
 
+# Phase 8.5 - PTrade Migration
+
+## MIG-001A
+
+PTrade Lifecycle
+
+新增：
+
+initialize()
+
+before_trading_start()
+
+after_trading_end()
+
+完成标准：
+
+策略成功加载
+
+Status:
+DONE
+
+Verified:
+- initialize(context)
+- before_trading_start(context, data)
+- after_trading_end(context, data)
+
+Successfully executed in PTrade.
+
+## MIG-001B
+
+Environment Validation
+
+新增：
+
+validate_ptrade_environment()
+
+打印：
+
+type(context)
+
+dir(context)
+
+dir(context.portfolio)
+
+完成标准：
+
+确认：
+
+portfolio字段
+
+真实名称。
+
+Status:
+IN PROGRESS
+
+## MIG-001C
+
+Scheduler Validation
+
+新增：
+
+run_daily()
+
+测试函数：
+
+daily_heartbeat()
+
+只打印日志。
+
+不交易。
+
+完成标准：
+
+定时任务成功触发
+
+Status:
+NOT STARTED
+
+## MIG-002 Data Interface Migration
+目标：
+
+彻底替换Stub。
+
+检查：
+
+_get_history_field()
+
+get_price()
+
+get_volume()
+
+get_high()
+
+get_low()
+
+get_close()
+
+全部改成：
+
+get_history()
+
+真实PTrade接口。
+
+完成标准：
+
+下面代码运行成功：
+
+calculate_atr()
+
+calculate_momentum()
+
+calculate_quality()
+
+全部返回真实数据。
+
+Status:
+NOT STARTED
+
+## MIG-003 Portfolio Interface Validation
+目标：
+
+验证：
+
+context.portfolio
+
+与当前封装一致。
+
+检查：
+
+get_positions()
+
+get_position()
+
+get_cash()
+
+get_total_value()
+
+完成标准：
+
+打印：
+
+context.portfolio
+
+验证：
+
+cash
+
+positions
+
+total_value
+
+字段全部存在。
+
+Status:
+NOT STARTED
+
+## MIG-004 Execution Interface Migration
+目标：
+
+替换：
+
+order_target_percent()
+
+order_target_value()
+
+封装。
+
+验证：
+
+buy_cash_etf()
+
+rebalance_portfolio()
+
+实际能够下单。
+
+完成标准：
+
+模拟盘产生真实订单。
+
+Status:
+NOT STARTED
+
+## MIG-005 Scheduler Integration
+目标：
+
+让策略自动运行。
+
+建立：
+
+run_daily()
+
+或者：
+
+run_monthly()
+
+机制。
+
+验证：
+
+market_filter
+ranking
+portfolio
+risk
+execution
+
+全部自动触发。
+
+完成标准：
+
+无需手工调用。
+
+Status:
+NOT STARTED
+
+## MIG-006 Backtest Validation
+目标：
+
+PTrade回测。
+
+先跑：
+
+2024-01-01
+~
+2025-12-31
+
+检查：
+
+调仓次数
+
+持仓变化
+
+现金ETF
+
+是否正确。
+
+完成标准：
+
+回测完整结束。
+
+无异常。
+
+Status:
+NOT STARTED
+
+## MIG-007 Simulation Validation
+目标：
+
+PTrade模拟盘。
+
+运行：
+
+2~4周
+
+检查：
+
+订单提交
+
+订单成交
+
+仓位同步
+
+日志输出
+
+完成标准：
+
+所有交易逻辑正常。
+
+Status:
+NOT STARTED
+
+## MIG-008 Production Readiness Review
+最终Code Review。
+
+重点检查：
+
+DATA
+FILTER
+RANK
+PORT
+RISK
+EXEC
+MIG
+
+全链路。
+
+确认：
+
+无Stub
+
+无TODO
+
+无Mock
+
+无临时Patch
+
+完成标准：
+
+允许实盘。
+
+Status:
+NOT STARTED
+
 # Phase 9 - Validation
 
 ## TEST-001 Indicator Validation
@@ -596,7 +898,7 @@ Dependencies:
 * IND-006
 
 Status:
-IN PROGRESS
+NOT STARTED
 
 ---
 
