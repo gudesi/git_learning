@@ -11,6 +11,48 @@ Format:
 
 ## 2026-06-13
 
+## [MIG-002] Data Interface Migration Completed
+
+### Added
+
+* Migrated DATA-003 historical market data interface into PTrade runtime.
+* Added `_get_history_field()` PTrade adapter implementation.
+* Added `get_close()` wrapper.
+* Added `get_high()` wrapper.
+* Added `get_low()` wrapper.
+* Added `get_volume()` wrapper.
+* Added `validate_data_interface()` migration validation routine.
+
+### Validated
+
+* PTrade `get_history()` API successfully invoked.
+* Historical close price retrieval validated.
+* Historical high price retrieval validated.
+* Historical low price retrieval validated.
+* Historical volume retrieval validated.
+* Rolling lookback window behavior validated.
+* 252-day historical data retrieval validated.
+
+### PTrade Compatibility Notes
+
+* Shanghai market securities require `.SS` suffix.
+* Shenzhen market securities require `.SZ` suffix.
+* PTrade `get_history()` returns pandas DataFrame objects.
+* Historical data interface confirmed compatible with downstream indicator layer requirements.
+
+### Migration Status
+
+* MIG-001A PTrade Lifecycle: Completed
+* MIG-001B Environment Validation: Completed
+* MIG-001C Scheduler Validation: Completed
+* MIG-002 Data Interface Migration: Completed
+
+### Next Phase
+
+* MIG-003 Indicator Migration
+* Validate indicator calculations using live PTrade historical data.
+
+
 ## MIG-001C Scheduler Validation
 
 Validated scheduled task framework.

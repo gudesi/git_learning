@@ -45,7 +45,7 @@ Current Phase:
 
 Current Focus
 
-## MIG-001C PTrade Lifecycle
+## MIG-003 Portfolio Interface Validation
 ---
 
 ## Development Rules

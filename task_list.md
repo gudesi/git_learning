@@ -706,7 +706,7 @@ calculate_quality()
 全部返回真实数据。
 
 Status:
-NOT STARTED
+DONE
 
 ## MIG-003 Portfolio Interface Validation
 目标：
