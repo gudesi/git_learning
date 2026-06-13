@@ -11,6 +11,45 @@ Format:
 
 ## 2026-06-13
 
+## MIG-001C Scheduler Validation
+
+Validated scheduled task framework.
+
+Implemented:
+
+run_daily(context, daily_heartbeat, time='14:50')
+
+Verified:
+
+- successful scheduler registration
+- successful callback execution
+- daily execution frequency
+- correct execution time
+
+Confirmed compatibility of
+Guojin PTrade scheduling framework.
+
+No trading logic changes.
+No data interface changes.
+
+## MIG-001B Environment Validation
+
+Validated Guojin PTrade runtime environment.
+
+Verified:
+
+- context object
+- context.portfolio object
+- context.portfolio.cash
+- context.portfolio.total_value
+- context.portfolio.positions
+
+Confirmed compatibility of core
+account information access layer.
+
+No strategy logic changes.
+No execution logic changes.
+
 ## MIG-001A
 
 Completed PTrade lifecycle integration.

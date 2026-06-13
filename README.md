@@ -45,7 +45,7 @@ Current Phase:
 
 Current Focus
 
-## MIG-001A PTrade Lifecycle
+## MIG-001C PTrade Lifecycle
 ---
 
 ## Development Rules

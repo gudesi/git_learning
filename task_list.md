@@ -610,55 +610,63 @@ Verified:
 
 Successfully executed in PTrade.
 
-## MIG-001B
+## MIG-001B Environment Validation
 
-Environment Validation
+Description:
+Validate PTrade runtime environment and
+portfolio object structure.
 
-新增：
+Verification Results:
 
-validate_ptrade_environment()
+✓ context object accessible
 
-打印：
+✓ context.portfolio accessible
 
-type(context)
+✓ context.portfolio.cash verified
 
-dir(context)
+✓ context.portfolio.total_value verified
 
-dir(context.portfolio)
+✓ context.portfolio.positions verified
 
-完成标准：
+Key Findings:
 
-确认：
+cash:
+context.portfolio.cash
 
-portfolio字段
+total_value:
+context.portfolio.total_value
 
-真实名称。
+positions:
+context.portfolio.positions
 
 Status:
-IN PROGRESS
+DONE
 
-## MIG-001C
+## MIG-001C Scheduler Validation
 
-Scheduler Validation
+Description:
+Validate PTrade scheduled task execution.
 
-新增：
+Verification Results:
 
-run_daily()
+✓ run_daily() registration successful
 
-测试函数：
+✓ scheduled callback executed
+
+✓ callback executed once per trading day
+
+✓ callback executed at configured time
+
+Test Function:
 
 daily_heartbeat()
 
-只打印日志。
+Observed Schedule:
 
-不交易。
-
-完成标准：
-
-定时任务成功触发
+14:50 each trading day
 
 Status:
-NOT STARTED
+DONE
 
 ## MIG-002 Data Interface Migration
 目标：
