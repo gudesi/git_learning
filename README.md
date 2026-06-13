@@ -29,6 +29,9 @@ changelog.md
 
 PROJECT_RULES.md
 项目规则
+
+Ptrade_api.md
+ptrade api 文档
 ---
 
 ## Current Progress
