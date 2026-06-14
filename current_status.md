@@ -4,17 +4,17 @@ Project:
 Institutional China ETF Trend Following Portfolio v4.0
 
 Last Updated:
-2026-06-10
+2026-06-14
 
 Current Phase:
 # Phase 8.5 - PTrade Migration
 
 Current Focus
 
-## MIG-004 Portfolio Interface Validation
+## MIG-005 Scheduler Integration
 
 Overall Progress:
-26 / 32 Tasks Completed
+27 / 32 Tasks Completed
 
 ---
 
@@ -275,14 +275,14 @@ None
 | MIG-001C | DONE |
 | MIG-002 | DONE |
 | MIG-003 | DONE |
-| MIG-004 | NOT STARTED |
+| MIG-004 | DONE |
 | MIG-005 | NOT STARTED |
 | MIG-006 | NOT STARTED |
 | MIG-007 | NOT STARTED |
 | MIG-008 | NOT STARTED |
 
 Progress:
-5 / 10
+6 / 10
 
 Objective:
 

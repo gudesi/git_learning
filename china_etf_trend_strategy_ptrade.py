@@ -25,7 +25,9 @@ def daily_heartbeat(context):
     
     # validate_data_interface()
     
-    validate_portfolio_snapshot(context)
+    # validate_portfolio_snapshot(context)
+    
+    validate_order_interface(context)
     
 def _get_history_field(symbol, field, count):
     try:
@@ -149,3 +151,35 @@ def validate_portfolio_snapshot(context):
     log.info("positions_value=" + str(context.portfolio.positions_value))
     
     log.info("returns=" + str(context.portfolio.returns))
+    
+# MIG-004 Order Interface Validation
+
+def validate_order_interface(context):
+
+    symbol = '510300.SS'
+
+    log.info("========== ORDER TEST ==========")
+
+    try:
+
+        o = order_target_value(symbol, 20000)
+
+        log.info("order=" + str(o))
+
+        log.info("type=" + str(type(o)))
+
+        log.info("dir=" + str(dir(o)))
+
+    except Exception as e:
+
+        log.error("order_target_value: " + str(e))
+
+    try:
+
+        orders = get_open_orders()
+
+        log.info("open_orders=" + str(orders))
+
+    except Exception as e:
+
+        log.error("get_open_orders: " + str(e))

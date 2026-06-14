@@ -66,7 +66,7 @@ Current Phase:
 
 Current Focus
 
-## MIG-004 Portfolio Interface Validation
+## MIG-005 Scheduler Integration
 ---
 
 ## Development Rules
@@ -203,3 +203,22 @@ Creates adjustment orders
 Cancels zero-share orders automatically
 
 Validated in MIG-003.
+
+## PTrade Order Mapping
+
+order_target_value(symbol, value)
+    -> returns order_id(str) or None
+
+order_target(symbol, amount)
+    -> not validated
+
+get_open_orders()
+    -> returns list
+
+Zero-share adjustment
+    -> order_target_value() returns None
+
+Target-position semantics
+    -> automatically calculates buy/sell quantity
+
+Validated in MIG-004.

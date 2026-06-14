@@ -11,6 +11,28 @@ Format:
 
 ## 2026-06-14
 
+## [Migration] MIG-004 Order Interface Validation Completed
+
+### Added
+
+- Implemented MIG-004 order interface validation suite
+- Verified order_target_value() execution behavior
+- Verified order ID return type (str)
+- Verified zero-share order behavior (returns None)
+- Verified automatic buy/sell adjustment toward target value
+- Verified get_open_orders() API availability
+
+### Documented
+
+- Added PTrade Order Mapping reference
+- Recorded order submission and return-value semantics
+- Recorded target-position execution behavior
+
+### Result
+
+MIG-004 validation passed.
+Core order-management APIs confirmed compatible with strategy migration requirements.
+
 ### MIG-003 Portfolio Interface Validation Completed
 
 Validated PTrade portfolio interfaces using live backtest execution.

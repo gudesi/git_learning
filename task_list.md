@@ -770,7 +770,7 @@ rebalance_portfolio()
 模拟盘产生真实订单。
 
 Status:
-NOT STARTED
+DONE
 
 ## MIG-005 Scheduler Integration
 目标：
