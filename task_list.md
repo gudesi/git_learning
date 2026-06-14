@@ -787,7 +787,6 @@ Prerequisites:
 Tasks:
 
 MIG-005A Indicator Integration
-Status: Pending
 
 Integrate:
 - IND-001 Return Calculation
@@ -799,6 +798,21 @@ Integrate:
 
 Dependencies:
 - MIG-002 Data Interface
+
+Status:
+IN PROGRESS
+
+Completed:
+- Indicator configuration migrated
+- ETF universe configuration migrated
+- Turnover interface migrated
+
+Validated:
+- turnover -> money mapping
+
+Open Issue:
+- Historical data adapters currently return DataFrame
+- Indicator layer requires Series/list compatibility validation
 
 
 MIG-005B Filter Integration

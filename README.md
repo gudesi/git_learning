@@ -238,3 +238,78 @@ Frozen
 
 Further modifications require
 explicit migration review approval.
+
+# PTrade Migration Architecture
+
+Phase 1
+
+Migration Validation
+
+Completed:
+
+MIG-001 Lifecycle
+MIG-002 Data Interface
+MIG-003 Portfolio Mapping
+MIG-004 Order Mapping
+
+Status:
+
+Frozen
+
+
+Phase 2
+
+Core Strategy Integration
+
+Planned:
+
+IND
+ ↓
+FILTER
+ ↓
+RANK
+ ↓
+PORT
+ ↓
+RISK
+ ↓
+EXEC
+ ↓
+Scheduler
+
+
+Target Runtime Flow:
+
+initialize()
+
+ ↓
+
+run_daily()
+
+ ↓
+
+strategy_main()
+
+ ↓
+
+rebalance()
+
+ ↓
+
+FILTER
+
+ ↓
+
+RANK
+
+ ↓
+
+PORT
+
+ ↓
+
+RISK
+
+ ↓
+
+EXEC

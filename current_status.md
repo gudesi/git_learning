@@ -297,7 +297,16 @@ Migration Layer v1.0 Frozen
 
 No further modifications planned.
 
-| MIG-005A | NOT STARTED |
+| MIG-005A | IN PROGRESS |
+Completed:
+- Indicator configuration migration
+- ETF universe migration
+- Turnover API migration
+
+Discovered:
+- Data interface return-type compatibility issue
+  (DataFrame vs Series/list)
+
 | MIG-005B | NOT STARTED |
 | MIG-005C | NOT STARTED |
 | MIG-005D | NOT STARTED |

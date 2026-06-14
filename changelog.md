@@ -11,6 +11,28 @@ Format:
 
 ## 2026-06-14
 
+## [MIG-005A] Pre-Migration Validation
+
+### Added
+
+- RETURN_LOOKBACKS configuration
+- ATR_LOOKBACK configuration
+- get_turnover() adapter
+
+### Validated
+
+- PTrade money field access
+- Turnover-to-money mapping
+
+### Findings
+
+Historical data adapters currently return
+DataFrame objects.
+
+Indicator layer expects iterable numeric
+series and requires compatibility review
+during MIG-005A implementation.
+
 ### Migration Review Completed
 
 Migration Layer Review completed.

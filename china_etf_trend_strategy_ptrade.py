@@ -1,4 +1,105 @@
 # =========================================================
+# Strategy Configuration
+# =========================================================
+
+
+# Cash ETF
+
+CASH_ETF = "511880"
+
+
+# Broad Market ETFs
+
+BROAD_ETFS = [
+    "510300",  # CSI 300
+    "510500",  # CSI 500
+    "512100",  # CSI 1000
+    "563300",  # CSI A500
+    "159915",  # ChiNext
+    "588000",  # STAR50
+    "510880",  # Dividend
+]
+
+
+# Financial ETFs
+
+FINANCIAL_ETFS = [
+    "512880",  # Securities
+    "512800",  # Banking
+]
+
+
+# Technology ETFs
+
+TECH_ETFS = [
+    "512480",  # Semiconductor
+    "159819",  # AI
+    "562500",  # Robotics
+    "512980",  # Media
+    "516160",  # New Energy
+]
+
+
+# Defense ETFs
+
+DEFENSE_ETFS = [
+    "512660",  # Military
+]
+
+
+# Healthcare ETFs
+
+HEALTHCARE_ETFS = [
+    "512010",  # Healthcare
+]
+
+
+# Consumer ETFs
+
+CONSUMER_ETFS = [
+    "159928",  # Consumer
+]
+
+
+# Resource ETFs
+
+RESOURCE_ETFS = [
+    "512400",  # Nonferrous Metals
+    "518880",  # Gold
+    "515220",  # Coal
+]
+
+
+# Risk ETF Universe
+
+RISK_ETFS = (
+    BROAD_ETFS
+    + FINANCIAL_ETFS
+    + TECH_ETFS
+    + DEFENSE_ETFS
+    + HEALTHCARE_ETFS
+    + CONSUMER_ETFS
+    + RESOURCE_ETFS
+)
+
+
+# Full Universe
+
+ETF_UNIVERSE = RISK_ETFS + [CASH_ETF]
+
+# Indicator Configuration
+
+RETURN_LOOKBACKS = (
+    20,
+    60,
+    120,
+    250,
+)
+
+ATR_LOOKBACK = 20
+
+
+# =========================================================
 # MIG-001A PTrade Lifecycle
 # =========================================================
 
@@ -27,7 +128,9 @@ def daily_heartbeat(context):
     
     # validate_portfolio_snapshot(context)
     
-    validate_order_interface(context)
+    # validate_order_interface(context)
+    
+    validate_turnover_api()
     
 def _get_history_field(symbol, field, count):
     try:
@@ -53,6 +156,9 @@ def get_low(symbol, count):
 
 def get_volume(symbol, count):
     return _get_history_field(symbol, 'volume', count)
+    
+def get_turnover(symbol, count):
+    return _get_history_field(symbol, 'money', count)
     
 
     
@@ -121,6 +227,22 @@ def validate_data_interface():
     log.info("high=" + str(high))
     log.info("low=" + str(low))
     log.info("volume=" + str(volume))
+    
+def validate_turnover_api():
+
+    try:
+
+        data = get_turnover('510300.SS', 5)
+
+        log.info("TURNOVER TEST: " + str(data))
+
+        if data is not None:
+
+            log.info("TURNOVER AVG: " + str(sum(data) / len(data)))
+
+    except Exception as e:
+
+        log.error("TURNOVER TEST FAILED: " + str(e))
 
 # MIG-003A Portfolio Snapshot
 
