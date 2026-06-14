@@ -772,37 +772,102 @@ rebalance_portfolio()
 Status:
 DONE
 
-## MIG-005 Scheduler Integration
-目标：
+## MIG-005 = Core Strategy Integration
 
-让策略自动运行。
+Goal:
+Integrate the validated strategy engine into the PTrade runtime environment.
 
-建立：
+Prerequisites:
+- MIG-001 Lifecycle Review Passed
+- MIG-002 Data Interface Review Passed
+- MIG-003 Portfolio Mapping Review Passed
+- MIG-004 Order Mapping Review Passed
+- Migration Layer v1.0 Frozen
 
-run_daily()
+Tasks:
 
-或者：
+MIG-005A Indicator Integration
+Status: Pending
 
-run_monthly()
+Integrate:
+- IND-001 Return Calculation
+- IND-002 Volatility Calculation
+- IND-003 Momentum Score
+- IND-004 Trend Quality Score
+- IND-005 Liquidity Score
+- IND-006 ATR
 
-机制。
+Dependencies:
+- MIG-002 Data Interface
 
-验证：
 
-market_filter
-ranking
-portfolio
-risk
-execution
+MIG-005B Filter Integration
+Status: Pending
 
-全部自动触发。
+Integrate:
+- FILTER-001 Market Breadth
+- FILTER-002 Market Exposure
 
-完成标准：
+Dependencies:
+- MIG-005A
 
-无需手工调用。
 
-Status:
-NOT STARTED
+MIG-005C Ranking Integration
+Status: Pending
+
+Integrate:
+- RANK-001 Final Score
+- RANK-002 ETF Selection
+
+Dependencies:
+- MIG-005A
+- MIG-005B
+
+
+MIG-005D Portfolio Integration
+Status: Pending
+
+Integrate:
+- PORT-001 Position Sizing
+- PORT-002 Portfolio Constraints
+
+Dependencies:
+- MIG-005C
+
+
+MIG-005E Risk Integration
+Status: Pending
+
+Integrate:
+- RISK-001 Portfolio Risk Engine
+- RISK-002 Portfolio Risk Control
+
+Dependencies:
+- MIG-005D
+
+
+MIG-005F Execution Integration
+Status: Pending
+
+Integrate:
+- EXEC-001 Order Mapping Layer
+- EXEC-002 Rebalance Engine
+
+Dependencies:
+- MIG-005E
+
+
+MIG-005G Scheduler Integration
+Status: Pending
+
+Integrate:
+- strategy_main()
+- run_daily()
+- rebalance()
+
+Dependencies:
+- MIG-005F
+
 
 ## MIG-006 Backtest Validation
 目标：

@@ -66,7 +66,7 @@ Current Phase:
 
 Current Focus
 
-## MIG-005 Scheduler Integration
+## MIG-005A Indicator Integration
 ---
 
 ## Development Rules
@@ -222,3 +222,19 @@ Target-position semantics
     -> automatically calculates buy/sell quantity
 
 Validated in MIG-004.
+
+# Migration Layer v1.0 Frozen
+
+Components:
+
+MIG-001 Lifecycle
+MIG-002 Data Interface
+MIG-003 Portfolio Mapping
+MIG-004 Order Mapping
+
+Status:
+
+Frozen
+
+Further modifications require
+explicit migration review approval.
