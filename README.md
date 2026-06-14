@@ -32,6 +32,27 @@ PROJECT_RULES.md
 
 Ptrade_api.md
 ptrade api 文档
+
+china_etf_trend_strategy.py
+
+作用：
+
+架构设计
+指标开发
+排名逻辑
+风控逻辑
+调仓逻辑
+Code Review
+
+china_etf_trend_strategy_ptrade
+
+作用：
+
+真正在PTrade运行
+验证PTrade API
+逐步把核心模块搬进去
+
+正确目标是 从 china_etf_trend_strategy.py 中挑选代码，迁移到 china_etf_trend_strategy_ptrade 中运行验证。
 ---
 
 ## Current Progress
@@ -45,7 +66,7 @@ Current Phase:
 
 Current Focus
 
-## MIG-003 Portfolio Interface Validation
+## MIG-004 Portfolio Interface Validation
 ---
 
 ## Development Rules
@@ -120,7 +141,7 @@ portfolio volatility.
 
 ## PTrade Migration Roadmap
 
-Phase 9 introduces runtime integration
+Phase 8.5 introduces runtime integration
 with the PTrade trading platform.
 
 Migration sequence:
@@ -137,3 +158,48 @@ MIG-008 Production Readiness Review
 Core strategy logic remains unchanged.
 Only infrastructure and broker interfaces
 will be adapted.
+
+# PTrade Runtime Mapping
+
+## Portfolio
+
+Original Quant Platform:
+
+context.portfolio.cash
+context.portfolio.total_value
+context.portfolio.positions
+
+PTrade:
+
+context.portfolio.cash
+context.portfolio.total_value
+context.portfolio.positions
+
+Validated in MIG-003.
+
+## Position
+
+PTrade Position fields:
+
+position.sid
+position.amount
+position.enable_amount
+position.cost_basis
+position.last_sale_price
+position.today_amount
+
+Validated in MIG-003.
+
+## Orders
+
+Target Value Order:
+
+order_target_value(symbol, value)
+
+Behavior verified:
+
+Creates buy orders
+Creates adjustment orders
+Cancels zero-share orders automatically
+
+Validated in MIG-003.

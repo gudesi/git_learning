@@ -744,7 +744,7 @@ total_value
 字段全部存在。
 
 Status:
-NOT STARTED
+DONE
 
 ## MIG-004 Execution Interface Migration
 目标：
