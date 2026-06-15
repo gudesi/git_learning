@@ -11,10 +11,10 @@ Current Phase:
 
 Current Focus
 
-## MIG-005A Indicator Integration
+## MIG-005B Filter Integration
 
 Overall Progress:
-27 / 38 Tasks Completed
+28 / 38 Tasks Completed
 
 ---
 
@@ -297,15 +297,23 @@ Migration Layer v1.0 Frozen
 
 No further modifications planned.
 
-| MIG-005A | IN PROGRESS |
-Completed:
-- Indicator configuration migration
-- ETF universe migration
-- Turnover API migration
+| MIG-005A | DONE |
 
-Discovered:
-- Data interface return-type compatibility issue
-  (DataFrame vs Series/list)
+Validated:
+- Historical data wrapper
+- Return indicators
+- Volatility indicators
+- Momentum indicators
+- Trend quality indicators
+- Liquidity indicators
+- ATR indicators
+
+Notes:
+- PTrade requires explicit exchange suffixes
+  (.SS / .SZ)
+
+- Cross-sectional ranking now produces
+  non-neutral scores.
 
 | MIG-005B | NOT STARTED |
 | MIG-005C | NOT STARTED |
@@ -318,7 +326,7 @@ Discovered:
 | MIG-008 | NOT STARTED |
 
 Progress:
-6 / 16
+7 / 16
 
 Objective:
 

@@ -786,34 +786,32 @@ Prerequisites:
 
 Tasks:
 
-MIG-005A Indicator Integration
+[MIG-005A] Indicator Integration
+Status: Completed
 
-Integrate:
+Completed:
+- RETURN_WINDOWS migrated
+- ATR_LOOKBACK migrated
+- LIQUIDITY_LOOKBACK migrated
+- QUALITY_LOOKBACK migrated
+- MOMENTUM_WEIGHTS migrated
+
 - IND-001 Return Calculation
 - IND-002 Volatility Calculation
 - IND-003 Momentum Score
 - IND-004 Trend Quality Score
 - IND-005 Liquidity Score
-- IND-006 ATR
+- IND-006 ATR20
 
-Dependencies:
-- MIG-002 Data Interface
+- get_turnover() migrated
+- turnover -> money field mapping validated
 
-Status:
-IN PROGRESS
-
-Completed:
-- Indicator configuration migrated
-- ETF universe configuration migrated
-- Turnover interface migrated
-
-Validated:
-- turnover -> money mapping
-
-Open Issue:
-- Historical data adapters currently return DataFrame
-- Indicator layer requires Series/list compatibility validation
-
+Validation:
+- _get_history_field() DataFrame compatibility verified
+- ETF symbol suffix mapping validated (.SS / .SZ)
+- Cross-sectional ranking validated
+- Momentum score validated
+- Quality score validated
 
 MIG-005B Filter Integration
 Status: Pending

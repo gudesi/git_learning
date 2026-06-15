@@ -11,6 +11,53 @@ Format:
 
 ## 2026-06-14
 
+## 2026-06-15
+
+### MIG-005A Indicator Integration Completed
+
+Added:
+- RETURN_WINDOWS
+- ATR_LOOKBACK
+- LIQUIDITY_LOOKBACK
+- QUALITY_LOOKBACK
+- MOMENTUM_WEIGHTS
+
+Migrated:
+- IND-001 Return Calculation
+- IND-002 Volatility Calculation
+- IND-003 Momentum Score
+- IND-004 Trend Quality Score
+- IND-005 Liquidity Score
+- IND-006 ATR20
+
+Data Interface:
+- Enhanced _get_history_field()
+  to support DataFrame / Series / iterable
+  return formats.
+
+- Added get_turnover() wrapper using
+  PTrade money field.
+
+Validation:
+- Verified turnover data retrieval.
+- Verified ATR calculation.
+- Verified momentum calculation.
+- Verified trend quality calculation.
+- Verified liquidity calculation.
+
+Bug Fix:
+- Fixed ETF universe symbol mapping.
+
+Root Cause:
+  PTrade get_history() requires
+  explicit exchange suffixes
+  (.SS / .SZ).
+
+Result:
+  Cross-sectional ranking restored.
+  Momentum and quality scores no
+  longer collapse to neutral 0.5.
+
 ## [MIG-005A] Pre-Migration Validation
 
 ### Added
