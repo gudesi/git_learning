@@ -11,6 +11,40 @@ Format:
 
 ## 2026-06-16
 
+### MIG-005E Risk Integration Completed
+
+Added:
+
+- RISK-001 Portfolio Risk Engine
+- RISK-002 Portfolio Risk Control
+
+Migrated Functions:
+
+- calc_portfolio_atr()
+- calc_weighted_average_volatility()
+- get_portfolio_statistics()
+- calc_risk_budget_usage()
+- get_risk_state()
+- get_risk_scaling_factor()
+- get_risk_control_state()
+- calc_risk_adjusted_weights()
+- get_cash_weight()
+- get_risk_control_summary()
+
+Validation:
+
+- Verified portfolio risk statistics
+- Verified risk budget usage calculation
+- Verified exposure scaling logic
+- Verified cash allocation logic
+- Verified FILTER → RISK integration
+- Verified PORT → RISK integration
+
+Result:
+
+Risk engine operational in PTrade runtime.
+Portfolio exposure control validated.
+
 ### MIG-005D Portfolio Integration Completed
 
 Added:

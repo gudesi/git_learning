@@ -66,7 +66,7 @@ Current Phase:
 
 Current Focus
 
-## MIG-005E Risk Integration
+## MIG-005F Execution Integration
 ---
 
 ## Development Rules

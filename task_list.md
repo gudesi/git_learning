@@ -848,7 +848,7 @@ Dependencies:
 
 
 MIG-005E Risk Integration
-Status: Pending
+Status: DONE
 
 Integrate:
 - RISK-001 Portfolio Risk Engine

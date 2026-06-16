@@ -122,8 +122,19 @@ LIQUIDITY_SCORE_WEIGHT = 0.10
 MAX_PORTFOLIO_SIZE = 5
 RANKING_TREND_MA = 200
 
+TARGET_PORTFOLIO_RISK = 0.10
+
 MAX_SINGLE_POSITION_WEIGHT = 0.25
 MIN_SINGLE_POSITION_WEIGHT = 0.05
+
+LOW_RISK_THRESHOLD = 0.80
+HIGH_RISK_THRESHOLD = 1.00
+EXTREME_RISK_THRESHOLD = 1.20
+
+LOW_RISK_EXPOSURE = 1.00
+HIGH_RISK_EXPOSURE = 0.90
+EXTREME_RISK_EXPOSURE = 0.75
+DEFENSIVE_EXPOSURE = 0.50
 
 # =========================================================
 # IND-001 Return Calculation
@@ -791,6 +802,183 @@ def calc_target_weights():
     weights = apply_position_constraints(weights)
 
     return weights
+    
+# =========================================================
+# RISK-001
+# Portfolio Risk Engine
+# =========================================================
+
+def calc_portfolio_atr():
+
+    weights = calc_target_weights()
+
+    if len(weights) == 0:
+
+        return None
+
+    total_risk = 0.0
+
+    total_weight = 0.0
+
+    for symbol, weight in weights.items():
+
+        atr_pct = calc_atr_percent(symbol)
+
+        if atr_pct is None:
+            continue
+
+        total_risk += atr_pct * weight
+        
+        total_weight += weight
+
+    if total_weight <= 0:
+        return None
+
+    return total_risk / total_weight
+   
+
+def calc_weighted_average_volatility():
+
+    weights = calc_target_weights()
+
+    if len(weights) == 0:
+        return None
+
+    total_vol = 0.0
+
+    total_weight = 0.0
+
+    for symbol, weight in weights.items():
+
+        vol = calc_volatility(symbol)
+
+        if vol is None:
+            continue
+
+        total_vol += vol * weight
+
+        total_weight += weight
+
+    if total_weight <= 0:
+        return None
+
+    return total_vol / total_weight
+    
+
+def get_portfolio_statistics():
+
+    weights = calc_target_weights()
+
+    return {"position_count": len(weights), "portfolio_atr": calc_portfolio_atr(), "weighted_average_volatility": calc_weighted_average_volatility(),}
+
+def calc_risk_budget_usage():
+
+    stats = get_portfolio_statistics()
+
+    portfolio_vol = stats.get("weighted_average_volatility")
+
+    if portfolio_vol is None:
+        return None
+
+    if TARGET_PORTFOLIO_RISK <= 0:
+        return None
+
+    return portfolio_vol / TARGET_PORTFOLIO_RISK
+    
+
+def get_risk_state():
+
+    usage = calc_risk_budget_usage()
+    
+    if usage is None:
+        return "UNKNOWN"
+
+    if usage < 0.8:
+        return "LOW"
+
+    if usage < 1.0:
+        return "NORMAL"
+
+    return "HIGH"
+
+# =========================================================
+# RISK-002
+# Portfolio Risk Control
+# =========================================================
+
+def get_risk_scaling_factor():
+
+    usage = calc_risk_budget_usage()
+
+    if usage is None:
+        return 1.0
+
+    if usage < LOW_RISK_THRESHOLD:
+        return LOW_RISK_EXPOSURE
+
+    if usage < HIGH_RISK_THRESHOLD:
+        return HIGH_RISK_EXPOSURE
+
+    if usage < EXTREME_RISK_THRESHOLD:
+        return EXTREME_RISK_EXPOSURE
+
+    return DEFENSIVE_EXPOSURE
+
+def get_risk_control_state():
+
+    factor = get_risk_scaling_factor()
+
+    if factor >= 1.0:
+        return "FULL"
+
+    if factor >= 0.90:
+        return "REDUCED"
+
+    if factor >= 0.75:
+        return "HIGH_RISK"
+
+    return "DEFENSIVE"
+
+def calc_risk_adjusted_weights():
+
+    weights = calc_target_weights()
+
+    if len(weights) == 0:
+        return {}
+
+    risk_factor = get_risk_scaling_factor()
+    
+
+    market_factor = calc_market_exposure()
+    
+    final_factor = risk_factor * market_factor
+    
+
+    adjusted = {}
+
+    for symbol, weight in weights.items():
+
+        adjusted[symbol] = weight * final_factor
+        
+    return adjusted
+
+def get_cash_weight():
+
+    weights = calc_risk_adjusted_weights()
+    
+
+    invested = sum(weights.values())
+
+    cash = max(0.0, 1.0 - invested)
+
+    if cash < 0.0001:
+        cash = 0.0
+
+    return cash
+
+def get_risk_control_summary():
+
+    return {"risk_state": get_risk_state(), "control_state": get_risk_control_state(), "scaling_factor": get_risk_scaling_factor(), "cash_weight": get_cash_weight(),}
 
 # =========================================================
 # MIG-001A PTrade Lifecycle
@@ -866,6 +1054,12 @@ def daily_heartbeat(context):
     # weights = calc_target_weights()
     
     # log.info("portfolio_weights=" + str(weights))
+    
+    # validate_risk_pipeline()
+    
+    # log.info("risk_summary=" + str(get_risk_control_summary()))
+    
+    # log.info("risk_adjusted_weights=" + str(calc_risk_adjusted_weights()))
     
 def _get_history_field(symbol, field, count):
 
@@ -1090,51 +1284,7 @@ def validate_market_exposure():
     assert (0.0 <= exposure <= 1.0)
     
     return True
-
-# RANK-001 Self Test
-
-def _test_final_score():
-
-    sample_symbol = RISK_ETFS[0]
-
-    score = calc_final_score(sample_symbol)
-
-    if score is not None:
-
-        assert isinstance(score, float,)
-
-        assert (0.0 <= score <= 1.0)
-
-    log.info("RANK-001 validation passed.")
-
-    return True
-
-def _test_ranked_etfs():
-
-    ranked = get_ranked_etfs()
-
-    if len(ranked) > 1:
-
-        for i in range(len(ranked) - 1):
-
-            assert (ranked[i][1] >= ranked[i + 1][1])
-
-    return True
     
-# RANK-002 Self Test
-
-def _test_selected_etfs():
-
-    selected = get_selected_etfs()
-
-    assert isinstance(selected, list,)
-
-    assert (len(selected) <= MAX_PORTFOLIO_SIZE)
-
-    log.info("RANK-002 validation passed.")
-
-    return True
-
 def validate_ranking_pipeline():
 
     ranked = get_ranked_etfs()
@@ -1162,46 +1312,7 @@ def validate_ranking_pipeline():
     assert len(selected) <= MAX_PORTFOLIO_SIZE
 
     return True
-    
-# PORT-001 Self Test
-
-def _test_position_sizing():
-
-    weights = calc_weights()
-
-    if len(weights) == 0:
-
-        return True
-
-    total_weight = sum(weights.values())
-
-    assert abs(total_weight - 1.0) < 0.0001
-
-    for weight in weights.values():
-        assert weight > 0
-
-    log.info("PORT-001 validation passed.")
-
-    return True
-    
-# PORT-002 Self Test
-
-def _test_portfolio_constraints():
-
-    weights = calc_target_weights()
-
-    if len(weights) > 0:
-
-        total = sum(weights.values())
-
-        assert abs(total - 1.0) < 0.0001
-
-        for weight in weights.values():
-
-            assert (weight <= MAX_SINGLE_POSITION_WEIGHT + 0.0001)
-
-            assert (weight >= MIN_SINGLE_POSITION_WEIGHT - 0.0001)
-            
+               
 # PORT Validation
 
 def validate_portfolio_pipeline():
@@ -1220,5 +1331,34 @@ def validate_portfolio_pipeline():
     for symbol, weight in weights.items():
 
         assert (MIN_SINGLE_POSITION_WEIGHT <= weight <= MAX_SINGLE_POSITION_WEIGHT)
+
+    return True
+    
+# Risk Validation
+
+def validate_risk_pipeline():
+
+    summary = get_risk_control_summary()
+
+    assert isinstance(summary, dict,)
+
+    factor = summary.get("scaling_factor")
+
+    assert factor is not None
+
+    assert factor > 0
+
+    cash_weight = summary.get("cash_weight")
+
+    assert (0.0 <= cash_weight <= 1.0)
+
+    adjusted = calc_risk_adjusted_weights()
+    
+
+    if len(adjusted) > 0:
+
+        invested = sum(adjusted.values())
+
+        assert invested <= 1.0001
 
     return True
