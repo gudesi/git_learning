@@ -825,7 +825,7 @@ Dependencies:
 
 
 MIG-005C Ranking Integration
-Status: Pending
+Status: DONE
 
 Integrate:
 - RANK-001 Final Score

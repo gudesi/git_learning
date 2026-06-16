@@ -11,6 +11,44 @@ Format:
 
 ## 2026-06-16
 
+### MIG-005C Ranking Integration Completed
+
+Added:
+
+* RANK-001 Final Score
+* RANK-002 ETF Selection
+
+Migrated Functions:
+
+* calc_final_score()
+* get_ranked_etfs()
+* passes_ranking_filter()
+* get_selected_etfs()
+* get_selected_etfs_with_score()
+
+Validation:
+
+* Verified ETF ranking generation
+* Verified descending score ordering
+* Verified MA200 trend filter
+* Verified Top-N ETF selection
+* Verified score range validation (0.0 ~ 1.0)
+
+Sample Output:
+
+Top Ranked ETFs:
+
+1. 512400.SS
+2. 159915.SZ
+3. 516160.SS
+4. 518880.SS
+5. 510500.SS
+
+Result:
+
+Ranking engine operational in PTrade runtime.
+ETF selection pipeline successfully migrated.
+
 ### MIG-005B Filter Integration Completed
 
 Added:

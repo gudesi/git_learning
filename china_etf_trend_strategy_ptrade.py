@@ -114,6 +114,14 @@ MA_LONG = 250
 
 MARKET_EXPOSURE_MAP = {0: 0.00, 1: 0.50, 2: 0.80, 3: 1.00,}
 
+MOMENTUM_SCORE_WEIGHT = 0.70
+QUALITY_SCORE_WEIGHT = 0.20
+LIQUIDITY_SCORE_WEIGHT = 0.10
+
+
+MAX_PORTFOLIO_SIZE = 5
+RANKING_TREND_MA = 200
+
 # =========================================================
 # IND-001 Return Calculation
 # =========================================================
@@ -484,9 +492,7 @@ def calc_market_score():
 
 # =========================================================
 
-# FILTER-002
-
-# Market Exposure
+# FILTER-002 Market Exposure
 
 # =========================================================
 
@@ -495,6 +501,98 @@ def calc_market_exposure():
     score = calc_market_score()
     
     return MARKET_EXPOSURE_MAP.get(score, 0.0,)
+    
+# =========================================================
+# RANK-001 Final Score
+# =========================================================
+
+def calc_final_score(symbol,):
+
+    momentum_score = calc_momentum_score(symbol)
+    
+    quality_score =  calc_quality_score(symbol)
+    
+    liquidity_score = calc_liquidity_score(symbol)
+    
+
+    if momentum_score is None or quality_score is None or liquidity_score is None:
+        return None
+
+    return MOMENTUM_SCORE_WEIGHT * momentum_score + QUALITY_SCORE_WEIGHT * quality_score + LIQUIDITY_SCORE_WEIGHT * liquidity_score
+    
+
+def get_ranked_etfs():
+
+    scores = []
+
+    for symbol in RISK_ETFS:
+
+        score = calc_final_score(symbol)
+
+        if score is None:
+            continue
+
+        scores.append((symbol, score,))
+
+    scores.sort(key=lambda x: x[1], reverse=True,)
+
+    return scores
+
+# =========================================================
+# RANK-002 ETF Selection
+# =========================================================
+
+def passes_ranking_filter(symbol):
+
+    close = get_close(symbol, RANKING_TREND_MA,)
+
+    if len(close) < RANKING_TREND_MA:
+        return False
+
+    ma200 = sum(close) / float(RANKING_TREND_MA)
+    
+
+    return close[-1] > ma200
+    
+def get_selected_etfs():
+    
+    candidates = []
+
+    for symbol in RISK_ETFS:
+
+        if not passes_ranking_filter(symbol):
+            continue
+
+        score = calc_final_score(symbol)
+
+        if score is None:
+            continue
+
+        candidates.append((symbol, score,))
+
+    candidates.sort(key=lambda x: x[1], reverse=True,)
+
+    return [symbol for symbol, score in candidates[ :MAX_PORTFOLIO_SIZE]]
+
+def get_selected_etfs_with_score():
+
+    candidates = []
+
+    for symbol in RISK_ETFS:
+
+        if not passes_ranking_filter(symbol):
+            continue
+
+        score = calc_final_score(symbol)
+
+        if score is None:
+            continue
+
+        candidates.append((symbol, score,))
+
+    candidates.sort(key=lambda x: x[1], reverse=True,)
+
+    return candidates[ :MAX_PORTFOLIO_SIZE]
 
 # =========================================================
 # MIG-001A PTrade Lifecycle
@@ -554,6 +652,16 @@ def daily_heartbeat(context):
     # log.info("market_score=" + str(calc_market_score()))
     
     # log.info("market_exposure=" + str(calc_market_exposure()))
+    
+    # validate_ranking_pipeline()
+    
+    # selected = get_selected_etfs()
+    
+    # log.info("selected_etfs=" + str(selected))
+    
+    # top_ranked = get_selected_etfs_with_score()
+    
+    # log.info("top_ranked=" + str(top_ranked))
     
 def _get_history_field(symbol, field, count):
 
@@ -777,4 +885,76 @@ def validate_market_exposure():
    
     assert (0.0 <= exposure <= 1.0)
     
+    return True
+
+# RANK-001 Self Test
+
+def _test_final_score():
+
+    sample_symbol = RISK_ETFS[0]
+
+    score = calc_final_score(sample_symbol)
+
+    if score is not None:
+
+        assert isinstance(score, float,)
+
+        assert (0.0 <= score <= 1.0)
+
+    log.info("RANK-001 validation passed.")
+
+    return True
+
+def _test_ranked_etfs():
+
+    ranked = get_ranked_etfs()
+
+    if len(ranked) > 1:
+
+        for i in range(len(ranked) - 1):
+
+            assert (ranked[i][1] >= ranked[i + 1][1])
+
+    return True
+    
+# RANK-002 Self Test
+
+def _test_selected_etfs():
+
+    selected = get_selected_etfs()
+
+    assert isinstance(selected, list,)
+
+    assert (len(selected) <= MAX_PORTFOLIO_SIZE)
+
+    log.info("RANK-002 validation passed.")
+
+    return True
+
+def validate_ranking_pipeline():
+
+    ranked = get_ranked_etfs()
+
+    assert ranked is not None
+
+    assert len(ranked) > 0
+
+    previous_score = 999
+
+    for symbol, score in ranked:
+
+        assert score is not None
+
+        assert 0.0 <= score <= 1.0
+
+        assert score <= previous_score
+
+        previous_score = score
+
+    selected = get_selected_etfs()
+
+    assert selected is not None
+
+    assert len(selected) <= MAX_PORTFOLIO_SIZE
+
     return True

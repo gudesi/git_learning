@@ -66,7 +66,7 @@ Current Phase:
 
 Current Focus
 
-## MIG-005A Indicator Integration
+## MIG-005D Portfolio Integration
 ---
 
 ## Development Rules
