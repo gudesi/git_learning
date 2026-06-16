@@ -9,7 +9,41 @@ Format:
 * Removed
 * Fixed
 
-## 2026-06-14
+## 2026-06-16
+
+### MIG-005B Filter Integration Completed
+
+Added:
+
+- MARKET_FILTER_INDEXES
+- MA_SHORT
+- MA_MID
+- MA_LONG
+- MARKET_EXPOSURE_MAP
+
+Migrated:
+
+- FILTER-001 Market Breadth
+- FILTER-002 Market Exposure
+
+Validation:
+
+- Verified MA calculation
+- Verified bull trend detection
+- Verified market score generation
+- Verified exposure mapping
+
+Result:
+
+Market regime filtering now runs
+inside PTrade runtime.
+
+Exposure output:
+
+0 -> 0.00
+1 -> 0.50
+2 -> 0.80
+3 -> 1.00
 
 ## 2026-06-15
 

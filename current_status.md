@@ -11,10 +11,10 @@ Current Phase:
 
 Current Focus
 
-## MIG-005B Filter Integration
+## MIG-005C Ranking Integration
 
 Overall Progress:
-28 / 38 Tasks Completed
+29 / 38 Tasks Completed
 
 ---
 
@@ -315,7 +315,23 @@ Notes:
 - Cross-sectional ranking now produces
   non-neutral scores.
 
-| MIG-005B | NOT STARTED |
+| MIG-005B | DONE |
+
+Validated:
+
+✓ MA50 calculation
+✓ MA150 calculation
+✓ MA250 calculation
+✓ Bull trend detection
+✓ Market breadth scoring
+✓ Market exposure mapping
+✓ PTrade historical data access
+
+Result:
+
+FILTER-001 operational
+FILTER-002 operational
+
 | MIG-005C | NOT STARTED |
 | MIG-005D | NOT STARTED |
 | MIG-005E | NOT STARTED |
@@ -326,7 +342,7 @@ Notes:
 | MIG-008 | NOT STARTED |
 
 Progress:
-7 / 16
+8 / 16
 
 Objective:
 

@@ -261,6 +261,19 @@ Phase 2
 
 Core Strategy Integration
 
+Completed:
+
+IND
+FILTER
+
+Pending:
+
+RANK
+PORT
+RISK
+EXEC
+Scheduler
+
 Planned:
 
 IND

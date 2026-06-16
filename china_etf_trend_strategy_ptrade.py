@@ -102,6 +102,18 @@ QUALITY_LOOKBACK = 120
 
 MOMENTUM_WEIGHTS = {20: 0.05, 60: 0.15, 120: 0.30, 250: 0.50,}
 
+MARKET_FILTER_INDEXES = (
+"510300.SS",  # CSI300
+"510500.SS",  # CSI500
+"512100.SS",  # CSI1000
+)
+
+MA_SHORT = 50
+MA_MID = 150
+MA_LONG = 250
+
+MARKET_EXPOSURE_MAP = {0: 0.00, 1: 0.50, 2: 0.80, 3: 1.00,}
+
 # =========================================================
 # IND-001 Return Calculation
 # =========================================================
@@ -421,6 +433,68 @@ def calc_atr(symbol, lookback=ATR_LOOKBACK,):
 
     return sum(tr_values) / len(tr_values)
     
+# =========================================================
+# FILTER-001 Market Breadth
+# =========================================================
+
+def calc_ma(symbol,period,):
+
+    close = get_close(symbol, period,)
+    
+    if len(close) < period:
+    
+        return None
+    
+    return sum(close[-period:]) / float(period)
+    
+
+
+def is_bull_trend(symbol,):
+
+    close = get_close(symbol, MA_LONG,)
+    
+    if len(close) < MA_LONG:
+    
+        return False
+    
+    latest_close = close[-1]
+    
+    ma50 = calc_ma(symbol, MA_SHORT,)
+    
+    ma150 = calc_ma(symbol, MA_MID,)
+    
+    ma250 = calc_ma(symbol, MA_LONG,)
+    
+    if ma50 is None or ma150 is None or ma250 is None:
+        return False
+    
+    return latest_close > ma50 and ma50 > ma150 and ma150 > ma250
+
+def calc_market_score():
+
+    score = 0
+    
+    for symbol in MARKET_FILTER_INDEXES:
+    
+        if is_bull_trend(symbol):
+    
+            score += 1
+    
+    return score
+
+# =========================================================
+
+# FILTER-002
+
+# Market Exposure
+
+# =========================================================
+
+def calc_market_exposure():
+
+    score = calc_market_score()
+    
+    return MARKET_EXPOSURE_MAP.get(score, 0.0,)
 
 # =========================================================
 # MIG-001A PTrade Lifecycle
@@ -473,6 +547,13 @@ def daily_heartbeat(context):
     
     # log.info("validate IND-003 calc_momentum_score " + str(calc_momentum_score('510300.SS')))
     
+    # validate_market_filter()
+    
+    # validate_market_exposure()
+    
+    # log.info("market_score=" + str(calc_market_score()))
+    
+    # log.info("market_exposure=" + str(calc_market_exposure()))
     
 def _get_history_field(symbol, field, count):
 
@@ -669,3 +750,31 @@ def validate_order_interface(context):
     except Exception as e:
 
         log.error("get_open_orders: " + str(e))
+        
+# FILTER-001 Self Test
+
+def validate_market_filter():
+
+    score = calc_market_score()
+    
+    log.info("FILTER-001 score=" + str(score))
+    
+    assert isinstance(score, int,)
+   
+    assert 0 <= score <= 3
+    
+    return True
+
+# FILTER-002 Self Test
+
+def validate_market_exposure():
+
+    exposure = calc_market_exposure()
+    
+    log.info("FILTER-002 exposure=" + str(exposure))
+    
+    assert isinstance(exposure, float,)
+   
+    assert (0.0 <= exposure <= 1.0)
+    
+    return True
