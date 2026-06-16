@@ -11,6 +11,45 @@ Format:
 
 ## 2026-06-16
 
+### MIG-005D Portfolio Integration Completed
+
+Added:
+
+* PORT-001 Position Sizing
+* PORT-002 Portfolio Constraints
+
+Migrated Functions:
+
+* calc_inverse_volatility_weights()
+* calc_weights()
+* normalize_weights()
+* apply_max_position_constraint()
+* apply_min_position_constraint()
+* apply_position_constraints()
+* calc_target_weights()
+
+Validation:
+
+* Verified inverse ATR weighting
+* Verified weight normalization
+* Verified maximum position constraint
+* Verified minimum position constraint
+* Verified portfolio weight generation
+
+Sample Portfolio:
+
+518880.SS
+159915.SZ
+516160.SS
+512400.SS
+510500.SS
+
+Result:
+
+Portfolio construction engine operational in PTrade runtime.
+
+Ranking → Portfolio integration successfully completed.
+
 ### MIG-005C Ranking Integration Completed
 
 Added:

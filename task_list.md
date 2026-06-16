@@ -837,7 +837,7 @@ Dependencies:
 
 
 MIG-005D Portfolio Integration
-Status: Pending
+Status: DONE
 
 Integrate:
 - PORT-001 Position Sizing

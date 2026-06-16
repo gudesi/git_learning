@@ -66,7 +66,7 @@ Current Phase:
 
 Current Focus
 
-## MIG-005D Portfolio Integration
+## MIG-005E Risk Integration
 ---
 
 ## Development Rules

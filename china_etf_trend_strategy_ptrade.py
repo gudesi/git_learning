@@ -122,6 +122,9 @@ LIQUIDITY_SCORE_WEIGHT = 0.10
 MAX_PORTFOLIO_SIZE = 5
 RANKING_TREND_MA = 200
 
+MAX_SINGLE_POSITION_WEIGHT = 0.25
+MIN_SINGLE_POSITION_WEIGHT = 0.05
+
 # =========================================================
 # IND-001 Return Calculation
 # =========================================================
@@ -441,6 +444,23 @@ def calc_atr(symbol, lookback=ATR_LOOKBACK,):
 
     return sum(tr_values) / len(tr_values)
     
+def calc_atr_percent(symbol,):
+
+    atr = calc_atr(symbol)
+
+    close = get_close(symbol, 1,)
+
+    if atr is None:
+        return None
+
+    if len(close) == 0:
+        return None
+
+    if close[-1] <= 0:
+        return None
+
+    return atr / close[-1]
+    
 # =========================================================
 # FILTER-001 Market Breadth
 # =========================================================
@@ -593,6 +613,184 @@ def get_selected_etfs_with_score():
     candidates.sort(key=lambda x: x[1], reverse=True,)
 
     return candidates[ :MAX_PORTFOLIO_SIZE]
+    
+# =========================================================
+# PORT-001 Position Sizing
+# =========================================================
+
+def calc_inverse_volatility_weights(symbols,):
+
+    risk_values = {}
+
+    for symbol in symbols:
+
+        atr_pct = calc_atr_percent(symbol)
+
+        if atr_pct is None:
+            continue
+
+        if atr_pct <= 0:
+            continue
+
+        risk_values[symbol] = 1.0 / atr_pct
+    
+    if len(risk_values) == 0:
+        return {}
+
+    total_risk = sum(risk_values.values())
+
+    return {symbol: value / total_risk for symbol, value in risk_values.items()}
+
+def calc_weights():
+
+    selected = get_selected_etfs()
+
+    if len(selected) == 0:
+        return {}
+
+    return calc_inverse_volatility_weights(selected)
+
+# =========================================================
+# PORT-002 Portfolio Constraints
+# =========================================================
+
+def normalize_weights(weights,):
+
+    if len(weights) == 0:
+        return {}
+
+    total = sum(weights.values())
+
+    if total <= 0:
+        return {}
+
+    return {symbol: weight / total for symbol, weight in weights.items()}
+
+
+def apply_max_position_constraint(weights,):
+
+    if len(weights) == 0:
+        return {}
+
+    adjusted = weights.copy()
+
+    max_iterations = 20
+
+    for _ in range(max_iterations):
+
+        excess_weight = 0.0
+
+        # Step 1
+        # Cap overweight positions
+
+        for symbol in adjusted:
+
+            weight = adjusted[symbol]
+
+            if weight > MAX_SINGLE_POSITION_WEIGHT:
+
+                excess_weight += (weight - MAX_SINGLE_POSITION_WEIGHT)
+
+                adjusted[symbol] = MAX_SINGLE_POSITION_WEIGHT                
+
+        # Finished
+        if excess_weight <= 1e-8:
+            break
+
+        # Step 2
+        # Find positions that can absorb weight
+
+        eligible_symbols = []
+
+        for symbol, weight in adjusted.items():
+
+            if weight < MAX_SINGLE_POSITION_WEIGHT:
+                eligible_symbols.append(symbol)
+
+        # Safety check
+
+        if len(eligible_symbols) == 0:
+
+            log.error("No eligible symbols for weight redistribution.")
+
+            break
+
+        eligible_total = sum(adjusted[symbol] for symbol in eligible_symbols)
+
+        if eligible_total <= 0:
+
+            equal_share = excess_weight / len(eligible_symbols)
+            
+            for symbol in eligible_symbols:
+
+                adjusted[symbol] += equal_share
+                
+        else:
+
+            for symbol in eligible_symbols:
+
+                proportion = adjusted[symbol] / eligible_total
+
+                adjusted[symbol] += excess_weight * proportion
+                
+    return adjusted
+
+
+def apply_min_position_constraint(weights,):
+
+    adjusted = {}
+
+    for symbol, weight in weights.items():
+
+        if weight >= MIN_SINGLE_POSITION_WEIGHT:
+            adjusted[symbol] = weight
+
+    return adjusted
+
+
+def apply_position_constraints(weights,):
+
+    if len(weights) == 0:
+        return {}
+
+    adjusted = weights.copy()
+
+    max_iterations = 10
+
+    for _ in range(max_iterations):
+
+        previous = adjusted.copy()
+
+        # Max position constraint
+
+        adjusted = apply_max_position_constraint(adjusted)
+        
+        adjusted = normalize_weights(adjusted)
+
+        # Min position constraint
+
+        adjusted = apply_min_position_constraint(adjusted)
+        
+        adjusted = normalize_weights(adjusted)
+
+        # Converged
+
+        if adjusted == previous:
+            break
+
+    return adjusted
+
+
+def calc_target_weights():
+
+    weights = calc_weights()
+
+    if len(weights) == 0:
+        return {}
+
+    weights = apply_position_constraints(weights)
+
+    return weights
 
 # =========================================================
 # MIG-001A PTrade Lifecycle
@@ -662,6 +860,12 @@ def daily_heartbeat(context):
     # top_ranked = get_selected_etfs_with_score()
     
     # log.info("top_ranked=" + str(top_ranked))
+    
+    # validate_portfolio_pipeline()
+    
+    # weights = calc_target_weights()
+    
+    # log.info("portfolio_weights=" + str(weights))
     
 def _get_history_field(symbol, field, count):
 
@@ -956,5 +1160,65 @@ def validate_ranking_pipeline():
     assert selected is not None
 
     assert len(selected) <= MAX_PORTFOLIO_SIZE
+
+    return True
+    
+# PORT-001 Self Test
+
+def _test_position_sizing():
+
+    weights = calc_weights()
+
+    if len(weights) == 0:
+
+        return True
+
+    total_weight = sum(weights.values())
+
+    assert abs(total_weight - 1.0) < 0.0001
+
+    for weight in weights.values():
+        assert weight > 0
+
+    log.info("PORT-001 validation passed.")
+
+    return True
+    
+# PORT-002 Self Test
+
+def _test_portfolio_constraints():
+
+    weights = calc_target_weights()
+
+    if len(weights) > 0:
+
+        total = sum(weights.values())
+
+        assert abs(total - 1.0) < 0.0001
+
+        for weight in weights.values():
+
+            assert (weight <= MAX_SINGLE_POSITION_WEIGHT + 0.0001)
+
+            assert (weight >= MIN_SINGLE_POSITION_WEIGHT - 0.0001)
+            
+# PORT Validation
+
+def validate_portfolio_pipeline():
+
+    weights = calc_target_weights()
+
+    assert isinstance(weights, dict,)
+
+    if len(weights) == 0:
+        return True
+
+    total_weight = sum(weights.values())
+
+    assert abs(total_weight - 1.0) < 0.0001
+
+    for symbol, weight in weights.items():
+
+        assert (MIN_SINGLE_POSITION_WEIGHT <= weight <= MAX_SINGLE_POSITION_WEIGHT)
 
     return True
