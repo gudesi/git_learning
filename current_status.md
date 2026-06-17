@@ -11,7 +11,7 @@ Current Phase:
 
 Current Focus
 
-## MIG-005G Scheduler Integration
+## Backtest Validation
 
 Overall Progress:
 34 / 37 Tasks Completed
@@ -356,13 +356,13 @@ Optimization deferred until post-MIG-005F performance review.
 | MIG-005D | DONE |
 | MIG-005E | DONE |
 | MIG-005F | DONE |
-| MIG-005G | NOT STARTED |
+| MIG-005G | DONE |
 | MIG-006 | NOT STARTED |
 | MIG-007 | NOT STARTED |
 | MIG-008 | NOT STARTED |
 
 Progress:
-12 / 16
+13 / 16
 
 Objective:
 

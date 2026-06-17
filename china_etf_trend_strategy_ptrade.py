@@ -92,6 +92,8 @@ ETF_UNIVERSE = RISK_ETFS + [CASH_ETF]
 
 # Indicator Configuration
 
+MAX_LOOKBACK = 252
+
 RETURN_WINDOWS = (20, 60, 120, 250,)
 
 ATR_LOOKBACK = 20
@@ -191,6 +193,9 @@ def calc_volatility(symbol, lookback=60):
     for i in range(1, len(close)):
 
         returns.append(close[i] / close[i - 1] - 1.0)
+        
+    if len(returns) < 2:
+        return None
 
     mean_return = sum(returns) / len(returns)
     
@@ -967,7 +972,7 @@ def get_cash_weight():
 
     invested = sum(weights.values())
 
-    cash = max(0.0, 1.0 - invested)
+    cash = max(0.0, min(1.0, 1.0 - invested))
 
     if cash < 0.0001:
         cash = 0.0
@@ -1116,7 +1121,7 @@ def rebalance(context,):
 
     except Exception as e:
 
-        print("REBALANCE_EXCEPTION=" + repr(e))
+        log.error("REBALANCE_EXCEPTION=" + repr(e))
 
         return False
 
@@ -1128,11 +1133,7 @@ def rebalance(context,):
 def initialize(context):
     log.info("MIG-001A initialize()")
     
-    # validate_ptrade_environment(context)
-    
-    g.MAX_LOOKBACK = 252
-    
-    run_daily(context, daily_heartbeat, time='14:50')
+    run_daily(context, strategy_main, time='14:50')
 
 def before_trading_start(context, data):
     log.info("MIG-001A before_trading_start()")
@@ -1141,72 +1142,19 @@ def before_trading_start(context, data):
 def after_trading_end(context, data):
     log.info("MIG-001A after_trading_end()")
             
-def daily_heartbeat(context):
-    log.info("daily_heartbeat()")
+def strategy_main(context):
+
+    log.info("strategy_main()")
     
-    # validate_data_interface()
+    log.info(f"risk={get_risk_state()}")
     
-    # validate_portfolio_snapshot(context)
+    log.info(f"market={calc_market_score()}")
     
-    # validate_order_interface(context)
-    
-    # validate_turnover_api()
-    
-    # log.info("validate IND-001 return_20 " + str(calc_return('510300.SS', 20)))
-    
-    # log.info("validate IND-001 return_60 " + str(calc_return('510300.SS', 60)))
-    
-    # log.info("validate IND-002 calc_volatility " + str(calc_volatility('510300.SS')))
-    
-    # log.info("validate IND-006 calc_atr " + str(calc_atr('510300.SS')))
-    
-    # log.info("validate IND-005 calc_adv60 " + str(calc_adv60('510300.SS')))
-    
-    # log.info("validate IND-005 calc_liquidity_score " + str(calc_liquidity_score('510300.SS')))
-    
-    # log.info("validate IND-005 type of get_turnover " + str(type(get_turnover('510300.SS', 60))))
-    
-    # log.info("validate IND-004 calc_quality_score " + str(calc_quality_score('510300.SS')))
-    
-    # log.info("validate IND-003 calc_momentum_score " + str(calc_momentum_score('510300.SS')))
-    
-    # validate_market_filter()
-    
-    # validate_market_exposure()
-    
-    # log.info("market_score=" + str(calc_market_score()))
-    
-    # log.info("market_exposure=" + str(calc_market_exposure()))
-    
-    # validate_ranking_pipeline()
-    
-    # selected = get_selected_etfs()
-    
-    # log.info("selected_etfs=" + str(selected))
-    
-    # top_ranked = get_selected_etfs_with_score()
-    
-    # log.info("top_ranked=" + str(top_ranked))
-    
-    # validate_portfolio_pipeline()
-    
-    # weights = calc_target_weights()
-    
-    # log.info("portfolio_weights=" + str(weights))
-    
-    # validate_risk_pipeline()
-    
-    # log.info("risk_summary=" + str(get_risk_control_summary()))
-    
-    # log.info("risk_adjusted_weights=" + str(calc_risk_adjusted_weights()))
-    
-    # log.info(f"risk_factor=" f"{get_risk_scaling_factor()}")
-    
-    # log.info("target_symbols=" + str(get_target_symbols()))
-    
-    # log.info("cash_weight=" + str( get_cash_weight()))
-    
-    # rebalance(context)    
+    log.info(f"cash={get_cash_weight():.2%}")
+
+    rebalance(context)
+
+    return True
     
 def _get_history_field(symbol, field, count):
 
@@ -1249,261 +1197,3 @@ def get_volume(symbol, count):
     
 def get_turnover(symbol, count):
     return _get_history_field(symbol, 'money', count)
-       
-# =========================================================
-# DEBUG TOOLS
-# =========================================================
-
-# MIG-001B Environment Validation
-
-def validate_ptrade_environment(context):
-    """
-    Validate PTrade runtime environment.
-    """
-
-    log.info("========== CONTEXT ==========")
-
-    try:
-        log.info(str(dir(context)))
-    except Exception as e:
-        log.error(str(e))
-
-    log.info("========== PORTFOLIO ==========")
-
-    try:
-        log.info(str(dir(context.portfolio)))
-    except Exception as e:
-        log.error(str(e))
-        
-    try:
-        log.info("cash=" + str(context.portfolio.cash))
-        
-    except Exception as e:
-        log.error(str(e))
-        
-    try:
-        log.info("total_value=" + str(context.portfolio.total_value))
-        
-    except Exception as e:
-        log.error(str(e))
-        
-    try:
-        log.info("positions=" + str(context.portfolio.positions))
-        
-    except Exception as e:
-            log.error(str(e))
-            
-# MIG-002 Data Interface Validation
-            
-def validate_data_interface():
-
-    symbol = '510300.SS'
-    
-    close = get_close(symbol, 252)
-    
-    print(len(close))
-
-    close = get_close(symbol, 5)
-
-    high = get_high(symbol, 5)
-
-    low = get_low(symbol, 5)
-
-    volume = get_volume(symbol, 5)
-
-    log.info("close=" + str(close))
-    log.info("high=" + str(high))
-    log.info("low=" + str(low))
-    log.info("volume=" + str(volume))
-    
-def validate_turnover_api():
-
-    try:
-
-        data = get_turnover('510300.SS', 5)
-
-        log.info("TURNOVER TEST: " + str(data))
-        
-        log.info(type(data))
-        
-        if len(data) > 0:
-
-            log.info("FIRST=" + str(data[0]))
-        
-            log.info("LAST=" + str(data[-1]))
-
-        if data is not None:
-
-            log.info("TURNOVER AVG: " + str(sum(data) / len(data)))
-
-    except Exception as e:
-
-        log.error("TURNOVER TEST FAILED: " + str(e))
-
-# MIG-003A Portfolio Snapshot
-
-def validate_portfolio_snapshot(context):
-
-    portfolio = context.portfolio
-
-    log.info("cash=" + str(portfolio.cash))
-
-    log.info("total_value=" + str(portfolio.total_value))
-
-    log.info("positions=" + str(portfolio.positions))
-    
-    order_target_value('510300.SS', 10000)
-    
-    positions = context.portfolio.positions
-
-    for symbol in positions:
-    
-        pos = positions[symbol]
-    
-        log.info("symbol=" + str(symbol))
-    
-        log.info("type=" + str(type(pos)))
-    
-        log.info("dir=" + str(dir(pos)))
-        
-    log.info("positions_value=" + str(context.portfolio.positions_value))
-    
-    log.info("returns=" + str(context.portfolio.returns))
-    
-# MIG-004 Order Interface Validation
-
-def validate_order_interface(context):
-
-    symbol = '510300.SS'
-
-    log.info("========== ORDER TEST ==========")
-
-    try:
-
-        o = order_target_value(symbol, 20000)
-
-        log.info("order=" + str(o))
-
-        log.info("type=" + str(type(o)))
-
-        log.info("dir=" + str(dir(o)))
-
-    except Exception as e:
-
-        log.error("order_target_value: " + str(e))
-
-    try:
-
-        orders = get_open_orders()
-
-        log.info("open_orders=" + str(orders))
-
-    except Exception as e:
-
-        log.error("get_open_orders: " + str(e))
-        
-# FILTER-001 Self Test
-
-def validate_market_filter():
-
-    score = calc_market_score()
-    
-    log.info("FILTER-001 score=" + str(score))
-    
-    assert isinstance(score, int,)
-   
-    assert 0 <= score <= 3
-    
-    return True
-
-# FILTER-002 Self Test
-
-def validate_market_exposure():
-
-    exposure = calc_market_exposure()
-    
-    log.info("FILTER-002 exposure=" + str(exposure))
-    
-    assert isinstance(exposure, float,)
-   
-    assert (0.0 <= exposure <= 1.0)
-    
-    return True
-    
-def validate_ranking_pipeline():
-
-    ranked = get_ranked_etfs()
-
-    assert ranked is not None
-
-    assert len(ranked) > 0
-
-    previous_score = 999
-
-    for symbol, score in ranked:
-
-        assert score is not None
-
-        assert 0.0 <= score <= 1.0
-
-        assert score <= previous_score
-
-        previous_score = score
-
-    selected = get_selected_etfs()
-
-    assert selected is not None
-
-    assert len(selected) <= MAX_PORTFOLIO_SIZE
-
-    return True
-               
-# PORT Validation
-
-def validate_portfolio_pipeline():
-
-    weights = calc_target_weights()
-
-    assert isinstance(weights, dict,)
-
-    if len(weights) == 0:
-        return True
-
-    total_weight = sum(weights.values())
-
-    assert abs(total_weight - 1.0) < 0.0001
-
-    for symbol, weight in weights.items():
-
-        assert (MIN_SINGLE_POSITION_WEIGHT <= weight <= MAX_SINGLE_POSITION_WEIGHT)
-
-    return True
-    
-# Risk Validation
-
-def validate_risk_pipeline():
-
-    summary = get_risk_control_summary()
-
-    assert isinstance(summary, dict,)
-
-    factor = summary.get("scaling_factor")
-
-    assert factor is not None
-
-    assert factor > 0
-
-    cash_weight = summary.get("cash_weight")
-
-    assert (0.0 <= cash_weight <= 1.0)
-
-    adjusted = calc_risk_adjusted_weights()
-    
-
-    if len(adjusted) > 0:
-
-        invested = sum(adjusted.values())
-
-        assert invested <= 1.0001
-
-    return True

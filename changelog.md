@@ -11,6 +11,41 @@ Format:
 
 ## 2026-06-17
 
+### MIG-005G Scheduler Integration Completed
+
+Implemented scheduler integration and completed end-to-end execution chain.
+
+Changes:
+
+* Added strategy_main() entry point
+* Connected run_daily() to strategy_main()
+* Connected strategy_main() to rebalance()
+* Integrated sell_removed_positions()
+* Integrated rebalance_portfolio()
+* Added scheduler execution logging
+* Improved rebalance exception handling using log.error()
+* Added volatility calculation safety check
+* Added cash weight boundary protection
+
+Validation:
+
+* initialize() → run_daily() verified
+* run_daily() → strategy_main() verified
+* strategy_main() → rebalance() verified
+* rebalance() → EXEC layer verified
+* No duplicate rebalance detected
+* PTrade lifecycle compatibility verified
+
+Result:
+
+* MIG-005G marked Completed
+* Full Scheduler → Filter → Rank → Portfolio → Risk → Execution pipeline operational
+* MIG-005 migration phase completed
+
+Next:
+
+* MIG-006 Full System Validation
+
 ### MIG-005F Execution Integration Completed
 
 Implemented PTrade execution layer integration.

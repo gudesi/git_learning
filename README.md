@@ -66,7 +66,7 @@ Current Phase:
 
 Current Focus
 
-## MIG-005G Scheduler Integration
+## Backtest Validation
 ---
 
 ## Development Rules

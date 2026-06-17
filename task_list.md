@@ -870,7 +870,7 @@ Dependencies:
 
 
 MIG-005G Scheduler Integration
-Status: Pending
+Status: DONE
 
 Integrate:
 - strategy_main()
