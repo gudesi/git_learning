@@ -66,7 +66,7 @@ Current Phase:
 
 Current Focus
 
-## Backtest Validation
+## PERF-001 Cache Infrastructure
 ---
 
 ## Development Rules

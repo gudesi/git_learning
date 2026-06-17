@@ -881,6 +881,135 @@ Dependencies:
 - MIG-005F
 
 
+# Post-Migration Performance Optimization
+
+
+Status: In Progress
+
+Background:
+After MIG-005A ~ MIG-005G completion, full strategy integration is functional.
+Post-migration review identified significant performance degradation:
+
+- Backtest runtime increased from ~1 minute to 10-30 minutes
+- Indicator calculations repeatedly request historical data
+- Ranking pipeline executes multiple times per rebalance
+- Portfolio weight calculations are recomputed unnecessarily
+- Original caching layer was not migrated
+
+Objective:
+Restore near pre-migration performance while preserving all migrated functionality.
+
+
+## PERF-001 Cache Infrastructure
+Status: Pending
+
+
+Implement global cache layer:
+
+- GLOBAL_CACHE dictionary
+- clear_cache()
+- cache_get()
+- cache_set()
+
+Requirements:
+
+- Cache lifetime = one strategy cycle
+- Cache cleared at strategy_main() start
+- No modifications to context object
+- All future performance optimizations use GLOBAL_CACHE
+
+Dependencies:
+None
+
+
+## PERF-002 Indicator Cache
+Status: Pending
+
+
+Add cache support to expensive indicator calculations:
+
+Functions:
+
+- calc_return()
+- calc_volatility()
+- calc_atr()
+- calc_adv60()
+- calc_trend_quality_raw()
+- calc_risk_adjusted_momentum()
+
+Goals:
+
+- Avoid repeated _get_history_field() calls
+- Avoid repeated indicator recomputation
+- Reuse results within same strategy cycle
+
+Dependencies:
+PERF-001
+
+
+## PERF-003 Ranking Cache
+Status: Pending
+
+
+Add cache support to ranking pipeline:
+
+Functions:
+
+- calc_final_score()
+
+Goals:
+
+- Each ETF score calculated once per cycle
+- Reuse ranking results across portfolio construction
+
+Dependencies:
+PERF-002
+
+
+## PERF-004 Portfolio Cache
+Status: Pending
+
+
+Add cache support to portfolio construction:
+
+Functions:
+
+- get_selected_etfs()
+- calc_target_weights()
+- calc_risk_adjusted_weights()
+- calc_market_exposure()
+
+Goals:
+
+- Eliminate duplicate ranking execution
+- Eliminate duplicate target weight calculation
+- Eliminate duplicate risk-adjusted weight calculation
+
+Dependencies:
+PERF-003
+
+
+## PERF-005 Performance Validation
+Status: Pending
+
+
+Validation:
+
+- Compare runtime before/after optimization
+- Verify identical portfolio outputs
+- Verify no cache contamination between cycles
+- Verify rebalance execution unchanged
+
+Success Criteria:
+
+- Significant runtime reduction
+- No functional changes
+- All MIG-005 functionality preserved
+
+Dependencies:
+PERF-004
+
+
 ## MIG-006 Backtest Validation
 目标：
 
