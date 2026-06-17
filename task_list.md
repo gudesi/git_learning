@@ -582,7 +582,7 @@ DONE
 
 ---
 
-# Phase 8.5 - PTrade Migration
+# Phase 9 - PTrade Migration
 
 ## MIG-001A
 
@@ -859,7 +859,7 @@ Dependencies:
 
 
 MIG-005F Execution Integration
-Status: Pending
+Status: DONE
 
 Integrate:
 - EXEC-001 Order Mapping Layer
@@ -965,52 +965,6 @@ MIG
 完成标准：
 
 允许实盘。
-
-Status:
-NOT STARTED
-
-# Phase 9 - Validation
-
-## TEST-001 Indicator Validation
-
-Dependencies:
-
-* IND-001
-* IND-002
-* IND-003
-* IND-004
-* IND-005
-* IND-006
-
-Status:
-NOT STARTED
-
----
-
-## TEST-002 Historical Backtest
-
-Dependencies:
-EXEC-002
-
-Status:
-NOT STARTED
-
----
-
-## TEST-003 Paper Trading
-
-Dependencies:
-TEST-002
-
-Status:
-NOT STARTED
-
----
-
-## TEST-004 Live Trading
-
-Dependencies:
-TEST-003
 
 Status:
 NOT STARTED

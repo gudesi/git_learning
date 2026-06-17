@@ -804,8 +804,7 @@ def calc_target_weights():
     return weights
     
 # =========================================================
-# RISK-001
-# Portfolio Risk Engine
+# RISK-001 Portfolio Risk Engine
 # =========================================================
 
 def calc_portfolio_atr():
@@ -902,8 +901,7 @@ def get_risk_state():
     return "HIGH"
 
 # =========================================================
-# RISK-002
-# Portfolio Risk Control
+# RISK-002 Portfolio Risk Control
 # =========================================================
 
 def get_risk_scaling_factor():
@@ -981,6 +979,149 @@ def get_risk_control_summary():
     return {"risk_state": get_risk_state(), "control_state": get_risk_control_state(), "scaling_factor": get_risk_scaling_factor(), "cash_weight": get_cash_weight(),}
 
 # =========================================================
+# EXEC-001
+# Order Mapping Layer
+# =========================================================
+
+def get_position_value(symbol):
+
+    positions = get_positions()
+
+    if positions is None:
+        return 0.0
+
+    position = positions.get(symbol)
+
+    if position is None:
+        return 0.0
+
+    try:
+        return float(position.amount) * float(position.last_sale_price)
+        
+
+    except Exception as e:
+
+        log.info(f"GET_POSITION_VALUE_EXCEPTION=" f"{repr(e)}")
+
+        return 0.0
+
+
+def order_target_percent(context, symbol, target_percent):
+
+    try:
+
+        total_equity = float(context.portfolio.portfolio_value)
+
+        target_value = total_equity * target_percent
+
+        current_value = get_position_value(symbol)
+
+        delta_value = target_value - current_value
+        
+        # Ignore tiny adjustments
+
+        if abs(delta_value) < 100:
+            return None
+
+        return order_value(symbol, delta_value)
+
+    except Exception as e:
+
+        log.info(f"ORDER_TARGET_PERCENT_EXCEPTION=" f"{repr(e)}")
+
+        return None
+    
+# =========================================================
+# EXEC-002 Rebalance Engine
+# =========================================================
+
+def get_current_symbols():
+
+    positions = get_positions()
+
+    if positions is None:
+        return set()
+
+    return set(positions.keys())
+
+def get_target_symbols():
+
+    weights = calc_risk_adjusted_weights()
+    
+    symbols = set()
+
+    for symbol, weight in weights.items():
+
+        if weight > 0:
+            symbols.add(symbol)
+
+    if get_cash_weight() > 0:
+        symbols.add(CASH_ETF)
+
+    return symbols
+
+def sell_removed_positions(context,):
+
+    current_symbols = get_current_symbols()
+
+    target_symbols = get_target_symbols()
+    
+
+    symbols_to_sell = current_symbols - target_symbols
+    
+    for symbol in symbols_to_sell:
+
+        order_target_percent(context, symbol, 0.0)
+
+        log.info(f"SELL {symbol}")
+
+    return symbols_to_sell
+
+
+def rebalance_portfolio(context,):
+
+    weights = calc_risk_adjusted_weights()
+    
+
+    cash_weight = get_cash_weight()
+    
+    target_weights = weights.copy()
+    
+    if cash_weight > 0:
+        target_weights[CASH_ETF] = cash_weight
+
+    for symbol, weight in target_weights.items():
+
+        order_target_percent(context, symbol, weight)
+
+        log.info(f"TARGET {symbol}: {weight:.2%}")
+
+    return True
+
+def rebalance(context,):
+
+    try:
+
+        log.info("STEP1 sell_removed_positions")
+
+        sell_removed_positions(context)
+
+        log.info("STEP2 rebalance_portfolio")
+
+        rebalance_portfolio(context)
+
+        log.info("STEP3 completed")
+
+        return True
+
+    except Exception as e:
+
+        print("REBALANCE_EXCEPTION=" + repr(e))
+
+        return False
+
+
+# =========================================================
 # MIG-001A PTrade Lifecycle
 # =========================================================
 
@@ -999,8 +1140,6 @@ def before_trading_start(context, data):
 
 def after_trading_end(context, data):
     log.info("MIG-001A after_trading_end()")
-    
-
             
 def daily_heartbeat(context):
     log.info("daily_heartbeat()")
@@ -1061,6 +1200,14 @@ def daily_heartbeat(context):
     
     # log.info("risk_adjusted_weights=" + str(calc_risk_adjusted_weights()))
     
+    # log.info(f"risk_factor=" f"{get_risk_scaling_factor()}")
+    
+    # log.info("target_symbols=" + str(get_target_symbols()))
+    
+    # log.info("cash_weight=" + str( get_cash_weight()))
+    
+    # rebalance(context)    
+    
 def _get_history_field(symbol, field, count):
 
     try:
@@ -1102,9 +1249,7 @@ def get_volume(symbol, count):
     
 def get_turnover(symbol, count):
     return _get_history_field(symbol, 'money', count)
-    
-
-    
+       
 # =========================================================
 # DEBUG TOOLS
 # =========================================================

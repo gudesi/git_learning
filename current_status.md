@@ -4,17 +4,17 @@ Project:
 Institutional China ETF Trend Following Portfolio v4.0
 
 Last Updated:
-2026-06-14
+2026-06-17
 
 Current Phase:
-# Phase 8.5 - PTrade Migration
+# Phase 9 - PTrade Migration
 
 Current Focus
 
-## MIG-005F Execution Integration
+## MIG-005G Scheduler Integration
 
 Overall Progress:
-32 / 38 Tasks Completed
+34 / 37 Tasks Completed
 
 ---
 
@@ -266,7 +266,7 @@ Open
 
 None
 
-# Phase 8.5 - PTrade Migration
+# Phase 9 - PTrade Migration
 
 | Task ID | Status |
 |----------|----------|
@@ -355,31 +355,19 @@ Optimization deferred until post-MIG-005F performance review.
 
 | MIG-005D | DONE |
 | MIG-005E | DONE |
-| MIG-005F | NOT STARTED |
+| MIG-005F | DONE |
 | MIG-005G | NOT STARTED |
 | MIG-006 | NOT STARTED |
 | MIG-007 | NOT STARTED |
 | MIG-008 | NOT STARTED |
 
 Progress:
-11 / 16
+12 / 16
 
 Objective:
 
 Integrate strategy engine into PTrade lifecycle
 without modifying strategy logic.
-
-# Phase 9 - Validation
-
-| Task ID  | Status      |
-| -------- | ----------- |
-| TEST-001 | NOT STARTED |
-| TEST-002 | NOT STARTED |
-| TEST-003 | NOT STARTED |
-| TEST-004 | NOT STARTED |
-
-Progress:
-0 / 4
 
 ---
 

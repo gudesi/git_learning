@@ -62,11 +62,11 @@ Current Status
 Phase 1-8 Completed
 
 Current Phase:
-# Phase 8.5 - PTrade Migration
+# Phase 9 - PTrade Migration
 
 Current Focus
 
-## MIG-005F Execution Integration
+## MIG-005G Scheduler Integration
 ---
 
 ## Development Rules

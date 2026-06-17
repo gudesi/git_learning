@@ -3405,9 +3405,17 @@ def get_target_symbols():
         calc_risk_adjusted_weights()
     )
 
-    symbols = set(
-        weights.keys()
-    )
+    symbols = set()
+
+    for symbol, weight in (
+        weights.items()
+    ):
+
+        if weight > 0:
+
+            symbols.add(
+                symbol
+            )
 
     if get_cash_weight() > 0:
 

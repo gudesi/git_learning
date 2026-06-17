@@ -9,6 +9,35 @@ Format:
 * Removed
 * Fixed
 
+## 2026-06-17
+
+### MIG-005F Execution Integration Completed
+
+Implemented PTrade execution layer integration.
+
+Changes:
+
+* Migrated EXEC-001 order mapping layer to native PTrade execution APIs.
+* Replaced target-value based wrapper with incremental order_value() rebalancing logic.
+* Added current position value calculation using Position.amount × Position.last_sale_price.
+* Implemented target allocation adjustment through delta position value.
+* Removed dependency on legacy get_equity() abstraction.
+* Fixed get_current_symbols() to use native get_positions() API.
+* Verified sell_removed_positions() workflow.
+* Verified rebalance_portfolio() workflow.
+* Verified cash ETF allocation workflow.
+* Verified order generation through PTrade order_value() API.
+
+Validation:
+
+* Rebalance engine completed without execution exceptions.
+* Cash ETF order successfully generated during backtest.
+* Full EXEC-001 / EXEC-002 integration path validated.
+
+Status:
+
+* MIG-005F marked Completed.
+
 ## 2026-06-16
 
 ### MIG-005E Risk Integration Completed
