@@ -810,7 +810,7 @@ def apply_position_constraints(weights,):
 
         # Converged
 
-        if adjusted == previous:
+        if all(abs(adjusted.get(symbol, 0) - previous.get(symbol, 0)) < 1e-8 for symbol in set(adjusted) | set(previous)):
             break
 
     return adjusted
@@ -1011,10 +1011,6 @@ def get_cash_weight(weights):
         cash = 0.0
 
     return cash
-
-def get_risk_control_summary():
-
-    return {"risk_state": get_risk_state(), "control_state": get_risk_control_state(), "scaling_factor": get_risk_scaling_factor(), "cash_weight": get_cash_weight(),}
 
 # =========================================================
 # EXEC-001

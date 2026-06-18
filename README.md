@@ -66,7 +66,7 @@ Current Phase:
 
 Current Focus
 
-## code review after PERF-002 History Data Cache
+## PERF-003 Ranking Cache(Indicator Cache Optimization?)
 ---
 
 ## Development Rules
