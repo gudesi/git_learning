@@ -171,20 +171,13 @@ def cache_set(key, value):
 # =========================================================
 
 def calc_return(symbol, lookback,):
-    """
-    Calculate simple return.
+    
+    cache_key = ("return", symbol, lookback,)
 
-    Parameters
-    ----------
-    symbol : str
+    cached = cache_get(cache_key)
 
-    lookback : int
-        20 / 60 / 120 / 250
-
-    Returns
-    -------
-    float
-    """
+    if cached is not None:
+        return cached
 
     if lookback not in RETURN_WINDOWS:
 
@@ -203,13 +196,24 @@ def calc_return(symbol, lookback,):
 
         return None
 
-    return (end_price / start_price - 1.0)
+    result = end_price / start_price - 1.0
+
+    cache_set(cache_key, result)
+
+    return result
     
 # =========================================================
 # IND-002 Volatility Calculation
 # =========================================================
 
 def calc_volatility(symbol, lookback=60):
+
+    cache_key = ("volatility", symbol, lookback,)
+
+    cached = cache_get(cache_key)
+
+    if cached is not None:
+        return cached
 
     close = get_close(symbol, lookback + 1)
 
@@ -221,15 +225,20 @@ def calc_volatility(symbol, lookback=60):
     for i in range(1, len(close)):
 
         returns.append(close[i] / close[i - 1] - 1.0)
-        
+
     if len(returns) < 2:
         return None
 
     mean_return = sum(returns) / len(returns)
-    
-    variance = sum((r - mean_return) ** 2 for r in returns) / (len(returns) - 1)
 
-    return (math.sqrt(variance) * math.sqrt(252))
+    variance = sum((r - mean_return) ** 2 for r in returns) / (len(returns) - 1)
+    
+    result = math.sqrt(variance) * math.sqrt(252)
+    
+
+    cache_set(cache_key, result,)
+
+    return result
     
 # =========================================================
 # IND-003 Momentum Score
@@ -318,18 +327,13 @@ def calc_momentum_score(symbol,):
 # =========================================================
 
 def calc_trend_quality_raw(symbol, lookback=QUALITY_LOOKBACK,):
-    """
-    Raw trend quality.
+    
+    cache_key = ("trend_quality", symbol, lookback,)
 
-    Quality =
-    Slope × R²
+    cached = cache_get(cache_key)
 
-    Uses log-price regression.
-
-    Returns
-    -------
-    float
-    """
+    if cached is not None:
+        return cached
 
     close = get_close(symbol, lookback,)
 
@@ -372,7 +376,11 @@ def calc_trend_quality_raw(symbol, lookback=QUALITY_LOOKBACK,):
 
     r_squared = 1.0 - ss_residual / ss_total
 
-    return slope * r_squared
+    result = slope * r_squared
+
+    cache_set(cache_key, result,)
+
+    return result
     
 
 def calc_quality_score(symbol,):
@@ -402,13 +410,13 @@ def calc_quality_score(symbol,):
 # =========================================================
 
 def calc_adv60(symbol, lookback=LIQUIDITY_LOOKBACK,):
-    """
-    Average Daily Turnover.
 
-    Returns
-    -------
-    float
-    """
+    cache_key = ("adv", symbol, lookback,)
+
+    cached = cache_get(cache_key)
+
+    if cached is not None:
+        return cached
 
     turnover = get_turnover(symbol, lookback,)
 
@@ -418,7 +426,12 @@ def calc_adv60(symbol, lookback=LIQUIDITY_LOOKBACK,):
     if len(turnover) < lookback:
         return None
 
-    return (sum(turnover) / len(turnover))
+    result = sum(turnover) / len(turnover)
+    
+
+    cache_set(cache_key, result,)
+
+    return result
 
 def calc_liquidity_score(symbol,):
     """
@@ -456,13 +469,13 @@ def calc_true_range(high, low, prev_close,):
     return max(high - low, abs(high - prev_close), abs(low - prev_close),)
 
 def calc_atr(symbol, lookback=ATR_LOOKBACK,):
-    """
-    ATR20.
 
-    Returns
-    -------
-    float
-    """
+    cache_key = ("atr", symbol, lookback,)
+
+    cached = cache_get(cache_key)
+
+    if cached is not None:
+        return cached
 
     high = get_high(symbol, lookback + 1,)
 
@@ -471,7 +484,6 @@ def calc_atr(symbol, lookback=ATR_LOOKBACK,):
     close = get_close(symbol, lookback + 1,)
 
     if len(high) < lookback + 1 or len(low) < lookback + 1 or len(close) < lookback + 1:
-        
         return None
 
     tr_values = []
@@ -483,10 +495,14 @@ def calc_atr(symbol, lookback=ATR_LOOKBACK,):
         tr_values.append(tr)
 
     if len(tr_values) == 0:
-
         return None
 
-    return sum(tr_values) / len(tr_values)
+    result = sum(tr_values) / len(tr_values)
+    
+
+    cache_set(cache_key, result,)
+
+    return result
     
 def calc_atr_percent(symbol,):
 

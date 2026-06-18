@@ -384,7 +384,7 @@ Performance review identified:
 Optimization Plan:
 
 PERF-001 Cache Infrastructure     DONE
-PERF-002 History Data Cache       DONE
+PERF-002A History Data Cache       DONE
 
 Performance Review Status
 
@@ -480,6 +480,17 @@ Status: Deferred
 Execution order sequencing may impact capital efficiency.
 
 No functional defect.
+
+PERF-002B
+Remaining Indicator Cache
+
+Status:
+Completed
+
+Notes:
+Indicator-level cache added to all remaining
+high-frequency indicator calculations.
+Backtest completed successfully after integration.
 
 PERF-004 Portfolio Cache          NOT STARTED
 PERF-005 Performance Validation   NOT STARTED

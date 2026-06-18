@@ -11,6 +11,46 @@ Format:
 
 ## 2026-06-18
 
+## PERF-002 Remaining Indicator Cache
+
+Status:
+Completed
+
+Changes:
+
+* Added cache support to calc_return()
+* Added cache support to calc_volatility()
+* Added cache support to calc_trend_quality_raw()
+* Added cache support to calc_adv60()
+* Added cache support to calc_atr()
+
+Cache Keys:
+
+* ("return", symbol, lookback)
+* ("volatility", symbol, lookback)
+* ("trend_quality", symbol, lookback)
+* ("adv60", symbol, lookback)
+* ("atr", symbol, lookback)
+
+Validation:
+
+* Full backtest completed successfully
+* No cache collisions detected
+* No indicator output anomalies observed
+* Portfolio construction unchanged
+* Strategy execution completed normally
+
+Impact:
+
+Reduced repeated indicator computation during ranking,
+filtering and portfolio construction stages.
+
+Result:
+
+PERF-002 completed.
+All remaining indicator calculations are now cache-enabled.
+
+
 ## [REVIEW-008]
 
 Reviewed execution layer order processing.
