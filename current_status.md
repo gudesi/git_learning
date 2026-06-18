@@ -492,7 +492,19 @@ Indicator-level cache added to all remaining
 high-frequency indicator calculations.
 Backtest completed successfully after integration.
 
-PERF-004 Portfolio Cache          NOT STARTED
+PERF-004 Portfolio Cache          DONE
+
+Portfolio construction pipeline now uses cached:
+
+- ranking_table
+- selected_etfs
+- target_weights
+
+Duplicate ranking and weight calculations removed.
+
+Validation:
+Multi-day backtest passed successfully.
+
 PERF-005 Performance Validation   NOT STARTED
 
 Expected Result:

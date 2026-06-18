@@ -978,8 +978,7 @@ Future EXEC optimization phase.
 
 
 ## PERF-004 Portfolio Cache
-Status: Pending
-
+Status: DONE
 
 Add cache support to portfolio construction:
 
@@ -998,6 +997,15 @@ Goals:
 
 Dependencies:
 PERF-003
+
+Implemented:
+- target_weights cache
+- ranking_table cache reuse
+- portfolio construction cache flow
+
+Verified:
+- Multi-day backtest passed
+- No duplicate ranking execution observed
 
 
 ## PERF-005 Performance Validation

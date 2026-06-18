@@ -582,6 +582,21 @@ def calc_market_exposure():
     
     return MARKET_EXPOSURE_MAP.get(score, 0.0,)
     
+def get_market_exposure():
+
+    cache_key = "market_exposure"
+
+    cached = cache_get(cache_key)
+
+    if cached is not None:
+        return cached
+
+    result = calc_market_exposure()
+
+    cache_set(cache_key, result)
+
+    return result
+    
 # =========================================================
 # RANK-001 Final Score
 # =========================================================
@@ -997,7 +1012,7 @@ def calc_risk_adjusted_weights():
     risk_factor = get_risk_scaling_factor()
     
 
-    market_factor = calc_market_exposure()
+    market_factor = get_market_exposure()
     
     final_factor = risk_factor * market_factor
     
@@ -1009,6 +1024,21 @@ def calc_risk_adjusted_weights():
         adjusted[symbol] = weight * final_factor
         
     return adjusted
+    
+def get_risk_adjusted_weights():
+
+    cache_key = "risk_adjusted_weights"
+
+    cached = cache_get(cache_key)
+
+    if cached is not None:
+        return cached
+
+    result = calc_risk_adjusted_weights()
+
+    cache_set(cache_key, result)
+
+    return result
 
 def get_cash_weight(weights):
 
@@ -1177,7 +1207,7 @@ def rebalance(context):
 
     try:
 
-        risk_weights = calc_risk_adjusted_weights()
+        risk_weights = get_risk_adjusted_weights()
 
         cash_weight = get_cash_weight(risk_weights)
 

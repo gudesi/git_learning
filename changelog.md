@@ -11,6 +11,15 @@ Format:
 
 ## 2026-06-18
 
+## PERF-004 Portfolio Cache
+
+- Added target_weights cache layer
+- Added selected_etfs cache support
+- Eliminated duplicate ranking table execution
+- Eliminated duplicate portfolio weight calculation
+- Reduced repeated risk-engine dependency calculations
+- Verified by multi-day backtest
+
 ## PERF-002 Remaining Indicator Cache
 
 Status:
