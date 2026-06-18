@@ -9,6 +9,39 @@ Format:
 * Removed
 * Fixed
 
+## 2026-06-18
+
+### PERF-001 Cache Infrastructure Completed
+
+Implemented:
+
+- Added GLOBAL_CACHE
+- Added clear_cache()
+- Added cache_get()
+- Added cache_set()
+
+Integration:
+
+- Cache lifecycle initialized in strategy_main()
+- Cache cleared once per strategy cycle
+- No modifications to context object
+- Established unified cache infrastructure for future optimization stages
+
+Validation:
+
+- One-day backtest completed successfully
+- No functional changes detected
+- No execution errors observed
+- Strategy behavior unchanged
+
+Result:
+
+PERF-001 completed and accepted.
+
+Next Step:
+
+PERF-002 Indicator Cache
+
 ## 2026-06-17
 
 ### Post-Migration Review Completed

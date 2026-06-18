@@ -138,6 +138,25 @@ HIGH_RISK_EXPOSURE = 0.90
 EXTREME_RISK_EXPOSURE = 0.75
 DEFENSIVE_EXPOSURE = 0.50
 
+# Global Cache
+
+GLOBAL_CACHE = {}
+
+# Cache Utilities
+
+def clear_cache():
+    GLOBAL_CACHE.clear()
+
+
+    log.info("PERF-001 cache cleared")
+
+def cache_get(key):
+    return GLOBAL_CACHE.get(key)
+
+
+def cache_set(key, value):
+    GLOBAL_CACHE[key] = value
+    
 # =========================================================
 # IND-001 Return Calculation
 # =========================================================
@@ -1131,18 +1150,20 @@ def rebalance(context,):
 # =========================================================
 
 def initialize(context):
-    log.info("MIG-001A initialize()")
+    log.info("initialize()")
     
     run_daily(context, strategy_main, time='14:50')
 
 def before_trading_start(context, data):
-    log.info("MIG-001A before_trading_start()")
+    log.info("before_trading_start()")
     
 
 def after_trading_end(context, data):
-    log.info("MIG-001A after_trading_end()")
+    log.info("after_trading_end()")
             
 def strategy_main(context):
+    
+    clear_cache()
 
     log.info("strategy_main()")
     

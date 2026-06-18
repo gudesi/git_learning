@@ -66,7 +66,7 @@ Current Phase:
 
 Current Focus
 
-## PERF-001 Cache Infrastructure
+## PERF-002 Indicator Cache
 ---
 
 ## Development Rules
