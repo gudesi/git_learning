@@ -475,19 +475,11 @@ Result:
 Backtest passed.
 
 REVIEW-008
-Order Execution Sequencing
+Status: Deferred
 
-Status: Open
+Execution order sequencing may impact capital efficiency.
 
-Issue:
-Rebalance orders executed without
-cash-aware sequencing.
-
-Impact:
-Frequent "insufficient cash" warnings.
-
-Priority:
-Medium
+No functional defect.
 
 PERF-004 Portfolio Cache          NOT STARTED
 PERF-005 Performance Validation   NOT STARTED

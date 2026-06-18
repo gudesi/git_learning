@@ -11,6 +11,16 @@ Format:
 
 ## 2026-06-18
 
+## [REVIEW-008]
+
+Reviewed execution layer order processing.
+
+Observed that order submission sequence may influence capital utilization efficiency.
+
+No functional issue detected.
+
+Improvement deferred to future execution optimization phase.
+
 ## [REVIEW-007] Symbol Format Consistency Fix
 
 Issue:

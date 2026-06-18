@@ -1097,19 +1097,63 @@ def sell_removed_positions(context, target_symbols):
         
     return symbols_to_sell
 
+def get_current_weight(context, symbol):
+
+    total_equity = float(context.portfolio.portfolio_value)
+
+    if total_equity <= 0:
+        return 0.0
+
+    value = get_position_value(symbol)
+
+    return value / total_equity
 
 def rebalance_portfolio(context, weights, cash_weight):
-    
+
     target_weights = weights.copy()
-    
+
     if cash_weight > 0:
         target_weights[CASH_ETF] = cash_weight
 
-    for symbol, weight in target_weights.items():
+    current_symbols = get_current_symbols()
 
-        order_target_percent(context, symbol, weight)
+    all_symbols = current_symbols | set(target_weights.keys())
 
-        log.info(f"TARGET {symbol}: {weight:.2%}")
+    sell_orders = []
+
+    buy_orders = []
+
+    for symbol in all_symbols:
+
+        current_weight = get_current_weight(context, symbol)
+
+        target_weight = target_weights.get(symbol, 0.0)
+
+        if target_weight < current_weight:
+
+            sell_orders.append((symbol, target_weight))
+
+        elif target_weight > current_weight:
+
+            buy_orders.append((symbol, target_weight))
+
+    # Phase 1
+    # Sell first
+
+    for symbol, target_weight in sell_orders:
+
+        order_target_percent(context, symbol, target_weight)
+
+        log.info(f"SELL TARGET {symbol}: " f"{target_weight:.2%}")
+
+    # Phase 2
+    # Buy later
+
+    for symbol, target_weight in buy_orders:
+
+        order_target_percent(context, symbol, target_weight)
+
+        log.info(f"BUY TARGET {symbol}: " f"{target_weight:.2%}")
 
     return True
 
