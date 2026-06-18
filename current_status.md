@@ -385,7 +385,57 @@ Optimization Plan:
 
 PERF-001 Cache Infrastructure     DONE
 PERF-002 History Data Cache       DONE
-PERF-003 Ranking Cache            NOT STARTED
+
+Performance Review Status
+-------------------------
+
+REVIEW-004
+Status: Resolved
+
+Target weight pipeline deduplicated.
+
+Introduced:
+
+- get_target_weights()
+
+Result:
+
+- target portfolio construction executed once per cycle
+- repeated PORT-001 / PORT-002 execution removed
+
+
+REVIEW-005
+Status: Deferred
+
+Portfolio statistics caching reviewed.
+
+Conclusion:
+
+- existing history cache already removes major data access overhead
+- additional statistics cache expected to provide limited benefit
+
+Deferred until future profiling identifies bottleneck.
+
+
+REVIEW-006
+Status: Resolved
+
+Risk pipeline deduplicated.
+
+Refactored:
+
+- get_cash_weight()
+- get_target_symbols()
+- sell_removed_positions()
+- rebalance_portfolio()
+
+Result:
+
+- calc_risk_adjusted_weights() centralized
+- repeated risk pipeline execution removed
+- rebalance workflow simplified
+
+PERF-003 Ranking Cache(Indicator Cache Optimization?)            NOT STARTED
 PERF-004 Portfolio Cache          NOT STARTED
 PERF-005 Performance Validation   NOT STARTED
 

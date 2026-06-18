@@ -827,13 +827,28 @@ def calc_target_weights():
 
     return weights
     
+def get_target_weights():
+
+    cache_key = "target_weights"
+
+    cached = cache_get(cache_key)
+
+    if cached is not None:
+        return cached
+
+    result = calc_target_weights()
+
+    cache_set(cache_key, result)
+
+    return result
+    
 # =========================================================
 # RISK-001 Portfolio Risk Engine
 # =========================================================
 
 def calc_portfolio_atr():
 
-    weights = calc_target_weights()
+    weights = get_target_weights()
 
     if len(weights) == 0:
 
@@ -862,7 +877,7 @@ def calc_portfolio_atr():
 
 def calc_weighted_average_volatility():
 
-    weights = calc_target_weights()
+    weights = get_target_weights()
 
     if len(weights) == 0:
         return None
@@ -890,7 +905,7 @@ def calc_weighted_average_volatility():
 
 def get_portfolio_statistics():
 
-    weights = calc_target_weights()
+    weights = get_target_weights()
 
     return {"position_count": len(weights), "portfolio_atr": calc_portfolio_atr(), "weighted_average_volatility": calc_weighted_average_volatility(),}
 
@@ -962,8 +977,10 @@ def get_risk_control_state():
     return "DEFENSIVE"
 
 def calc_risk_adjusted_weights():
+    
+    log.info("DEBUG calc_risk_adjusted_weights")
 
-    weights = calc_target_weights()
+    weights = get_target_weights()
 
     if len(weights) == 0:
         return {}
@@ -984,10 +1001,7 @@ def calc_risk_adjusted_weights():
         
     return adjusted
 
-def get_cash_weight():
-
-    weights = calc_risk_adjusted_weights()
-    
+def get_cash_weight(weights):
 
     invested = sum(weights.values())
 
@@ -1068,10 +1082,8 @@ def get_current_symbols():
 
     return set(positions.keys())
 
-def get_target_symbols():
+def get_target_symbols(weights, cash_weight):
 
-    weights = calc_risk_adjusted_weights()
-    
     symbols = set()
 
     for symbol, weight in weights.items():
@@ -1079,35 +1091,19 @@ def get_target_symbols():
         if weight > 0:
             symbols.add(symbol)
 
-    if get_cash_weight() > 0:
+    if cash_weight > 0:
         symbols.add(CASH_ETF)
 
     return symbols
 
-def sell_removed_positions(context,):
+def sell_removed_positions(context, target_symbols):
 
     current_symbols = get_current_symbols()
 
-    target_symbols = get_target_symbols()
-    
-
     symbols_to_sell = current_symbols - target_symbols
-    
-    for symbol in symbols_to_sell:
-
-        order_target_percent(context, symbol, 0.0)
-
-        log.info(f"SELL {symbol}")
-
-    return symbols_to_sell
 
 
-def rebalance_portfolio(context,):
-
-    weights = calc_risk_adjusted_weights()
-    
-
-    cash_weight = get_cash_weight()
+def rebalance_portfolio(context, weights, cash_weight):
     
     target_weights = weights.copy()
     
@@ -1122,17 +1118,23 @@ def rebalance_portfolio(context,):
 
     return True
 
-def rebalance(context,):
+def rebalance(context):
 
     try:
 
+        risk_weights = calc_risk_adjusted_weights()
+
+        cash_weight = get_cash_weight(risk_weights)
+
+        target_symbols = get_target_symbols(risk_weights, cash_weight)
+
         log.info("STEP1 sell_removed_positions")
 
-        sell_removed_positions(context)
+        sell_removed_positions(context, target_symbols)
 
         log.info("STEP2 rebalance_portfolio")
 
-        rebalance_portfolio(context)
+        rebalance_portfolio(context, risk_weights, cash_weight)
 
         log.info("STEP3 completed")
 
@@ -1166,12 +1168,6 @@ def strategy_main(context):
     clear_cache()
 
     log.info("strategy_main()")
-    
-    log.info(f"risk={get_risk_state()}")
-    
-    log.info(f"market={calc_market_score()}")
-    
-    log.info(f"cash={get_cash_weight():.2%}")
 
     rebalance(context)
 

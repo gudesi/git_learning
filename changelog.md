@@ -11,8 +11,48 @@ Format:
 
 ## 2026-06-18
 
-### PERF-002 History Cache Completed
+### REVIEW-004 resolved
 
+Portfolio construction pipeline optimized.
+
+Added:
+
+- get_target_weights()
+
+Result:
+
+- target weights calculated once per rebalance cycle
+- removed repeated PORT-001 / PORT-002 execution
+
+
+REVIEW-006 resolved
+
+Risk pipeline optimized.
+
+Refactored:
+
+- get_cash_weight(weights)
+- get_target_symbols(weights, cash_weight)
+- sell_removed_positions(context, target_symbols)
+- rebalance_portfolio(context, weights, cash_weight)
+
+Result:
+
+- centralized risk weight calculation
+- removed repeated calc_risk_adjusted_weights() calls
+- reduced redundant Portfolio/Risk processing
+
+
+REVIEW-005 deferred
+
+Portfolio statistics caching evaluated.
+
+Decision:
+
+- existing history cache already mitigates primary bottleneck
+- additional statistics cache postponed pending profiling evidence
+
+### PERF-002 History Cache Completed
 
 Implemented:
 
