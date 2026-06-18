@@ -11,6 +11,48 @@ Format:
 
 ## 2026-06-18
 
+## [REVIEW-007] Symbol Format Consistency Fix
+
+Issue:
+- Position symbols returned by PTrade use XSHG/XSHE format.
+- Strategy universe uses SS/SZ format.
+- sell_removed_positions() incorrectly identified existing positions as removed positions.
+
+Fix:
+- Added normalize_symbol().
+- Standardized position symbols before portfolio comparison.
+
+Validation:
+- Repeated sell-and-buy cycles eliminated.
+- sell_removed_positions() behaves correctly.
+- Multi-day backtest passed.
+
+Impact:
+- Prevented unnecessary turnover.
+- Reduced execution noise.
+- Improved portfolio consistency.
+
+## [PERF-003] Ranking Cache Optimization
+
+Implemented:
+- Added ranking cache layer.
+- Cached ETF ranking table results.
+- Cached ETF selection results.
+- Eliminated repeated ranking calculations within a single rebalance cycle.
+
+Validation:
+- build_ranking_table() executes once per trading day.
+- Cache reset verified through PERF-001 daily cache clear.
+- Multi-day backtest passed.
+
+Impact:
+- Reduced repeated score calculations.
+- Reduced indicator evaluation workload.
+- Improved overall rebalance performance.
+
+## ARCH-001
+Portfolio/Risk responsibility boundary review
+
 ### REVIEW-008 resolved
 Position constraints iteration optimized.
 Refactored:

@@ -435,7 +435,60 @@ Result:
 - repeated risk pipeline execution removed
 - rebalance workflow simplified
 
-PERF-003 Ranking Cache(Indicator Cache Optimization?)            NOT STARTED
+PERF-003 Ranking Cache            DONE
+
+Status: Completed
+
+Ranking Cache implemented.
+
+Validation:
+- build_ranking_table() executes once per trading day.
+- Cache cleared by PERF-001 daily.
+- Backtest verification passed.
+
+REVIEW-007
+Symbol Format Consistency
+
+Status: Completed
+
+Issue:
+Current positions use XSHG/XSHE.
+Strategy universe uses SS/SZ.
+
+Impact:
+sell_removed_positions()
+generates unnecessary sell-and-buy cycles.
+
+Priority:
+High
+
+Symbol format normalization added.
+
+Validation:
+- XSHG -> SS
+- XSHE -> SZ
+
+Result:
+- sell_removed_positions() no longer generates
+  repeated sell-and-buy cycles.
+
+Backtest passed.
+
+REVIEW-008
+Order Execution Sequencing
+
+Status: Open
+
+Issue:
+Rebalance orders executed without
+cash-aware sequencing.
+
+Impact:
+Frequent "insufficient cash" warnings.
+
+Priority:
+Medium
+
 PERF-004 Portfolio Cache          NOT STARTED
 PERF-005 Performance Validation   NOT STARTED
 

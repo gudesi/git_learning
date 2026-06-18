@@ -85,6 +85,15 @@ RISK_ETFS = (
     + RESOURCE_ETFS
 )
 
+def normalize_symbol(symbol):
+
+    if symbol.endswith(".XSHG"):
+        return symbol.replace(".XSHG", ".SS")
+
+    if symbol.endswith(".XSHE"):
+        return symbol.replace(".XSHE", ".SZ")
+
+    return symbol
 
 # Full Universe
 
@@ -575,10 +584,18 @@ def calc_final_score(symbol,):
 
     return MOMENTUM_SCORE_WEIGHT * momentum_score + QUALITY_SCORE_WEIGHT * quality_score + LIQUIDITY_SCORE_WEIGHT * liquidity_score
     
+def build_ranking_table():
+    
+    log.info("DEBUG build_ranking_table")
 
-def get_ranked_etfs():
+    cache_key = "ranking_table"
 
-    scores = []
+    cached = cache_get(cache_key)
+
+    if cached is not None:
+        return cached
+
+    candidates = []
 
     for symbol in RISK_ETFS:
 
@@ -587,11 +604,17 @@ def get_ranked_etfs():
         if score is None:
             continue
 
-        scores.append((symbol, score,))
+        candidates.append((symbol, score))
 
-    scores.sort(key=lambda x: x[1], reverse=True,)
+    candidates.sort(key=lambda x: x[1], reverse=True)
 
-    return scores
+    cache_set(cache_key, candidates)
+
+    return candidates
+
+def get_ranked_etfs():
+
+    return build_ranking_table()
 
 # =========================================================
 # RANK-002 ETF Selection
@@ -610,44 +633,16 @@ def passes_ranking_filter(symbol):
     return close[-1] > ma200
     
 def get_selected_etfs():
-    
-    candidates = []
-
-    for symbol in RISK_ETFS:
-
-        if not passes_ranking_filter(symbol):
-            continue
-
-        score = calc_final_score(symbol)
-
-        if score is None:
-            continue
-
-        candidates.append((symbol, score,))
-
-    candidates.sort(key=lambda x: x[1], reverse=True,)
-
-    return [symbol for symbol, score in candidates[ :MAX_PORTFOLIO_SIZE]]
-
-def get_selected_etfs_with_score():
 
     candidates = []
 
-    for symbol in RISK_ETFS:
+    for symbol, score in build_ranking_table():
 
-        if not passes_ranking_filter(symbol):
-            continue
+        if passes_ranking_filter(symbol):
 
-        score = calc_final_score(symbol)
+            candidates.append((symbol, score))
 
-        if score is None:
-            continue
-
-        candidates.append((symbol, score,))
-
-    candidates.sort(key=lambda x: x[1], reverse=True,)
-
-    return candidates[ :MAX_PORTFOLIO_SIZE]
+    return [symbol for symbol, score in candidates[:MAX_PORTFOLIO_SIZE]]
     
 # =========================================================
 # PORT-001 Position Sizing
@@ -977,8 +972,6 @@ def get_risk_control_state():
     return "DEFENSIVE"
 
 def calc_risk_adjusted_weights():
-    
-    log.info("DEBUG calc_risk_adjusted_weights")
 
     weights = get_target_weights()
 
@@ -1076,7 +1069,7 @@ def get_current_symbols():
     if positions is None:
         return set()
 
-    return set(positions.keys())
+    return {normalize_symbol(symbol) for symbol in positions.keys()}
 
 def get_target_symbols(weights, cash_weight):
 
@@ -1097,6 +1090,12 @@ def sell_removed_positions(context, target_symbols):
     current_symbols = get_current_symbols()
 
     symbols_to_sell = current_symbols - target_symbols
+    
+    for symbol in symbols_to_sell:
+    
+        order_target_percent(context, symbol, 0.0)
+        
+    return symbols_to_sell
 
 
 def rebalance_portfolio(context, weights, cash_weight):

@@ -941,7 +941,7 @@ PERF-001
 
 
 ## PERF-003 Ranking Cache(Indicator Cache Optimization?)
-Status: Pending
+Status: DONE
 
 
 Add cache support to ranking pipeline:
