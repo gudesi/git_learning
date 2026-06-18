@@ -922,25 +922,18 @@ Dependencies:
 None
 
 
-## PERF-002 Indicator Cache
-Status: Pending
-
+## PERF-002 History Data Cache
+Status: DONE
 
 Add cache support to expensive indicator calculations:
 
 Functions:
 
-- calc_return()
-- calc_volatility()
-- calc_atr()
-- calc_adv60()
-- calc_trend_quality_raw()
-- calc_risk_adjusted_momentum()
+- _get_history_field()
 
 Goals:
 
 - Avoid repeated _get_history_field() calls
-- Avoid repeated indicator recomputation
 - Reuse results within same strategy cycle
 
 Dependencies:

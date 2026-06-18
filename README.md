@@ -66,7 +66,7 @@ Current Phase:
 
 Current Focus
 
-## PERF-002 Indicator Cache
+## code review after PERF-002 History Data Cache
 ---
 
 ## Development Rules

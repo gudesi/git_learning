@@ -11,6 +11,41 @@ Format:
 
 ## 2026-06-18
 
+### PERF-002 History Cache Completed
+
+
+Implemented:
+
+- Added cache support to _get_history_field()
+- Historical data requests now reuse cached results
+- Eliminated repeated get_history() calls within a strategy cycle
+
+Validation:
+
+- Multi-day backtest completed successfully
+- No functional changes detected
+- Portfolio construction unchanged
+- Order generation unchanged
+
+Performance Result:
+
+Backtest runtime reduced from approximately
+10-30 minutes to under 1 minute.
+
+Root Cause Confirmed:
+
+Primary performance bottleneck was repeated
+historical data retrieval rather than indicator
+calculation logic.
+
+Result:
+
+PERF-002 completed and accepted.
+
+Next Step:
+
+Post-Optimization Code Review
+
 ### PERF-001 Cache Infrastructure Completed
 
 Implemented:

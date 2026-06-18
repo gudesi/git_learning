@@ -1179,27 +1179,59 @@ def strategy_main(context):
     
 def _get_history_field(symbol, field, count):
 
+    cache_key = ("history", symbol, field, count)
+
+    cached = cache_get(cache_key)
+
+    if cached is not None:
+        return cached
+
     try:
+
         data = get_history(count, '1d', field, symbol, fq=None, include=False)
 
         if data is None:
-            return []
 
-        # DataFrame (has both values and columns)
+            result = []
+
+            cache_set(cache_key, result)
+
+            return result
+
         if hasattr(data, "values") and hasattr(data, "columns"):
+
             if field in data.columns:
-                return list(data[field].values)
+
+                result = list(data[field].values)
+
+                cache_set(cache_key, result)
+
+                return result
+
             if len(data.columns) == 1:
-                return list(data.iloc[:, 0].values)
 
-        # Series (has tolist method)
+                result = list(data.iloc[:, 0].values)
+
+                cache_set(cache_key, result)
+
+                return result
+
         if hasattr(data, "tolist"):
-            return data.tolist()
 
-        # Fallback: treat as list or other iterable
-        return list(data)
+            result = data.tolist()
+
+            cache_set(cache_key, result)
+
+            return result
+
+        result = list(data)
+
+        cache_set(cache_key, result)
+
+        return result
 
     except Exception as e:
+
         log.error("_get_history_field failed: " + str(e))
 
         return []

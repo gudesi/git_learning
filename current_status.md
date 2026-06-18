@@ -11,14 +11,14 @@ Current Phase:
 
 Current Focus
 
-## Indicator Cache 
+## code review after PERF-002 History Data Cache
 
 Objective:
 
 Reduce repeated historical data retrieval and indicator recomputation by introducing cache support for core indicator functions.
 
 Overall Progress:
-35 / 42 Tasks Completed
+36 / 42 Tasks Completed
 
 ---
 
@@ -384,7 +384,7 @@ Performance review identified:
 Optimization Plan:
 
 PERF-001 Cache Infrastructure     DONE
-PERF-002 Indicator Cache          NOT STARTED
+PERF-002 History Data Cache       DONE
 PERF-003 Ranking Cache            NOT STARTED
 PERF-004 Portfolio Cache          NOT STARTED
 PERF-005 Performance Validation   NOT STARTED
