@@ -772,7 +772,7 @@ def apply_max_position_constraint(weights,):
 
         if len(eligible_symbols) == 0:
 
-            log.error("No eligible symbols for weight redistribution.")
+            log.warning("No eligible symbols for weight redistribution.")
 
             break
 

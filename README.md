@@ -66,7 +66,7 @@ Current Phase:
 
 Current Focus
 
-## PERF-003 Ranking Cache(Indicator Cache Optimization?)
+## MIG-006 Backtest Validation
 ---
 
 ## Development Rules

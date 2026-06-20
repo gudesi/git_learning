@@ -1009,7 +1009,7 @@ Verified:
 
 
 ## PERF-005 Performance Validation
-Status: Pending
+Status: DONE
 
 
 Validation:
@@ -1057,7 +1057,28 @@ PTrade回测。
 无异常。
 
 Status:
-NOT STARTED
+DONE
+
+## STRAT-001 Strategy Evaluation
+
+验证：
+
+1. 年化收益
+2. 最大回撤
+3. 夏普
+4. 胜率
+5. 平均持仓数
+6. 现金ETF占比
+7. 风险因子触发比例
+8. 市场过滤触发比例
+
+然后重点检查：
+
+get_market_exposure()
+
+以及：
+
+get_risk_scaling_factor()
 
 ## MIG-007 Simulation Validation
 目标：

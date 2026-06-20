@@ -11,14 +11,10 @@ Current Phase:
 
 Current Focus
 
-## PERF-003 Ranking Cache(Indicator Cache Optimization?)
-
-Objective:
-
-Reduce repeated historical data retrieval and indicator recomputation by introducing cache support for core indicator functions.
+## MIG-006 Backtest Validation
 
 Overall Progress:
-36 / 42 Tasks Completed
+39 / 42 Tasks Completed
 
 ---
 
@@ -505,19 +501,34 @@ Duplicate ranking and weight calculations removed.
 Validation:
 Multi-day backtest passed successfully.
 
-PERF-005 Performance Validation   NOT STARTED
+PERF-005 Performance Validation   DONE
 
 Expected Result:
 
 Restore near pre-migration runtime while preserving
 all migrated functionality.
 
-| MIG-006 | NOT STARTED |
+| MIG-006 | DONE |
+
+Result:
+"No eligible symbols for weight redistribution."
+reviewed.
+
+Root Cause:
+Expected behavior when all positions reach
+MAX_SINGLE_POSITION_WEIGHT.
+
+Impact:
+None.
+
+Action:
+Downgraded to informational warning.
+
 | MIG-007 | NOT STARTED |
 | MIG-008 | NOT STARTED |
 
 Progress:
-14 / 21
+18 / 21
 
 Objective:
 

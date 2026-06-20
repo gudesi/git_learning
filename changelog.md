@@ -9,12 +9,33 @@ Format:
 * Removed
 * Fixed
 
+## 2026-06-20
+
+## MIG-006 Backtest Validation
+
+Result:
+"No eligible symbols for weight redistribution."
+reviewed.
+
+Root Cause:
+Expected behavior when all positions reach
+MAX_SINGLE_POSITION_WEIGHT.
+
+Impact:
+None.
+
+Action:
+Downgraded to informational warning.
+
 ## 2026-06-18
+
+## PERF-005 Performance Optimization Phase
+
+Status: CLOSED
 
 ## PERF-004 Portfolio Cache
 
 - Added target_weights cache layer
-- Added selected_etfs cache support
 - Eliminated duplicate ranking table execution
 - Eliminated duplicate portfolio weight calculation
 - Reduced repeated risk-engine dependency calculations
