@@ -66,7 +66,7 @@ Current Phase:
 
 Current Focus
 
-## MIG-006 Backtest Validation
+## STRAT-001C
 ---
 
 ## Development Rules

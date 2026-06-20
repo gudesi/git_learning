@@ -120,8 +120,8 @@ MARKET_FILTER_INDEXES = (
 )
 
 MA_SHORT = 50
-MA_MID = 150
-MA_LONG = 250
+MA_MID = 100
+MA_LONG = 200
 
 MARKET_EXPOSURE_MAP = {0: 0.00, 1: 0.50, 2: 0.80, 3: 1.00,}
 
@@ -147,6 +147,8 @@ HIGH_RISK_EXPOSURE = 0.90
 EXTREME_RISK_EXPOSURE = 0.75
 DEFENSIVE_EXPOSURE = 0.50
 
+REBALANCE_TOLERANCE = 0.01
+
 # Global Cache
 
 GLOBAL_CACHE = {}
@@ -165,6 +167,17 @@ def cache_get(key):
 
 def cache_set(key, value):
     GLOBAL_CACHE[key] = value
+    
+# =========================================================
+# STRAT-001 Market Filter Diagnostics
+# =========================================================
+
+MARKET_SCORE_STATS = {
+    0: 0,
+    1: 0,
+    2: 0,
+    3: 0,
+}
     
 # =========================================================
 # IND-001 Return Calculation
@@ -547,16 +560,16 @@ def is_bull_trend(symbol,):
     
     latest_close = close[-1]
     
-    ma50 = calc_ma(symbol, MA_SHORT,)
+    ma_short = calc_ma(symbol, MA_SHORT,)
     
-    ma150 = calc_ma(symbol, MA_MID,)
+    ma_mid = calc_ma(symbol, MA_MID,)
     
-    ma250 = calc_ma(symbol, MA_LONG,)
+    ma_long = calc_ma(symbol, MA_LONG,)
     
-    if ma50 is None or ma150 is None or ma250 is None:
+    if ma_short is None or ma_mid is None or ma_long is None:
         return False
     
-    return latest_close > ma50 and ma50 > ma150 and ma150 > ma250
+    return latest_close > ma_short and ma_short > ma_mid and ma_mid > ma_long
 
 def calc_market_score():
 
@@ -579,8 +592,11 @@ def calc_market_score():
 def calc_market_exposure():
 
     score = calc_market_score()
-    
-    return MARKET_EXPOSURE_MAP.get(score, 0.0,)
+
+    if score in MARKET_SCORE_STATS:
+        MARKET_SCORE_STATS[score] += 1
+
+    return MARKET_EXPOSURE_MAP.get(score, 0.0)
     
 def get_market_exposure():
 
@@ -772,7 +788,7 @@ def apply_max_position_constraint(weights,):
 
         if len(eligible_symbols) == 0:
 
-            log.warning("No eligible symbols for weight redistribution.")
+            log.info(f"Position cap reached. Remaining excess weight={excess_weight:.4f}")
 
             break
 
@@ -1056,20 +1072,34 @@ def get_cash_weight(weights):
 # Order Mapping Layer
 # =========================================================
 
-def get_position_value(symbol):
+def lookup_position(symbol):
 
     positions = get_positions()
 
     if positions is None:
-        return 0.0
+        return None
 
-    position = positions.get(symbol)
+    log.info( f"POSITIONS KEYS = " f"{list(positions.keys())}" )
+
+    for raw_symbol, position in positions.items():
+
+        if normalize_symbol(raw_symbol) == symbol:
+            return position
+
+    return None
+    
+def get_position_value(symbol):
+
+    position = lookup_position(symbol)
+    
+    log.info( f"FOUND = {position}" )
 
     if position is None:
         return 0.0
 
     try:
-        return float(position.amount) * float(position.last_sale_price)
+
+        return  float(position.amount) * float(position.last_sale_price)
         
 
     except Exception as e:
@@ -1077,7 +1107,6 @@ def get_position_value(symbol):
         log.info(f"GET_POSITION_VALUE_EXCEPTION=" f"{repr(e)}")
 
         return 0.0
-
 
 def order_target_percent(context, symbol, target_percent):
 
@@ -1093,7 +1122,7 @@ def order_target_percent(context, symbol, target_percent):
         
         # Ignore tiny adjustments
 
-        if abs(delta_value) < 100:
+        if abs(delta_value) < total_equity * 0.005:
             return None
 
         return order_value(symbol, delta_value)
@@ -1161,26 +1190,27 @@ def rebalance_portfolio(context, weights, cash_weight):
     if cash_weight > 0:
         target_weights[CASH_ETF] = cash_weight
 
-    current_symbols = get_current_symbols()
-
-    all_symbols = current_symbols | set(target_weights.keys())
+    all_symbols = set(target_weights.keys())
 
     sell_orders = []
 
     buy_orders = []
 
-    for symbol in all_symbols:
+    for symbol in sorted(all_symbols):
 
         current_weight = get_current_weight(context, symbol)
 
         target_weight = target_weights.get(symbol, 0.0)
 
-        if target_weight < current_weight:
-
+        difference = target_weight - current_weight
+        
+        if abs(difference) < REBALANCE_TOLERANCE:
+            continue
+        
+        if difference < 0:
             sell_orders.append((symbol, target_weight))
-
-        elif target_weight > current_weight:
-
+        
+        else:
             buy_orders.append((symbol, target_weight))
 
     # Phase 1
@@ -1247,10 +1277,32 @@ def before_trading_start(context, data):
 
 def after_trading_end(context, data):
     log.info("after_trading_end()")
+    
+    total = sum(MARKET_SCORE_STATS.values())
+
+    if total > 0:
+
+        log.info(
+            "MARKET SCORE STATS: "
+            f"score0={MARKET_SCORE_STATS[0]} "
+            f"score1={MARKET_SCORE_STATS[1]} "
+            f"score2={MARKET_SCORE_STATS[2]} "
+            f"score3={MARKET_SCORE_STATS[3]}"
+        )
+
+        log.info(
+            "MARKET SCORE PCT: "
+            f"score0={MARKET_SCORE_STATS[0] / total:.2%} "
+            f"score1={MARKET_SCORE_STATS[1] / total:.2%} "
+            f"score2={MARKET_SCORE_STATS[2] / total:.2%} "
+            f"score3={MARKET_SCORE_STATS[3] / total:.2%}"
+        )
             
 def strategy_main(context):
     
     clear_cache()
+
+    positions = get_positions()
 
     log.info("strategy_main()")
 
@@ -1269,7 +1321,7 @@ def _get_history_field(symbol, field, count):
 
     try:
 
-        data = get_history(count, '1d', field, symbol, fq=None, include=False)
+        data = get_history(count, '1d', field, symbol, fq='post', include=False)
 
         if data is None:
 

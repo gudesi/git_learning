@@ -11,7 +11,7 @@ Current Phase:
 
 Current Focus
 
-## MIG-006 Backtest Validation
+## STRAT-001C
 
 Overall Progress:
 39 / 42 Tasks Completed
@@ -535,16 +535,39 @@ Objective:
 Integrate strategy engine into PTrade lifecycle
 without modifying strategy logic.
 
+# Phase 10 Optimization
+
+OPT-001
+Ranking
+
+OPT-002
+Position Sizing
+
+OPT-003
+Portfolio Size
+
+OPT-004
+Trend Filter
+
+OPT-005
+Rebalance Frequency
+
+OPT-006
+Bear Defense
+
+OPT-007
+Volatility Filter
+
+OPT-008
+Cash Management
+
+OPT-009
+Walk Forward
+
+OPT-010
+Production V2
+
 ---
-
-# Open Bugs
-
-| Bug ID  | Status |
-| ------- | ------ |
-| BUG-001 | OPEN   |
-| BUG-002 | OPEN   |
-| BUG-003 | OPEN   |
-
 
 # Completion Rules
 

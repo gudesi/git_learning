@@ -1059,7 +1059,7 @@ PTrade回测。
 Status:
 DONE
 
-## STRAT-001 Strategy Evaluation
+## STRAT-001A Strategy Evaluation
 
 验证：
 
@@ -1080,73 +1080,369 @@ get_market_exposure()
 
 get_risk_scaling_factor()
 
-## MIG-007 Simulation Validation
+Status:
+DONE
+
+STRAT-001B
+
+审查执行层
+
+重点看：
+
+rebalance_portfolio()
+
+特别是：
+
+SELL TARGET
+BUY TARGET
+
+执行顺序。
+
+Status:
+DONE
+
+STRAT-001C
+
+市场过滤参数实验
+
+把：
+
+50/150/250
+
+改成：
+
+50/100/200
+
+重新跑 2022-06 ~ 2026-06。
+
+Status:
+DONE
+
+Phase 10 – Strategy Optimization
+
 目标：
 
-PTrade模拟盘。
+在保持策略可解释性、可维护性和实盘可执行性的前提下，系统性提升：
 
-运行：
+CAGR（年化收益率）
+Sharpe Ratio
+Sortino Ratio
+Calmar Ratio
 
-2~4周
+同时控制：
 
-检查：
+Max Drawdown（最大回撤）
+Turnover（换手率）
+实盘交易成本
+OPT-001 Ranking Optimization
 
-订单提交
+Status: Pending
 
-订单成交
+目标：
 
-仓位同步
+优化ETF选择逻辑，提高资产筛选质量。
 
-日志输出
+当前：
 
-完成标准：
+单一动量排序
 
-所有交易逻辑正常。
+研究方向：
 
-Status:
-NOT STARTED
+3个月动量
+6个月动量
+12个月动量
+多周期加权动量
+风险调整动量
+波动率调整动量
+Relative Strength Score
+Dual Momentum
 
-## MIG-008 Production Readiness Review
-最终Code Review。
+评估指标：
 
-重点检查：
-
-DATA
-FILTER
-RANK
-PORT
-RISK
-EXEC
-MIG
-
-全链路。
-
-确认：
-
-无Stub
-
-无TODO
-
-无Mock
-
-无临时Patch
+CAGR
+Sharpe
+Win Rate
+Max Drawdown
 
 完成标准：
 
-允许实盘。
+确定最终排序模型。
 
-Status:
-NOT STARTED
+OPT-002 Position Sizing Optimization
 
----
+Status: Pending
 
-# Bug Backlog
+目标：
 
-| ID      | Description | Priority | Status |
-| ------- | ----------- | -------- | ------ |
-| BUG-001 | Reserved    | -        | Open   |
-| BUG-002 | Reserved    | -        | Open   |
-| BUG-003 | Reserved    | -        | Open   |
+优化仓位分配方式。
+
+当前：
+
+Equal Weight
+
+研究方向：
+
+Equal Weight
+Momentum Weight
+Volatility Weight
+Inverse Volatility
+Risk Parity
+Conviction Weighting
+
+评估指标：
+
+CAGR
+Sharpe
+Calmar
+Max Drawdown
+
+完成标准：
+
+确定最优仓位模型。
+
+OPT-003 Portfolio Size Optimization
+
+Status: Pending
+
+目标：
+
+确定最佳持仓数量。
+
+当前：
+
+Top 3
+
+研究方向：
+
+Top 1
+Top 2
+Top 3
+Top 4
+Top 5
+Top 8
+
+评估指标：
+
+CAGR
+Sharpe
+Max Drawdown
+Turnover
+
+完成标准：
+
+确定最优持仓数量。
+
+OPT-004 Trend Filter Optimization
+
+Status: Pending
+
+目标：
+
+优化市场趋势过滤器。
+
+当前：
+
+50 / 100 / 200
+
+研究方向：
+
+20 / 60 / 120
+30 / 90 / 180
+50 / 150 / 250
+Price > MA200
+Dual MA
+Triple MA
+Long-Term Trend Only
+
+评估指标：
+
+CAGR
+Max Drawdown
+Sharpe
+Cash Utilization
+
+完成标准：
+
+确定最终市场过滤方案。
+
+OPT-005 Rebalance Frequency Optimization
+
+Status: Pending
+
+目标：
+
+优化调仓频率。
+
+当前：
+
+Daily Rebalance
+
+研究方向：
+
+Weekly
+Biweekly
+Monthly
+End-of-Month
+Signal Change Only
+
+评估指标：
+
+CAGR
+Sharpe
+Turnover
+Transaction Cost Impact
+
+完成标准：
+
+确定最佳调仓周期。
+
+OPT-006 Bear Market Defense
+
+Status: Pending
+
+目标：
+
+降低熊市和系统性风险期间的回撤。
+
+研究方向：
+
+Partial Cash
+Defensive ETF Basket
+Dynamic Risk-Off Allocation
+Market Regime Detection
+Drawdown Control Rules
+
+评估指标：
+
+Max Drawdown
+Calmar Ratio
+Recovery Time
+
+完成标准：
+
+建立熊市防御模块。
+
+OPT-007 Volatility Filter
+
+Status: Pending
+
+目标：
+
+避免高波动环境下的错误交易。
+
+研究方向：
+
+ATR Filter
+Historical Volatility
+Realized Volatility
+Volatility Percentile
+Volatility Regime Filter
+
+评估指标：
+
+Sharpe
+Sortino
+Max Drawdown
+
+完成标准：
+
+确定波动率过滤模块是否纳入正式版本。
+
+OPT-008 Cash Management Optimization
+
+Status: Pending
+
+目标：
+
+提升闲置资金收益率。
+
+当前：
+
+511880.SS
+
+研究方向：
+
+511880.SS
+511990.SS
+Cash ETF Rotation
+Dynamic Cash Allocation
+
+评估指标：
+
+CAGR
+Cash Yield
+Liquidity
+
+完成标准：
+
+确定现金管理方案。
+
+OPT-009 Walk-Forward Validation
+
+Status: Pending
+
+目标：
+
+验证优化结果是否具有样本外有效性。
+
+训练区间：
+
+2020-01 ~ 2023-12
+
+测试区间：
+
+2024-01 ~ 2026-12
+
+验证内容：
+
+Parameter Stability
+Robustness
+Overfitting Detection
+
+完成标准：
+
+所有优化项目通过样本外验证。
+
+OPT-010 Production Strategy V2
+
+Status: Pending
+
+目标：
+
+整合所有验证通过的优化成果。
+
+输出：
+
+china_etf_trend_strategy_v2.py
+
+包含：
+
+Final Ranking Model
+Final Position Sizing
+Final Portfolio Size
+Final Trend Filter
+Final Rebalance Logic
+Bear Defense Module
+Validated Risk Controls
+
+完成标准：
+
+生成可部署实盘版本V2。
+
+Completion Criteria
+
+Phase 10 完成条件：
+
+OPT-001 ~ OPT-008 完成研究与回测
+OPT-009 完成样本外验证
+OPT-010 完成V2整合
+
+最终交付：
+
+china_etf_trend_strategy_v2.py
+Phase10 Research Report
+Optimization Changelog
+Production Deployment Notes
 
 ## Development Notes
 
