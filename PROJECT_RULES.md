@@ -6,7 +6,7 @@ Single File Architecture
 
 所有代码最终必须存在于：
 
-china_etf_trend_strategy.py
+china_etf_trend_strategy_api.py
 
 禁止：
 
