@@ -105,6 +105,8 @@ HIGH_RISK_EXPOSURE = 0.90
 EXTREME_RISK_EXPOSURE = 0.75
 DEFENSIVE_EXPOSURE = 0.50
 REBALANCE_TOLERANCE = 0.01
+COMMISSION_BUFFER = 0.98
+MIN_ORDER_VALUE = 12000
 
 # Global Cache
 GLOBAL_CACHE = {}
@@ -656,99 +658,368 @@ def get_cash_weight(weights):
 # EXEC-001
 # Order Mapping Layer
 # =========================================================
+
+def get_positions_cached():
+    cache_key = "positions"
+
+    cached = cache_get(cache_key)
+
+    if cached is not None:
+        return cached
+
+    result = get_positions()
+
+    cache_set(cache_key, result)
+
+    return result
+
+
+def get_normalized_positions():
+    cache_key = "normalized_positions"
+
+    cached = cache_get(cache_key)
+
+    if cached is not None:
+        return cached
+
+    positions = get_positions_cached()
+
+    result = {
+        normalize_symbol(symbol): position
+        for symbol, position in positions.items()
+    }
+
+    cache_set(cache_key, result)
+
+    return result
+
+
 def lookup_position(symbol):
+
     positions = get_normalized_positions()
+
     return positions.get(symbol)
 
+
 def get_position_value(symbol):
+
     position = lookup_position(symbol)
+
     if position is None:
         return 0.0
+
     try:
-        return float(position.amount) * float(position.last_sale_price)
+        return (
+            float(position.amount)
+            * float(position.last_sale_price)
+        )
+
     except Exception as e:
-        log.info(f"GET_POSITION_VALUE_EXCEPTION={repr(e)}")
+
+        log.info(
+            f"GET_POSITION_VALUE_EXCEPTION={repr(e)}"
+        )
+
         return 0.0
 
-def order_target_percent(context, symbol, target_percent):
+
+def order_target_percent(
+    context,
+    symbol,
+    target_percent
+):
+
     try:
-        total_equity = float(context.portfolio.portfolio_value)
-        target_value = total_equity * target_percent
+
+        total_equity = float(
+            context.portfolio.portfolio_value
+        )
+
+        # EXEC-001
+        # 留出手续费和滑点缓冲
+        target_value = (
+            total_equity
+            * target_percent
+            * COMMISSION_BUFFER
+        )
+
         current_value = get_position_value(symbol)
-        delta_value = target_value - current_value
-        # Ignore tiny adjustments
-        if abs(delta_value) < total_equity * 0.005:
+
+        delta_value = (
+            target_value
+            - current_value
+        )
+
+        threshold = max(
+            total_equity * 0.005,
+            MIN_ORDER_VALUE
+        )
+
+        log.info(
+            f"ORDER_DEBUG "
+            f"{symbol} "
+            f"target={target_percent:.4f} "
+            f"current={current_value:.2f} "
+            f"target_value={target_value:.2f} "
+            f"delta={delta_value:.2f}"
+        )
+
+        if abs(delta_value) < threshold:
+
+            log.info(
+                f"ORDER_SKIPPED "
+                f"{symbol} "
+                f"delta={delta_value:.2f}"
+            )
+
             return None
-        return order_value(symbol, delta_value)
+
+        return order_value(
+            symbol,
+            delta_value
+        )
+
     except Exception as e:
-        log.info(f"ORDER_TARGET_PERCENT_EXCEPTION={repr(e)}")
+
+        log.info(
+            f"ORDER_TARGET_PERCENT_EXCEPTION={repr(e)}"
+        )
+
         return None
 
+
 # =========================================================
-# EXEC-002 Rebalance Engine
+# EXEC-002
+# Rebalance Engine
 # =========================================================
+
 def get_current_symbols():
+
     positions = get_positions_cached()
+
     if positions is None:
         return set()
-    return {normalize_symbol(symbol) for symbol in positions.keys()}
 
-def get_target_symbols(weights, cash_weight):
+    return {
+        normalize_symbol(symbol)
+        for symbol in positions.keys()
+    }
+
+
+def get_target_symbols(
+    weights,
+    cash_weight
+):
+
     symbols = set()
+
     for symbol, weight in weights.items():
+
         if weight > 0:
             symbols.add(symbol)
+
     if cash_weight > 0:
         symbols.add(CASH_ETF)
+
     return symbols
 
-def sell_removed_positions(context, target_symbols):
+
+def sell_removed_positions(
+    context,
+    target_symbols
+):
+
     current_symbols = get_current_symbols()
-    symbols_to_sell = current_symbols - target_symbols
+
+    symbols_to_sell = (
+        current_symbols
+        - target_symbols
+    )
+
+    log.info(
+        f"CURRENT={current_symbols}"
+    )
+
+    log.info(
+        f"TARGET={target_symbols}"
+    )
+
+    log.info(
+        f"REMOVE={symbols_to_sell}"
+    )
+
     for symbol in symbols_to_sell:
-        order_target_percent(context, symbol, 0.0)
+
+        log.info(
+            f"SELL_REMOVED {symbol}"
+        )
+
+        order_target_percent(
+            context,
+            symbol,
+            0.0
+        )
+
     return symbols_to_sell
 
-def get_current_weight(context, symbol):
-    total_equity = float(context.portfolio.portfolio_value)
+
+def get_current_weight(
+    context,
+    symbol
+):
+
+    total_equity = float(
+        context.portfolio.portfolio_value
+    )
+
     if total_equity <= 0:
         return 0.0
+
     value = get_position_value(symbol)
+
     return value / total_equity
 
-def rebalance_portfolio(context, weights, cash_weight):
+
+def rebalance_portfolio(
+    context,
+    weights,
+    cash_weight
+):
+
     target_weights = weights.copy()
+
     if cash_weight > 0:
+
         target_weights[CASH_ETF] = cash_weight
-    all_symbols = set(target_weights.keys())
+
+    all_symbols = set(
+        target_weights.keys()
+    )
+
     sell_orders = []
+
     buy_orders = []
+
     for symbol in sorted(all_symbols):
-        current_weight = get_current_weight(context, symbol)
-        target_weight = target_weights.get(symbol, 0.0)
-        difference = target_weight - current_weight
+
+        current_weight = get_current_weight(
+            context,
+            symbol
+        )
+
+        target_weight = (
+            target_weights.get(
+                symbol,
+                0.0
+            )
+        )
+
+        difference = (
+            target_weight
+            - current_weight
+        )
+
         if abs(difference) < REBALANCE_TOLERANCE:
             continue
+
         if difference < 0:
-            sell_orders.append((symbol, target_weight))
+
+            sell_orders.append(
+                (
+                    symbol,
+                    target_weight
+                )
+            )
+
         else:
-            buy_orders.append((symbol, target_weight))
+
+            buy_orders.append(
+                (
+                    symbol,
+                    target_weight
+                )
+            )
+
+    # ====================================
+    # Phase 1
+    # Sell First
+    # ====================================
+
     for symbol, target_weight in sell_orders:
-        order_target_percent(context, symbol, target_weight)
+
+        log.info(
+            f"SELL {symbol} "
+            f"target={target_weight:.4f}"
+        )
+
+        order_target_percent(
+            context,
+            symbol,
+            target_weight
+        )
+
+    # ====================================
+    # Phase 2
+    # Buy Second
+    # ====================================
+
     for symbol, target_weight in buy_orders:
-        order_target_percent(context, symbol, target_weight)
+
+        log.info(
+            f"BUY {symbol} "
+            f"target={target_weight:.4f}"
+        )
+
+        order_target_percent(
+            context,
+            symbol,
+            target_weight
+        )
+
     return True
 
+
 def rebalance(context):
+
     try:
-        risk_weights = get_risk_adjusted_weights()
-        cash_weight = get_cash_weight(risk_weights)
-        target_symbols = get_target_symbols(risk_weights, cash_weight)
-        sell_removed_positions(context, target_symbols)
-        rebalance_portfolio(context, risk_weights, cash_weight)
+
+        risk_weights = (
+            get_risk_adjusted_weights()
+        )
+
+        cash_weight = (
+            get_cash_weight(
+                risk_weights
+            )
+        )
+
+        target_symbols = (
+            get_target_symbols(
+                risk_weights,
+                cash_weight
+            )
+        )
+
+        sell_removed_positions(
+            context,
+            target_symbols
+        )
+
+        rebalance_portfolio(
+            context,
+            risk_weights,
+            cash_weight
+        )
+
         return True
+
     except Exception as e:
-        log.error("REBALANCE_EXCEPTION=" + repr(e))
+
+        log.error(
+            "REBALANCE_EXCEPTION="
+            + repr(e)
+        )
+
         return False
 
 # =========================================================
@@ -815,22 +1086,3 @@ def get_volume(symbol, count):
 
 def get_turnover(symbol, count):
     return _get_history_field(symbol, 'money', count)
-
-def get_positions_cached():
-    cache_key = "positions"
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
-    result = get_positions()
-    cache_set(cache_key, result)
-    return result
-
-def get_normalized_positions():
-    cache_key = "normalized_positions"
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
-    positions = get_positions_cached()
-    result = {normalize_symbol(symbol): position for symbol, position in positions.items()}
-    cache_set(cache_key, result)
-    return result
