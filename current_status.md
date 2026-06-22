@@ -1,78 +1,37 @@
-# current phase:
-    P0
+# Current Phase
 
-# current focus:
-    EXEC-005 Threshold Bug Fix
+P1-B Risk Budget Engine Audit
 
-Latest Result:
-发现执行层Bug：
+# Progress
 
-order_target_percent()
-中的threshold变量在卖单路径未定义。
+P0 Execution Layer
+100% Complete
 
-导致：
+P1 Exposure Reconstruction
+25% Complete
 
-- SELL_REMOVED全部失败
-- 仓位未更新
-- 后续BUY资金不足
+# Latest Finding
 
-Next Action:
-修复threshold逻辑后重新回测。
+Exposure Audit completed.
 
-# task_list:
+Average cash allocation:
 
-## P0
+80%+
 
-EXEC-001 Cash Check
-Status: Completed
+Average final exposure:
 
-EXEC-002 Commission Buffer
-Status: Completed
+20%
 
-EXEC-003 Sell First
-Status: Completed
+Primary suspects:
 
-实现：
+1. Risk Budget Engine
 
-- 卖单优先执行
-- 买单后执行
+2. Market Exposure Engine
 
-验证：
+Next Step
 
-- 长周期回测通过
-- 无资金不足
-- 无现金不足
+Review calc_risk_budget_usage()
 
-结论：
+Review portfolio volatility calculation
 
-无需升级为T+1调仓
-
-EXEC-004 Scaled Buy (Optional)
-Status: Cancelled
-Reason:
-
-EXEC-001~003 已解决执行层问题。
-回测未再出现资金不足、现金不足或0股委托。
-分批买入不再具备明确收益。
-
-EXEC-005 Threshold Bug Fix
-Status: Pending
-
-1. threshold bug修复
-
-2. 短回测
-2026-05-25 ~ 2026-06-30
-
-验证：
-- REMOVE仓位消失
-- CURRENT变化
-- TARGET达成
-- 无资金不足异常
-
-3. 长回测
-2024-01-01 ~ 2025-12-31
-
-验证：
-- 调仓正常
-- 现金ETF正常
-- 无执行层异常
+Determine whether risk scaling is structurally suppressing exposure.

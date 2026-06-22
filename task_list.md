@@ -1,76 +1,189 @@
-# P0 - 先修执行层	增加下单前现金检查、手续费缓冲和买单分批；必要时把卖出和买入拆成两个时点，避免同一轮内资金占用冲突。
+# P0 - Execution Layer Stabilization
+Status: Completed
 
-## EXEC-001 现金预检查（Cash Check）
+EXEC-001 Cash Check
+Status: Completed
+
+EXEC-002 Commission Buffer
+Status: Completed
+
+EXEC-003 Sell First
+Status: Completed
+
+EXEC-004 Scaled Buy
+Status: Completed
+
+EXEC-005 Threshold Bug Fix
+Status: Completed
+
+验证：
+
+✓ 长周期回测通过
+  (2024-06-01 ~ 2026-06-01)
+
+✓ REMOVE 成功清仓
+
+✓ 无 ORDER_TARGET_PERCENT_EXCEPTION
+
+✓ 无 UnboundLocalError
+
+✓ 持仓正确更新
+
+# P1 - Portfolio Exposure Reconstruction
+Status: In Progress
 
 目标：
 
-下单前先判断资金够不够。
+定位策略长期低收益原因。
 
-不要让order_value()去报错。
+当前两年回测：
 
+2024-06-01 ~ 2026-06-01
+
+累计收益：
+
+5.29%
+
+已完成：
+
+## P1-A Exposure Audit
 Status: Completed
 
-## EXEC-002 手续费缓冲（Commission Buffer）
+审计结果：
+
+AUDIT_DAYS=400
+
+AVG_CASH_WEIGHT=0.8000
+
+CASH_GT_50_PCT=71.25%
+
+CASH_GT_80_PCT=52.25%
+
+AVG_RISK_FACTOR=0.5019
+
+AVG_MARKET_FACTOR=0.3962
+
+AVG_FINAL_FACTOR=0.2000
+
+结论：
+
+策略长期处于过度防御状态。
+
+风险资产暴露通常仅为：
+
+10% ~ 20%
+
+现金仓长期占：
+
+80%+
+
+怀疑收益不足主要来自：
+
+Market Exposure Engine
++
+Risk Budget Engine
+
+## P1-B Risk Budget Engine Audit
+Status: Pending
 
 目标：
 
-避免理论仓位=实际仓位。
+验证 calc_risk_budget_usage()
 
-Status: Completed
+是否正确计算组合风险。
 
-## EXEC-003 卖出优先（Sell First）
-Status: Completed
+当前怀疑：
 
-## EXEC-004 分批买入（Scaled Buy）
-Status: Completed
+weighted_average_volatility()
 
-## EXEC-005 Threshold Bug Fix
+计算的是：
 
-目标：
+资产平均波动率
 
-修复order_target_percent()
+而不是：
 
-确保：
+组合实际波动率
 
-- SELL_REMOVED正常执行
-- SELL正常执行
-- BUY正常执行
-- 无UnboundLocalError
+可能导致：
+
+风险引擎长期误判为：
+
+DEFENSIVE_EXPOSURE
+
+验证内容：
+
+PORTFOLIO_VOL
+
+RISK_USAGE
+
+RISK_FACTOR
 
 完成标准：
 
-短区间回测中：
+确认风险预算逻辑是否存在结构性缺陷。
 
-无ORDER_TARGET_PERCENT_EXCEPTION
-
-REMOVE仓位成功消失
-
-CURRENT与TARGET能够收敛
-
+## P1-C Market Exposure Review
 Status: Pending
 
-# P1 - 重新定义现金仓	511880 仅作为防守停泊位，不参与和风险ETF同权的打分竞争；避免把现金仓做成高频交易标的。
-       降低换手	把日频调仓改成周频或“评分变化阈值触发”；增加仓位切换滞后，避免微小排名变化引发交易。
-为什么：
+目标：
 
-cash_weight
-经常是
+评估市场过滤器是否过于保守。
 
-50%
-60%
-甚至更高
+当前配置：
 
-我怀疑这才是导致策略收益只有 7.65% 的核心原因。
+50 / 100 / 200 MA
 
-从这段日志看，518880反复出现在 REMOVE 里是一个小问题；而长期 50%~60% 现金仓位，可能是收益不达预期的主要原因。下一步我会优先审查：
+市场指数：
 
-get_cash_weight()
+510300
+510500
+512100
 
-和
+暴露映射：
 
-get_risk_adjusted_weights()
+0 -> 0.00
+1 -> 0.50
+2 -> 0.80
+3 -> 1.00
 
-的实际输出逻辑。因为从日志看，策略很可能长期处于过度防御状态。
+审计结果：
+
+AVG_MARKET_FACTOR
+长期仅：
+
+0.04 ~ 0.40
+
+验证内容：
+
+Market Score 分布
+
+各 Score 出现频率
+
+长期平均暴露
+
+完成标准：
+
+确认市场过滤器是否过度压制仓位。
+
+## P1-D Cash Allocation Redesign
+Status: Pending
+
+目标：
+
+重新定义 511880 的角色。
+
+原则：
+
+511880 仅作为现金停泊位。
+
+不参与风险资产竞争。
+
+避免现金仓成为主要持仓。
+
+依赖：
+
+P1-B
+P1-C
 
 # P2 - 收缩资产池	优先保留宽基ETF和少数长期有效的赛道ETF；对长期净贡献为负的品种做样本外验证后再决定是否剔除。
        优化打分函数	降低“质量/流动性”在当前模型中的权重，加入趋势持续性、回撤惩罚或斜率稳定性，提升信号的可交易性。

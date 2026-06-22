@@ -1,6 +1,60 @@
 
 
-## 2026-06-21
+## 2026-06-22
+
+P0 Execution Layer officially completed.
+
+Completed:
+
+- EXEC-001 Cash Check
+- EXEC-002 Commission Buffer
+- EXEC-003 Sell First
+- EXEC-004 Scaled Buy
+- EXEC-005 Threshold Bug Fix
+
+Validated through long-term backtest:
+
+2024-06-01 ~ 2026-06-01
+
+No execution-layer failures observed.
+
+--------------------------------------------------
+
+Added Exposure Audit framework.
+
+New metrics:
+
+- AVG_CASH_WEIGHT
+- CASH_GT_50_PCT
+- CASH_GT_80_PCT
+- AVG_RISK_FACTOR
+- AVG_MARKET_FACTOR
+- AVG_FINAL_FACTOR
+
+Audit findings:
+
+- Average cash allocation >80%
+- Risk exposure typically 10%-20%
+- Market exposure heavily constrained
+- Risk factor remained near defensive level
+
+Conclusion:
+
+Low performance is no longer believed to be caused by execution issues.
+
+Focus shifted from execution layer to exposure layer.
+
+Next phase:
+
+P1-B Risk Budget Engine Audit
+
+[EXEC-005] Threshold Bug Fix
+
+- Fixed threshold scope bug in order_target_percent()
+- Threshold filtering now applies only to buy orders
+- Sell orders and REMOVE liquidation bypass threshold checks
+- Validated with REMOVE scenarios on 2024-07-22 and 2024-07-24
+- Passed full PTrade backtest (2024-06-01 ~ 2026-06-01)
 
 [EXEC-001]
 Added minimum order threshold.

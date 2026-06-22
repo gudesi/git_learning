@@ -1,4 +1,5 @@
 import math
+from functools import wraps
 
 # =========================================================
 # Strategy Configuration
@@ -110,7 +111,25 @@ COMMISSION_BUFFER = 0.98
 # Global Cache
 GLOBAL_CACHE = {}
 
-# Cache Utilities
+# Cache Decorator
+def cached(prefix):
+    """Decorator that caches function results in GLOBAL_CACHE.
+    For functions with arguments, the cache key is (prefix, *args).
+    For functions without arguments, the cache key is the prefix string itself.
+    """
+    def deco(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            key = (prefix,) + args if args else prefix
+            if key in GLOBAL_CACHE:
+                return GLOBAL_CACHE[key]
+            result = func(*args, **kwargs)
+            GLOBAL_CACHE[key] = result
+            return result
+        return wrapper
+    return deco
+
+# Cache Utilities (kept for compatibility, though no longer directly used)
 def clear_cache():
     GLOBAL_CACHE.clear()
 
@@ -132,13 +151,28 @@ MARKET_SCORE_STATS = {
 }
 
 # =========================================================
+# AUDIT Portfolio Exposure Audit
+# =========================================================
+
+AUDIT_DAYS = 0
+
+AUDIT_CASH_SUM = 0.0
+
+AUDIT_CASH_GT_50 = 0
+
+AUDIT_CASH_GT_80 = 0
+
+AUDIT_RISK_FACTOR_SUM = 0.0
+
+AUDIT_MARKET_FACTOR_SUM = 0.0
+
+AUDIT_FINAL_FACTOR_SUM = 0.0
+
+# =========================================================
 # IND-001 Return Calculation
 # =========================================================
+@cached("return")
 def calc_return(symbol, lookback):
-    cache_key = ("return", symbol, lookback)
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
     if lookback not in RETURN_WINDOWS:
         raise ValueError(f"Unsupported lookback: {lookback}")
     close = get_close(symbol, lookback + 1)
@@ -149,17 +183,13 @@ def calc_return(symbol, lookback):
     if start_price <= 0:
         return None
     result = end_price / start_price - 1.0
-    cache_set(cache_key, result)
     return result
 
 # =========================================================
 # IND-002 Volatility Calculation
 # =========================================================
+@cached("volatility")
 def calc_volatility(symbol, lookback=60):
-    cache_key = ("volatility", symbol, lookback)
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
     close = get_close(symbol, lookback + 1)
     if len(close) < lookback + 1:
         return None
@@ -169,19 +199,14 @@ def calc_volatility(symbol, lookback=60):
     mean_return = sum(returns) / len(returns)
     variance = sum((r - mean_return) ** 2 for r in returns) / (len(returns) - 1)
     result = math.sqrt(variance) * math.sqrt(252)
-    cache_set(cache_key, result)
     return result
 
 # =========================================================
 # IND-003 Momentum Score
 # =========================================================
+@cached("momentum_cross_section")
 def get_momentum_cross_section(lookback):
-    cache_key = ("momentum_cross_section", lookback)
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
     result = [calc_risk_adjusted_momentum(etf, lookback) for etf in RISK_ETFS]
-    cache_set(cache_key, result)
     return result
 
 def _percentile_rank(value, values):
@@ -194,18 +219,14 @@ def _percentile_rank(value, values):
     rank = sum(1 for v in valid_values if v <= value)
     return (rank - 1) / (len(valid_values) - 1)
 
+@cached("risk_adj_momentum")
 def calc_risk_adjusted_momentum(symbol, lookback):
-    cache_key = ("risk_adj_momentum", symbol, lookback)
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
     ret = calc_return(symbol, lookback)
     vol = calc_volatility(symbol, 60)
     if ret is None or vol is None or vol <= 0:
         result = None
     else:
         result = ret / vol
-    cache_set(cache_key, result)
     return result
 
 def calc_momentum_score(symbol):
@@ -222,20 +243,13 @@ def calc_momentum_score(symbol):
 # =========================================================
 # IND-004 Trend Quality Score
 # =========================================================
+@cached("quality_cross_section")
 def get_quality_cross_section():
-    cache_key = "quality_cross_section"
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
     result = [calc_trend_quality_raw(etf) for etf in RISK_ETFS]
-    cache_set(cache_key, result)
     return result
 
+@cached("trend_quality")
 def calc_trend_quality_raw(symbol, lookback=QUALITY_LOOKBACK):
-    cache_key = ("trend_quality", symbol, lookback)
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
     close = get_close(symbol, lookback)
     if len(close) < lookback:
         return None
@@ -257,7 +271,6 @@ def calc_trend_quality_raw(symbol, lookback=QUALITY_LOOKBACK):
     ss_residual = sum((log_prices[i] - (y_mean + slope*(x[i]-x_mean))) ** 2 for i in range(n))
     r_squared = 1.0 - ss_residual / ss_total
     result = slope * r_squared
-    cache_set(cache_key, result)
     return result
 
 def calc_quality_score(symbol):
@@ -268,27 +281,19 @@ def calc_quality_score(symbol):
 # =========================================================
 # IND-005 Liquidity Score
 # =========================================================
+@cached("liquidity_cross_section")
 def get_liquidity_cross_section():
-    cache_key = "liquidity_cross_section"
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
     result = [calc_adv60(etf) for etf in RISK_ETFS]
-    cache_set(cache_key, result)
     return result
 
+@cached("adv")
 def calc_adv60(symbol, lookback=LIQUIDITY_LOOKBACK):
-    cache_key = ("adv", symbol, lookback)
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
     turnover = get_turnover(symbol, lookback)
     if turnover is None:
         return None
     if len(turnover) < lookback:
         return None
     result = sum(turnover) / len(turnover)
-    cache_set(cache_key, result)
     return result
 
 def calc_liquidity_score(symbol):
@@ -309,11 +314,8 @@ def calc_true_range(high, low, prev_close):
     """
     return max(high - low, abs(high - prev_close), abs(low - prev_close))
 
+@cached("atr")
 def calc_atr(symbol, lookback=ATR_LOOKBACK):
-    cache_key = ("atr", symbol, lookback)
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
     high = get_high(symbol, lookback + 1)
     low = get_low(symbol, lookback + 1)
     close = get_close(symbol, lookback + 1)
@@ -323,7 +325,6 @@ def calc_atr(symbol, lookback=ATR_LOOKBACK):
     if len(tr_values) == 0:
         return None
     result = sum(tr_values) / len(tr_values)
-    cache_set(cache_key, result)
     return result
 
 def calc_atr_percent(symbol):
@@ -340,16 +341,12 @@ def calc_atr_percent(symbol):
 # =========================================================
 # FILTER-001 Market Breadth
 # =========================================================
+@cached("ma")
 def calc_ma(symbol, period):
-    cache_key = ("ma", symbol, period)
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
     close = get_close(symbol, period)
     if len(close) < period:
         return None
     result = sum(close) / float(period)
-    cache_set(cache_key, result)
     return result
 
 def is_bull_trend(symbol):
@@ -380,13 +377,9 @@ def calc_market_exposure():
         MARKET_SCORE_STATS[score] += 1
     return MARKET_EXPOSURE_MAP.get(score, 0.0)
 
+@cached("market_exposure")
 def get_market_exposure():
-    cache_key = "market_exposure"
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
     result = calc_market_exposure()
-    cache_set(cache_key, result)
     return result
 
 # =========================================================
@@ -400,11 +393,8 @@ def calc_final_score(symbol):
         return None
     return MOMENTUM_SCORE_WEIGHT * momentum_score + QUALITY_SCORE_WEIGHT * quality_score + LIQUIDITY_SCORE_WEIGHT * liquidity_score
 
+@cached("ranking_table")
 def build_ranking_table():
-    cache_key = "ranking_table"
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
     candidates = []
     for symbol in RISK_ETFS:
         score = calc_final_score(symbol)
@@ -412,7 +402,6 @@ def build_ranking_table():
             continue
         candidates.append((symbol, score))
     candidates.sort(key=lambda x: x[1], reverse=True)
-    cache_set(cache_key, candidates)
     return candidates
 
 # =========================================================
@@ -535,13 +524,9 @@ def calc_target_weights():
     weights = apply_position_constraints(weights)
     return weights
 
+@cached("target_weights")
 def get_target_weights():
-    cache_key = "target_weights"
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
     result = calc_target_weights()
-    cache_set(cache_key, result)
     return result
 
 # =========================================================
@@ -637,13 +622,9 @@ def calc_risk_adjusted_weights():
     adjusted = {symbol: weight * final_factor for symbol, weight in weights.items()}
     return adjusted
 
+@cached("risk_adjusted_weights")
 def get_risk_adjusted_weights():
-    cache_key = "risk_adjusted_weights"
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
     result = calc_risk_adjusted_weights()
-    cache_set(cache_key, result)
     return result
 
 def get_cash_weight(weights):
@@ -658,67 +639,37 @@ def get_cash_weight(weights):
 # Order Mapping Layer
 # =========================================================
 
+@cached("positions")
 def get_positions_cached():
-    cache_key = "positions"
-
-    cached = cache_get(cache_key)
-
-    if cached is not None:
-        return cached
-
     result = get_positions()
-
-    cache_set(cache_key, result)
-
     return result
 
-
+@cached("normalized_positions")
 def get_normalized_positions():
-    cache_key = "normalized_positions"
-
-    cached = cache_get(cache_key)
-
-    if cached is not None:
-        return cached
-
     positions = get_positions_cached()
-
     result = {
         normalize_symbol(symbol): position
         for symbol, position in positions.items()
     }
-
-    cache_set(cache_key, result)
-
     return result
 
-
 def lookup_position(symbol):
-
     positions = get_normalized_positions()
-
     return positions.get(symbol)
 
-
 def get_position_value(symbol):
-
     position = lookup_position(symbol)
-
     if position is None:
         return 0.0
-
     try:
         return (
             float(position.amount)
             * float(position.last_sale_price)
         )
-
     except Exception as e:
-
         log.info(
             f"GET_POSITION_VALUE_EXCEPTION={repr(e)}"
         )
-
         return 0.0
 
 def order_target_percent(
@@ -726,13 +677,10 @@ def order_target_percent(
     symbol,
     target_percent
 ):
-
     try:
-
         total_equity = float(
             context.portfolio.portfolio_value
         )
-
         # EXEC-001
         # 留出手续费和滑点缓冲
         target_value = (
@@ -740,14 +688,11 @@ def order_target_percent(
             * target_percent
             * COMMISSION_BUFFER
         )
-
         current_value = get_position_value(symbol)
-
         delta_value = (
             target_value
             - current_value
         )
-
         log.info(
             f"ORDER_DEBUG "
             f"{symbol} "
@@ -756,46 +701,33 @@ def order_target_percent(
             f"target_value={target_value:.2f} "
             f"delta={delta_value:.2f}"
         )
-
         # EXEC-001
         # 仅过滤买入小单
         if delta_value > 0:
-
             if symbol == CASH_ETF:
-
                 threshold = max(
                     total_equity * 0.005,
                     12000
                 )
-
             else:
-
                 threshold = 1000
-
             if delta_value < threshold:
-
                 log.info(
                     f"ORDER_SKIPPED "
                     f"{symbol} "
                     f"delta={delta_value:.2f} "
                     f"threshold={threshold:.2f}"
                 )
-
                 return None
-
         return order_value(
             symbol,
             delta_value
         )
-
     except Exception as e:
-
         log.info(
             f"ORDER_TARGET_PERCENT_EXCEPTION={repr(e)}"
         )
-
         return None
-
 
 # =========================================================
 # EXEC-002
@@ -803,232 +735,172 @@ def order_target_percent(
 # =========================================================
 
 def get_current_symbols():
-
     positions = get_positions_cached()
-
     if positions is None:
         return set()
-
     return {
         normalize_symbol(symbol)
         for symbol in positions.keys()
     }
 
-
 def get_target_symbols(
     weights,
     cash_weight
 ):
-
     symbols = set()
-
     for symbol, weight in weights.items():
-
         if weight > 0:
             symbols.add(symbol)
-
     if cash_weight > 0:
         symbols.add(CASH_ETF)
-
     return symbols
-
 
 def sell_removed_positions(
     context,
     target_symbols
 ):
-
     current_symbols = get_current_symbols()
-
     symbols_to_sell = (
         current_symbols
         - target_symbols
     )
-
     log.info(
         f"CURRENT={current_symbols}"
     )
-
     log.info(
         f"TARGET={target_symbols}"
     )
-
     log.info(
         f"REMOVE={symbols_to_sell}"
     )
-
     for symbol in symbols_to_sell:
-
         log.info(
             f"SELL_REMOVED {symbol}"
         )
-
         order_target_percent(
             context,
             symbol,
             0.0
         )
-
     return symbols_to_sell
-
 
 def get_current_weight(
     context,
     symbol
 ):
-
     total_equity = float(
         context.portfolio.portfolio_value
     )
-
     if total_equity <= 0:
         return 0.0
-
     value = get_position_value(symbol)
-
     return value / total_equity
-
 
 def rebalance_portfolio(
     context,
     weights,
     cash_weight
 ):
-
     target_weights = weights.copy()
-
     if cash_weight > 0:
-
         target_weights[CASH_ETF] = cash_weight
-
     all_symbols = set(
         target_weights.keys()
     )
-
     sell_orders = []
-
     buy_orders = []
-
     for symbol in sorted(all_symbols):
-
         current_weight = get_current_weight(
             context,
             symbol
         )
-
         target_weight = (
             target_weights.get(
                 symbol,
                 0.0
             )
         )
-
         difference = (
             target_weight
             - current_weight
         )
-
         if abs(difference) < REBALANCE_TOLERANCE:
             continue
-
         if difference < 0:
-
             sell_orders.append(
                 (
                     symbol,
                     target_weight
                 )
             )
-
         else:
-
             buy_orders.append(
                 (
                     symbol,
                     target_weight
                 )
             )
-
     # ====================================
     # Phase 1
     # Sell First
     # ====================================
-
     for symbol, target_weight in sell_orders:
-
         log.info(
             f"SELL {symbol} "
             f"target={target_weight:.4f}"
         )
-
         order_target_percent(
             context,
             symbol,
             target_weight
         )
-
     # ====================================
     # Phase 2
     # Buy Second
     # ====================================
-
     for symbol, target_weight in buy_orders:
-
         log.info(
             f"BUY {symbol} "
             f"target={target_weight:.4f}"
         )
-
         order_target_percent(
             context,
             symbol,
             target_weight
         )
-
     return True
 
-
 def rebalance(context):
-
     try:
-
         risk_weights = (
             get_risk_adjusted_weights()
         )
-
         cash_weight = (
             get_cash_weight(
                 risk_weights
             )
         )
-
         target_symbols = (
             get_target_symbols(
                 risk_weights,
                 cash_weight
             )
         )
-
         sell_removed_positions(
             context,
             target_symbols
         )
-
         rebalance_portfolio(
             context,
             risk_weights,
             cash_weight
         )
-
         return True
-
     except Exception as e:
-
         log.error(
             "REBALANCE_EXCEPTION="
             + repr(e)
         )
-
         return False
 
 # =========================================================
@@ -1044,38 +916,36 @@ def before_trading_start(context, data):
 def after_trading_end(context, data):
     log.info("LIFECYCLE after_trading_end")
 
+    if AUDIT_DAYS % 100 == 0:
+        print_audit_summary()
+
 def strategy_main(context):
     log.info("LIFECYCLE strategy_main")
     clear_cache()
+
+    audit_portfolio_state()
+    
     rebalance(context)
     return True
 
+@cached("history")
 def _get_history_field(symbol, field, count):
-    cache_key = ("history", symbol, field, count)
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return cached
     try:
         data = get_history(count, '1d', field, symbol, fq='post', include=False)
         if data is None:
             result = []
-            cache_set(cache_key, result)
             return result
         if hasattr(data, "values") and hasattr(data, "columns"):
             if field in data.columns:
                 result = list(data[field].values)
-                cache_set(cache_key, result)
                 return result
             if len(data.columns) == 1:
                 result = list(data.iloc[:, 0].values)
-                cache_set(cache_key, result)
                 return result
         if hasattr(data, "tolist"):
             result = data.tolist()
-            cache_set(cache_key, result)
             return result
         result = list(data)
-        cache_set(cache_key, result)
         return result
     except Exception as e:
         log.error(f"GET_HISTORY_FAILED symbol={symbol} field={field} count={count} error={repr(e)}")
@@ -1095,3 +965,141 @@ def get_volume(symbol, count):
 
 def get_turnover(symbol, count):
     return _get_history_field(symbol, 'money', count)
+
+# =========================================================
+# DEBUG Portfolio Audit
+# =========================================================
+
+# =========================================================
+# AUDIT Portfolio Exposure Audit
+# =========================================================
+
+def audit_portfolio_state():
+
+    global AUDIT_DAYS
+
+    global AUDIT_CASH_SUM
+
+    global AUDIT_CASH_GT_50
+
+    global AUDIT_CASH_GT_80
+
+    global AUDIT_RISK_FACTOR_SUM
+
+    global AUDIT_MARKET_FACTOR_SUM
+
+    global AUDIT_FINAL_FACTOR_SUM
+
+    try:
+
+        risk_factor = get_risk_scaling_factor()
+
+        market_factor = get_market_exposure()
+
+        final_factor = (
+            risk_factor
+            * market_factor
+        )
+
+        adjusted_weights = (
+            get_risk_adjusted_weights()
+        )
+
+        cash_weight = get_cash_weight(
+            adjusted_weights
+        )
+
+        AUDIT_DAYS += 1
+
+        AUDIT_CASH_SUM += cash_weight
+
+        AUDIT_RISK_FACTOR_SUM += risk_factor
+
+        AUDIT_MARKET_FACTOR_SUM += market_factor
+
+        AUDIT_FINAL_FACTOR_SUM += final_factor
+
+        if cash_weight > 0.50:
+            AUDIT_CASH_GT_50 += 1
+
+        if cash_weight > 0.80:
+            AUDIT_CASH_GT_80 += 1
+
+    except Exception as e:
+
+        log.info(
+            f"AUDIT_EXCEPTION={repr(e)}"
+        )
+
+def print_audit_summary():
+
+    if AUDIT_DAYS <= 0:
+        return
+
+    avg_cash = (
+        AUDIT_CASH_SUM
+        / AUDIT_DAYS
+    )
+
+    avg_risk_factor = (
+        AUDIT_RISK_FACTOR_SUM
+        / AUDIT_DAYS
+    )
+
+    avg_market_factor = (
+        AUDIT_MARKET_FACTOR_SUM
+        / AUDIT_DAYS
+    )
+
+    avg_final_factor = (
+        AUDIT_FINAL_FACTOR_SUM
+        / AUDIT_DAYS
+    )
+
+    pct_cash_gt_50 = (
+        AUDIT_CASH_GT_50
+        / AUDIT_DAYS
+        * 100
+    )
+
+    pct_cash_gt_80 = (
+        AUDIT_CASH_GT_80
+        / AUDIT_DAYS
+        * 100
+    )
+
+    log.info(
+        "========== AUDIT SUMMARY =========="
+    )
+
+    log.info(
+        f"AUDIT_DAYS={AUDIT_DAYS}"
+    )
+
+    log.info(
+        f"AVG_CASH_WEIGHT={avg_cash:.4f}"
+    )
+
+    log.info(
+        f"CASH_GT_50_PCT={pct_cash_gt_50:.2f}"
+    )
+
+    log.info(
+        f"CASH_GT_80_PCT={pct_cash_gt_80:.2f}"
+    )
+
+    log.info(
+        f"AVG_RISK_FACTOR={avg_risk_factor:.4f}"
+    )
+
+    log.info(
+        f"AVG_MARKET_FACTOR={avg_market_factor:.4f}"
+    )
+
+    log.info(
+        f"AVG_FINAL_FACTOR={avg_final_factor:.4f}"
+    )
+
+    log.info(
+        "==================================="
+    )
