@@ -106,7 +106,6 @@ EXTREME_RISK_EXPOSURE = 0.75
 DEFENSIVE_EXPOSURE = 0.50
 REBALANCE_TOLERANCE = 0.01
 COMMISSION_BUFFER = 0.98
-MIN_ORDER_VALUE = 12000
 
 # Global Cache
 GLOBAL_CACHE = {}
@@ -722,7 +721,6 @@ def get_position_value(symbol):
 
         return 0.0
 
-
 def order_target_percent(
     context,
     symbol,
@@ -750,11 +748,6 @@ def order_target_percent(
             - current_value
         )
 
-        threshold = max(
-            total_equity * 0.005,
-            MIN_ORDER_VALUE
-        )
-
         log.info(
             f"ORDER_DEBUG "
             f"{symbol} "
@@ -764,15 +757,31 @@ def order_target_percent(
             f"delta={delta_value:.2f}"
         )
 
-        if abs(delta_value) < threshold:
+        # EXEC-001
+        # 仅过滤买入小单
+        if delta_value > 0:
 
-            log.info(
-                f"ORDER_SKIPPED "
-                f"{symbol} "
-                f"delta={delta_value:.2f}"
-            )
+            if symbol == CASH_ETF:
 
-            return None
+                threshold = max(
+                    total_equity * 0.005,
+                    12000
+                )
+
+            else:
+
+                threshold = 1000
+
+            if delta_value < threshold:
+
+                log.info(
+                    f"ORDER_SKIPPED "
+                    f"{symbol} "
+                    f"delta={delta_value:.2f} "
+                    f"threshold={threshold:.2f}"
+                )
+
+                return None
 
         return order_value(
             symbol,

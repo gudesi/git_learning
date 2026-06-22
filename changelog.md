@@ -1,4 +1,22 @@
-# 2026-06-21
+
+
+## 2026-06-21
+
+[EXEC-001]
+Added minimum order threshold.
+
+- Introduced MIN_ORDER_VALUE = 12000
+- Reduced zero-share ETF orders
+- Reduced order spam warnings
+
+Status:
+Partially successful
+
+Known Issue:
+threshold variable causes
+UnboundLocalError during sell orders.
+
+Requires fix before MIG-006 completion.
 
 ## 2026-06-21
 

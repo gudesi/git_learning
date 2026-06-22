@@ -24,6 +24,31 @@ Status: Completed
 ## EXEC-004 分批买入（Scaled Buy）
 Status: Completed
 
+## EXEC-005 Threshold Bug Fix
+
+目标：
+
+修复order_target_percent()
+
+确保：
+
+- SELL_REMOVED正常执行
+- SELL正常执行
+- BUY正常执行
+- 无UnboundLocalError
+
+完成标准：
+
+短区间回测中：
+
+无ORDER_TARGET_PERCENT_EXCEPTION
+
+REMOVE仓位成功消失
+
+CURRENT与TARGET能够收敛
+
+Status: Pending
+
 # P1 - 重新定义现金仓	511880 仅作为防守停泊位，不参与和风险ETF同权的打分竞争；避免把现金仓做成高频交易标的。
        降低换手	把日频调仓改成周频或“评分变化阈值触发”；增加仓位切换滞后，避免微小排名变化引发交易。
 为什么：
