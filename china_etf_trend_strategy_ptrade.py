@@ -95,7 +95,7 @@ QUALITY_SCORE_WEIGHT = 0.20
 LIQUIDITY_SCORE_WEIGHT = 0.10
 MAX_PORTFOLIO_SIZE = 5
 RANKING_TREND_MA = 200
-TARGET_PORTFOLIO_RISK = 0.10
+TARGET_PORTFOLIO_RISK = 0.15
 MAX_SINGLE_POSITION_WEIGHT = 0.25
 MIN_SINGLE_POSITION_WEIGHT = 0.05
 LOW_RISK_THRESHOLD = 0.80
@@ -167,6 +167,12 @@ AUDIT_RISK_FACTOR_SUM = 0.0
 AUDIT_MARKET_FACTOR_SUM = 0.0
 
 AUDIT_FINAL_FACTOR_SUM = 0.0
+
+AUDIT_VOL_SUM = 0.0
+AUDIT_USAGE_SUM = 0.0
+
+AUDIT_VOL_COUNT = 0
+AUDIT_USAGE_COUNT = 0
 
 # =========================================================
 # IND-001 Return Calculation
@@ -372,10 +378,13 @@ def calc_market_score():
 # FILTER-002 Market Exposure
 # =========================================================
 def calc_market_exposure():
-    score = calc_market_score()
-    if score in MARKET_SCORE_STATS:
-        MARKET_SCORE_STATS[score] += 1
-    return MARKET_EXPOSURE_MAP.get(score, 0.0)
+    return 1.0
+
+# def calc_market_exposure():
+#     score = calc_market_score()
+#     if score in MARKET_SCORE_STATS:
+#         MARKET_SCORE_STATS[score] += 1
+#     return MARKET_EXPOSURE_MAP.get(score, 0.0)
 
 @cached("market_exposure")
 def get_market_exposure():
@@ -990,6 +999,14 @@ def audit_portfolio_state():
 
     global AUDIT_FINAL_FACTOR_SUM
 
+    global AUDIT_VOL_SUM
+
+    global AUDIT_USAGE_SUM
+
+    global AUDIT_VOL_COUNT
+
+    global AUDIT_USAGE_COUNT
+
     try:
 
         risk_factor = get_risk_scaling_factor()
@@ -1024,6 +1041,22 @@ def audit_portfolio_state():
 
         if cash_weight > 0.80:
             AUDIT_CASH_GT_80 += 1
+
+        portfolio_vol = (
+            calc_weighted_average_volatility()
+        )
+
+        usage = (
+            calc_risk_budget_usage()
+        )
+
+        if portfolio_vol is not None:
+            AUDIT_VOL_SUM += portfolio_vol
+            AUDIT_VOL_COUNT += 1
+
+        if usage is not None:
+            AUDIT_USAGE_SUM += usage
+            AUDIT_USAGE_COUNT += 1
 
     except Exception as e:
 
@@ -1102,4 +1135,26 @@ def print_audit_summary():
 
     log.info(
         "==================================="
+    )
+
+    avg_vol = (
+        AUDIT_VOL_SUM
+        / AUDIT_VOL_COUNT
+        if AUDIT_VOL_COUNT > 0
+        else 0
+    )
+
+    avg_usage = (
+        AUDIT_USAGE_SUM
+        / AUDIT_USAGE_COUNT
+        if AUDIT_USAGE_COUNT > 0
+        else 0
+    )
+
+    log.info(
+        f"AVG_PORTFOLIO_VOL={avg_vol:.4f}"
+    )
+
+    log.info(
+        f"AVG_RISK_USAGE={avg_usage:.4f}"
     )

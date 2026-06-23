@@ -1,4 +1,5 @@
 # P0 - Execution Layer Stabilization
+
 Status: Completed
 
 EXEC-001 Cash Check
@@ -16,40 +17,42 @@ Status: Completed
 EXEC-005 Threshold Bug Fix
 Status: Completed
 
-验证：
+Validation:
 
-✓ 长周期回测通过
-  (2024-06-01 ~ 2026-06-01)
+✓ Long-term backtest passed
+(2024-06-01 ~ 2026-06-01)
 
-✓ REMOVE 成功清仓
+✓ REMOVE successfully liquidates positions
 
-✓ 无 ORDER_TARGET_PERCENT_EXCEPTION
+✓ No ORDER_TARGET_PERCENT_EXCEPTION
 
-✓ 无 UnboundLocalError
+✓ No UnboundLocalError
 
-✓ 持仓正确更新
+✓ Positions update correctly
+
+---
 
 # P1 - Portfolio Exposure Reconstruction
-Status: In Progress
 
-目标：
-
-定位策略长期低收益原因。
-
-当前两年回测：
-
-2024-06-01 ~ 2026-06-01
-
-累计收益：
-
-5.29%
-
-已完成：
-
-## P1-A Exposure Audit
 Status: Completed
 
-审计结果：
+Goal:
+
+Identify root cause of chronic underperformance.
+
+Original Backtest
+(2024-06-01 ~ 2026-06-01)
+
+Return:
+5.29%
+
+---
+
+## P1-A Exposure Audit
+
+Status: Completed
+
+Audit Summary:
 
 AUDIT_DAYS=400
 
@@ -65,128 +68,262 @@ AVG_MARKET_FACTOR=0.3962
 
 AVG_FINAL_FACTOR=0.2000
 
-结论：
+Conclusion:
 
-策略长期处于过度防御状态。
+Strategy remained in a highly defensive state.
 
-风险资产暴露通常仅为：
+Average risk exposure was only 20%.
 
-10% ~ 20%
+Cash allocation averaged 80%.
 
-现金仓长期占：
-
-80%+
-
-怀疑收益不足主要来自：
-
-Market Exposure Engine
-+
-Risk Budget Engine
+---
 
 ## P1-B Risk Budget Engine Audit
-Status: Pending
 
-目标：
+Status: Completed
 
-验证 calc_risk_budget_usage()
+Findings:
 
-是否正确计算组合风险。
+1. Portfolio volatility uses weighted-average volatility rather than true covariance-based portfolio volatility.
 
-当前怀疑：
+2. TARGET_PORTFOLIO_RISK=10% was likely too conservative.
 
-weighted_average_volatility()
+3. Risk Budget Engine reduced exposure materially.
 
-计算的是：
+4. Market Exposure Engine remained the dominant source of underexposure.
 
-资产平均波动率
-
-而不是：
-
-组合实际波动率
-
-可能导致：
-
-风险引擎长期误判为：
-
-DEFENSIVE_EXPOSURE
-
-验证内容：
-
-PORTFOLIO_VOL
-
-RISK_USAGE
-
-RISK_FACTOR
-
-完成标准：
-
-确认风险预算逻辑是否存在结构性缺陷。
+---
 
 ## P1-C Market Exposure Review
+
+Status: Completed
+
+Findings:
+
+1. AVG_MARKET_FACTOR=0.3962
+
+2. Market Exposure Engine was the primary source of chronic underexposure.
+
+3. MA50 > MA100 > MA200 trend definition was excessively strict.
+
+4. Trend filtering existed at both market level and ETF level.
+
+---
+
+## P1-D Market Filter Redesign
+
+Status: Completed
+
+Backtest Validation:
+
+Replace:
+
+def calc_market_exposure()
+
+with:
+
+return 1.0
+
+Result:
+
+Annual Return:
+2.70% -> 10.13%
+
+Sharpe:
+-0.17 -> 0.55
+
+Max Drawdown:
+5.28% -> 8.79%
+
+Conclusion:
+
+Market Exposure Engine duplicated ETF trend filtering and significantly reduced performance.
+
+Decision:
+
+Remove Market Exposure Engine.
+
+Final Implementation:
+
+def calc_market_exposure():
+return 1.0
+
+---
+
+## P1-E Risk Budget Engine Review
+
+Status: Completed
+
+Sensitivity Test:
+
+Target Risk = 10%
+
+Annual Return:
+10.13%
+
+Sharpe:
+0.55
+
+Max DD:
+8.79%
+
+---
+
+Target Risk = 15%
+
+Annual Return:
+13.65%
+
+Sharpe:
+0.79
+
+Max DD:
+8.82%
+
+---
+
+Target Risk = 20%
+
+Annual Return:
+13.61%
+
+Sharpe:
+0.70
+
+Max DD:
+9.75%
+
+Conclusion:
+
+TARGET_PORTFOLIO_RISK=10%
+is too conservative.
+
+TARGET_PORTFOLIO_RISK=15%
+provides the best risk-adjusted performance.
+
+Increasing target risk beyond 15%
+does not improve returns and increases drawdown.
+
+Decision:
+
+TARGET_PORTFOLIO_RISK = 0.15
+
+---
+
+P1 Final Result
+
+Original Strategy:
+
+Annual Return:
+2.70%
+
+Sharpe:
+-0.17
+
+Max DD:
+5.28%
+
+---
+
+After P1 Reconstruction:
+
+Annual Return:
+13.65%
+
+Sharpe:
+0.79
+
+Max DD:
+8.82%
+
+Conclusion:
+
+The primary cause of underperformance was excessive exposure suppression.
+
+P1 successfully resolved the exposure bottleneck.
+
+---
+
+# P2 - ETF Selection Audit
+
+Status: Ready
+
+Goal:
+
+Identify ETFs that consistently destroy alpha.
+
+Focus:
+
+1. Per-ETF contribution analysis
+
+2. Win/loss distribution analysis
+
+3. Negative expectancy ETF identification
+
+4. Out-of-sample validation before removal
+
+Candidate ETFs requiring review:
+
+588000.XSHG
+
+512660.XSHG
+
+159915.XSHE
+
+515220.XSHG
+
+Expected Outcome:
+
+Reduce asset universe.
+
+Improve signal quality.
+
+Improve portfolio expectancy.
+
+---
+
+# P3 - Ranking Engine Enhancement
+
 Status: Pending
 
-目标：
+Goal:
 
-评估市场过滤器是否过于保守。
+Improve ranking quality.
 
-当前配置：
+Potential Work:
 
-50 / 100 / 200 MA
+* Reduce Quality Score weight
 
-市场指数：
+* Reduce Liquidity Score weight
 
-510300
-510500
-512100
+* Add trend persistence
 
-暴露映射：
+* Add drawdown penalty
 
-0 -> 0.00
-1 -> 0.50
-2 -> 0.80
-3 -> 1.00
+* Add slope stability factor
 
-审计结果：
+* Recalibrate ranking weights
 
-AVG_MARKET_FACTOR
-长期仅：
+---
 
-0.04 ~ 0.40
+# P4 - Walk-Forward Validation
 
-验证内容：
-
-Market Score 分布
-
-各 Score 出现频率
-
-长期平均暴露
-
-完成标准：
-
-确认市场过滤器是否过度压制仓位。
-
-## P1-D Cash Allocation Redesign
 Status: Pending
 
-目标：
+Goal:
 
-重新定义 511880 的角色。
+Perform rolling out-of-sample validation.
 
-原则：
+Tasks:
 
-511880 仅作为现金停泊位。
+* Rolling optimization
 
-不参与风险资产竞争。
+* Walk-forward testing
 
-避免现金仓成为主要持仓。
+* Parameter stability analysis
 
-依赖：
+* Robustness verification
 
-P1-B
-P1-C
+Success Criteria:
 
-# P2 - 收缩资产池	优先保留宽基ETF和少数长期有效的赛道ETF；对长期净贡献为负的品种做样本外验证后再决定是否剔除。
-       优化打分函数	降低“质量/流动性”在当前模型中的权重，加入趋势持续性、回撤惩罚或斜率稳定性，提升信号的可交易性。
-# P3 - 做 walk-forward	用滚动窗口重新训练/验证权重，不要依赖整段样本的固定参数直接外推到未来。
-
-最重要的判断：这不是一个“再调一点参数就能从 7.65% 变成 15%”的问题。它更像是一个需要先修执行、再收缩资产池、最后重做信号工程的系统性重构问题。
+Strategy remains profitable across unseen periods without parameter re-tuning.

@@ -1,37 +1,74 @@
 # Current Phase
 
+P2 - ETF Selection Audit
+
+Status:
+Ready to Start
+
+---
+
+Completed
+
+P0 - Execution Layer Stabilization
+
+P1-A Exposure Audit
+
 P1-B Risk Budget Engine Audit
 
-# Progress
+P1-C Market Exposure Review
 
-P0 Execution Layer
-100% Complete
+P1-D Market Filter Redesign
 
-P1 Exposure Reconstruction
-25% Complete
+P1-E Risk Budget Engine Review
 
-# Latest Finding
+---
 
-Exposure Audit completed.
+Validated Decisions
 
-Average cash allocation:
+1.
 
-80%+
+Remove Market Exposure Engine
 
-Average final exposure:
+Current:
 
-20%
+def calc_market_exposure():
+return 1.0
 
-Primary suspects:
+2.
 
-1. Risk Budget Engine
+TARGET_PORTFOLIO_RISK = 0.15
 
-2. Market Exposure Engine
+3.
 
-Next Step
+Keep Risk Budget Engine
 
-Review calc_risk_budget_usage()
+4.
 
-Review portfolio volatility calculation
+Keep ETF MA200 Trend Filter
 
-Determine whether risk scaling is structurally suppressing exposure.
+---
+
+Current Best Backtest
+
+Period:
+
+2024-06-01 ~ 2026-06-01
+
+Annual Return:
+13.65%
+
+Sharpe:
+0.79
+
+Max Drawdown:
+8.82%
+
+---
+
+Next Task
+
+P2 - ETF Selection Audit
+
+Objective:
+
+Determine which ETFs create positive expectancy and which ETFs consistently reduce portfolio performance.

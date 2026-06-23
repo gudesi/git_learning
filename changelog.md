@@ -1,8 +1,56 @@
+# 2026-06-22
+
+## Version: P1 Exposure Reconstruction Complete
+
+### Added
+
+* Exposure audit framework
+* Risk budget audit metrics
+* Market exposure audit metrics
+* Portfolio exposure summary reporting
+
+### Changed
+
+* Removed Market Exposure Engine
+* calc_market_exposure() now returns 1.0
+* TARGET_PORTFOLIO_RISK increased from 0.10 to 0.15
+
+### Validated
+
+Backtest Period:
+
+2024-06-01 ~ 2026-06-01
+
+Performance:
+
+Annual Return:
+2.70% -> 13.65%
+
+Sharpe:
+-0.17 -> 0.79
+
+Max Drawdown:
+5.28% -> 8.82%
+
+### Conclusion
+
+P1 completed successfully.
+
+Root cause of chronic underperformance was excessive exposure suppression caused by:
+
+* Market Exposure Engine
+* Overly conservative Risk Budget target
+
+Exposure bottleneck resolved.
+
+Next phase:
+
+P2 ETF Selection Audit.
 
 
-## 2026-06-22
+# 2026-06-22
 
-P0 Execution Layer officially completed.
+## P0 Execution Layer officially completed.
 
 Completed:
 
@@ -72,9 +120,9 @@ UnboundLocalError during sell orders.
 
 Requires fix before MIG-006 completion.
 
-## 2026-06-21
+# 2026-06-21
 
-### MIG-006 Completed
+## MIG-006 Completed
 
 完成PTrade长周期回测验证。
 
@@ -98,7 +146,7 @@ PASS
 
 ---
 
-### EXEC-001 Cash Management Fix
+## EXEC-001 Cash Management Fix
 
 问题：
 
@@ -117,7 +165,7 @@ PASS
 
 ---
 
-### EXEC-002 Diagnostics Logging
+## EXEC-002 Diagnostics Logging
 
 新增：
 
@@ -132,7 +180,7 @@ PASS
 
 ---
 
-### Project Milestone
+## Project Milestone
 项目进入：
 
  P0 - 先修执行层
