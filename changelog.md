@@ -1,3 +1,52 @@
+## 2026-06-24
+
+## P2 ETF Selection Audit Completed
+
+Analysis:
+
+Performed ETF-level attribution analysis using:
+
+* Trade history
+* Position history
+* Removal simulations
+
+Universe Changes:
+
+Removed:
+
+* 588000.SS (STAR 50 ETF)
+
+Rationale:
+
+Attribution Analysis:
+
+* Negative contribution
+* Low win rate
+* Poor profit/loss ratio
+
+Removal Simulation:
+
+* Annualized return improved:
+  13.72% -> 15.58%
+
+* Sharpe improved:
+  0.80 -> 0.96
+
+* Excess return improved:
+  -6.06% -> -1.98%
+
+* Maximum drawdown unchanged
+
+Retained After Review:
+
+* 512660.SS
+* 512800.SS
+
+Final Decision:
+
+Remove 588000.SS from ETF universe.
+
+
 # 2026-06-22
 
 ## Version: P1 Exposure Reconstruction Complete

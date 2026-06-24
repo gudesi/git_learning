@@ -243,44 +243,89 @@ The primary cause of underperformance was excessive exposure suppression.
 P1 successfully resolved the exposure bottleneck.
 
 ---
-
 # P2 - ETF Selection Audit
 
-Status: Ready
+Status: Completed
 
-Goal:
+Objective:
 
-Identify ETFs that consistently destroy alpha.
+Identify ETFs with persistent negative contribution and determine whether they should remain in the universe.
 
-Focus:
+Completed Work:
 
-1. Per-ETF contribution analysis
+## P2-A ETF Attribution Analysis
 
-2. Win/loss distribution analysis
+Completed
 
-3. Negative expectancy ETF identification
+Analyzed:
 
-4. Out-of-sample validation before removal
+* Trade records
+* Holding records
+* ETF-level contribution
+* Win rate
+* Profit/loss ratio
 
-Candidate ETFs requiring review:
+Key Findings:
 
-588000.XSHG
+Negative contributors:
 
-512660.XSHG
+* 588000.SS
+* 512660.SS
+* 512800.SS
+* 515220.SS
 
-159915.XSHE
+## P2-B Negative Expectancy Detection
 
-515220.XSHG
+Completed
 
-Expected Outcome:
+Watch List:
 
-Reduce asset universe.
+* 588000.SS
+* 512660.SS
+* 512800.SS
 
-Improve signal quality.
+## P2-C Removal Simulation
 
-Improve portfolio expectancy.
+Completed
 
----
+Tested:
+
+* Remove 588000.SS
+* Remove 512660.SS
+* Remove 512800.SS
+* Remove 588000.SS + 512660.SS
+
+Results:
+
+588000.SS:
+
+* Strong performance improvement after removal
+* Sharpe increased significantly
+* Excess return improved significantly
+* Drawdown unchanged
+
+512660.SS:
+
+* Mild improvement when removed alone
+* Combination test showed diversification value
+
+512800.SS:
+
+* Removal did not improve portfolio quality
+* Slight deterioration in risk-adjusted returns
+
+Decision:
+
+Remove:
+
+* 588000.SS
+
+Retain:
+
+* 512660.SS
+* 512800.SS
+
+P2 Closed.
 
 # P3 - Ranking Engine Enhancement
 

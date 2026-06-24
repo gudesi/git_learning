@@ -1,122 +1,100 @@
+"""
+PTrade 量化策略 —— 多因子 ETF 轮动（最终版）
+
+特点：
+- 配置集中管理，便于调整参数
+- 预计算宇宙一次性拉取所有指标与横截面排序，杜绝重复计算
+- 指标函数底层缓存，跨资产共享
+- 排名、权重、风险控制链路无冗余计算
+- 再平衡流程清晰：清仓 → 调仓
+"""
+
 import math
+import bisect
 from functools import wraps
+from typing import List, Dict, Optional, Tuple, Any
+
 
 # =========================================================
-# Strategy Configuration
+# 全局配置
 # =========================================================
+class Config:
+    # 现金等价物
+    CASH_ETF = "511880.SS"
 
-# Cash ETF
-CASH_ETF = "511880.SS"
+    # 资产池                   
+    BROAD_ETFS    = ["510300.SS", "510500.SS", "512100.SS", "563300.SS",
+                     "159915.SZ",  "510880.SS"]                       
+    FINANCIAL_ETFS = ["512880.SS", "512800.SS"]
+    TECH_ETFS      = ["512480.SS", "159819.SZ", "562500.SS", "512980.SS", "516160.SS"]
+    DEFENSE_ETFS   = ["512660.SS"]
+    HEALTHCARE_ETFS = ["512010.SS"]
+    CONSUMER_ETFS  = ["159928.SZ"]
+    RESOURCE_ETFS  = ["512400.SS", "518880.SS", "515220.SS"]
+    RISK_ETFS = tuple(BROAD_ETFS + FINANCIAL_ETFS + TECH_ETFS +
+                      DEFENSE_ETFS + HEALTHCARE_ETFS + CONSUMER_ETFS + RESOURCE_ETFS)
 
-# Broad Market ETFs
-BROAD_ETFS = [
-    "510300.SS",  # CSI 300
-    "510500.SS",  # CSI 500
-    "512100.SS",  # CSI 1000
-    "563300.SS",  # CSI A500
-    "159915.SZ",  # ChiNext
-    "588000.SS",  # STAR50
-    "510880.SS",  # Dividend
-]
+    # 精度与阈值
+    EPSILON = 1e-8
+    MIN_CASH_WEIGHT = 1e-4
+    CASH_MIN_TRADE_PCT = 0.005
+    CASH_MIN_TRADE_ABS = 12000
+    STOCK_MIN_TRADE_ABS = 1000
 
-# Financial ETFs
-FINANCIAL_ETFS = [
-    "512880.SS",  # Securities
-    "512800.SS",  # Banking
-]
+    # 指标参数
+    RETURN_WINDOWS = (20, 60, 120, 250)
+    ATR_LOOKBACK = 20
+    LIQUIDITY_LOOKBACK = 60
+    QUALITY_LOOKBACK = 120
+    MOMENTUM_WEIGHTS = {20: 0.05, 60: 0.15, 120: 0.30, 250: 0.50}
+    MOMENTUM_SCORE_WEIGHT = 0.70
+    QUALITY_SCORE_WEIGHT = 0.20
+    LIQUIDITY_SCORE_WEIGHT = 0.10
 
-# Technology ETFs
-TECH_ETFS = [
-    "512480.SS",  # Semiconductor
-    "159819.SZ",  # AI
-    "562500.SS",  # Robotics
-    "512980.SS",  # Media
-    "516160.SS",  # New Energy
-]
+    # 组合构建
+    MAX_PORTFOLIO_SIZE = 5
+    RANKING_TREND_MA = 200
+    TARGET_PORTFOLIO_RISK = 0.15
+    MAX_SINGLE_POSITION_WEIGHT = 0.25
+    MIN_SINGLE_POSITION_WEIGHT = 0.05
 
-# Defense ETFs
-DEFENSE_ETFS = [
-    "512660.SS",
-]
+    # 风险控制
+    LOW_RISK_THRESHOLD = 0.80
+    HIGH_RISK_THRESHOLD = 1.00
+    EXTREME_RISK_THRESHOLD = 1.20
+    LOW_RISK_EXPOSURE = 1.00
+    HIGH_RISK_EXPOSURE = 0.90
+    EXTREME_RISK_EXPOSURE = 0.75
+    DEFENSIVE_EXPOSURE = 0.50
 
-# Healthcare ETFs
-HEALTHCARE_ETFS = [
-    "512010.SS",
-]
+    # 交易执行
+    REBALANCE_TOLERANCE = 0.01
+    COMMISSION_BUFFER = 0.98
+    MAX_WEIGHT_ITER = 10
 
-# Consumer ETFs
-CONSUMER_ETFS = [
-    "159928.SZ",
-]
 
-# Resource ETFs
-RESOURCE_ETFS = [
-    "512400.SS",  # Nonferrous Metals
-    "518880.SS",  # Gold
-    "515220.SS",  # Coal
-]
-
-# Risk ETF Universe
-RISK_ETFS = (
-    BROAD_ETFS
-    + FINANCIAL_ETFS
-    + TECH_ETFS
-    + DEFENSE_ETFS
-    + HEALTHCARE_ETFS
-    + CONSUMER_ETFS
-    + RESOURCE_ETFS
-)
-
-def normalize_symbol(symbol):
+# =========================================================
+# 工具函数
+# =========================================================
+def normalize_symbol(symbol: str) -> str:
+    """统一 XSHG/XSHE → SS/SZ"""
     if symbol.endswith(".XSHG"):
         return symbol.replace(".XSHG", ".SS")
     if symbol.endswith(".XSHE"):
         return symbol.replace(".XSHE", ".SZ")
     return symbol
 
-# Indicator Configuration
 
-RETURN_WINDOWS = (20, 60, 120, 250)
-ATR_LOOKBACK = 20
-LIQUIDITY_LOOKBACK = 60
-QUALITY_LOOKBACK = 120
-MOMENTUM_WEIGHTS = {20: 0.05, 60: 0.15, 120: 0.30, 250: 0.50}
-MARKET_FILTER_INDEXES = (
-    "510300.SS",  # CSI300
-    "510500.SS",  # CSI500
-    "512100.SS",  # CSI1000
-)
-MA_SHORT = 50
-MA_MID = 100
-MA_LONG = 200
-MARKET_EXPOSURE_MAP = {0: 0.00, 1: 0.50, 2: 0.80, 3: 1.00}
-MOMENTUM_SCORE_WEIGHT = 0.70
-QUALITY_SCORE_WEIGHT = 0.20
-LIQUIDITY_SCORE_WEIGHT = 0.10
-MAX_PORTFOLIO_SIZE = 5
-RANKING_TREND_MA = 200
-TARGET_PORTFOLIO_RISK = 0.15
-MAX_SINGLE_POSITION_WEIGHT = 0.25
-MIN_SINGLE_POSITION_WEIGHT = 0.05
-LOW_RISK_THRESHOLD = 0.80
-HIGH_RISK_THRESHOLD = 1.00
-EXTREME_RISK_THRESHOLD = 1.20
-LOW_RISK_EXPOSURE = 1.00
-HIGH_RISK_EXPOSURE = 0.90
-EXTREME_RISK_EXPOSURE = 0.75
-DEFENSIVE_EXPOSURE = 0.50
-REBALANCE_TOLERANCE = 0.01
-COMMISSION_BUFFER = 0.98
-
-# Global Cache
+# =========================================================
+# 轻量缓存管理
+# =========================================================
 GLOBAL_CACHE = {}
 
-# Cache Decorator
-def cached(prefix):
-    """Decorator that caches function results in GLOBAL_CACHE.
-    For functions with arguments, the cache key is (prefix, *args).
-    For functions without arguments, the cache key is the prefix string itself.
-    """
+def clear_cache():
+    GLOBAL_CACHE.clear()
+
+def cached(prefix: str):
+    """仅接受可哈希参数，避免字典作为键"""
     def deco(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -129,1032 +107,469 @@ def cached(prefix):
         return wrapper
     return deco
 
-# Cache Utilities (kept for compatibility, though no longer directly used)
-def clear_cache():
-    GLOBAL_CACHE.clear()
-
-def cache_get(key):
-    return GLOBAL_CACHE.get(key)
-
-def cache_set(key, value):
-    GLOBAL_CACHE[key] = value
 
 # =========================================================
-# STRAT-001 Market Filter Diagnostics
+# 底层历史数据 (带缓存)
 # =========================================================
+@cached("history")
+def _get_history_field(symbol: str, field: str, count: int) -> List[float]:
+    try:
+        data = get_history(count, '1d', field, symbol, fq='post', include=False)
+        if data is None:
+            return []
+        if hasattr(data, "values") and hasattr(data, "columns"):
+            if field in data.columns:
+                return list(data[field].values)
+            if len(data.columns) == 1:
+                return list(data.iloc[:, 0].values)
+        if hasattr(data, "tolist"):
+            return data.tolist()
+        return list(data)
+    except Exception as e:
+        log.error(f"HISTORY_FAILED {symbol} {field} {count}: {e}")
+        return []
 
-MARKET_SCORE_STATS = {
-    0: 0,
-    1: 0,
-    2: 0,
-    3: 0,
-}
+def get_close(symbol: str, count: int) -> List[float]:
+    return _get_history_field(symbol, 'close', count)
+
+def get_high(symbol: str, count: int) -> List[float]:
+    return _get_history_field(symbol, 'high', count)
+
+def get_low(symbol: str, count: int) -> List[float]:
+    return _get_history_field(symbol, 'low', count)
+
+def get_turnover(symbol: str, count: int) -> List[float]:
+    return _get_history_field(symbol, 'money', count)
+
 
 # =========================================================
-# AUDIT Portfolio Exposure Audit
-# =========================================================
-
-AUDIT_DAYS = 0
-
-AUDIT_CASH_SUM = 0.0
-
-AUDIT_CASH_GT_50 = 0
-
-AUDIT_CASH_GT_80 = 0
-
-AUDIT_RISK_FACTOR_SUM = 0.0
-
-AUDIT_MARKET_FACTOR_SUM = 0.0
-
-AUDIT_FINAL_FACTOR_SUM = 0.0
-
-AUDIT_VOL_SUM = 0.0
-AUDIT_USAGE_SUM = 0.0
-
-AUDIT_VOL_COUNT = 0
-AUDIT_USAGE_COUNT = 0
-
-# =========================================================
-# IND-001 Return Calculation
+# 原始指标计算 (底层均缓存)
 # =========================================================
 @cached("return")
-def calc_return(symbol, lookback):
-    if lookback not in RETURN_WINDOWS:
+def calc_return(symbol: str, lookback: int) -> Optional[float]:
+    if lookback not in Config.RETURN_WINDOWS:
         raise ValueError(f"Unsupported lookback: {lookback}")
     close = get_close(symbol, lookback + 1)
-    if len(close) < lookback + 1:
+    if len(close) < lookback + 1 or close[0] <= 0:
         return None
-    start_price = close[0]
-    end_price = close[-1]
-    if start_price <= 0:
-        return None
-    result = end_price / start_price - 1.0
-    return result
+    return close[-1] / close[0] - 1.0
 
-# =========================================================
-# IND-002 Volatility Calculation
-# =========================================================
 @cached("volatility")
-def calc_volatility(symbol, lookback=60):
+def calc_volatility(symbol: str, lookback: int = 60) -> Optional[float]:
     close = get_close(symbol, lookback + 1)
     if len(close) < lookback + 1:
         return None
     returns = [close[i] / close[i-1] - 1 for i in range(1, len(close))]
-    if len(returns) < 2:
+    n = len(returns)
+    if n < 2:
         return None
-    mean_return = sum(returns) / len(returns)
-    variance = sum((r - mean_return) ** 2 for r in returns) / (len(returns) - 1)
-    result = math.sqrt(variance) * math.sqrt(252)
-    return result
-
-# =========================================================
-# IND-003 Momentum Score
-# =========================================================
-@cached("momentum_cross_section")
-def get_momentum_cross_section(lookback):
-    result = [calc_risk_adjusted_momentum(etf, lookback) for etf in RISK_ETFS]
-    return result
-
-def _percentile_rank(value, values):
-    if value is None:
-        return None
-    valid_values = [v for v in values if v is not None]
-    if len(valid_values) <= 1:
-        return 0.5
-    valid_values.sort()
-    rank = sum(1 for v in valid_values if v <= value)
-    return (rank - 1) / (len(valid_values) - 1)
+    mean = sum(returns) / n
+    variance = sum((r - mean) ** 2 for r in returns) / (n - 1)
+    return math.sqrt(variance * 252)
 
 @cached("risk_adj_momentum")
-def calc_risk_adjusted_momentum(symbol, lookback):
+def calc_risk_adjusted_momentum(symbol: str, lookback: int) -> Optional[float]:
     ret = calc_return(symbol, lookback)
     vol = calc_volatility(symbol, 60)
     if ret is None or vol is None or vol <= 0:
-        result = None
-    else:
-        result = ret / vol
-    return result
-
-def calc_momentum_score(symbol):
-    total_score = 0.0
-    for lookback in RETURN_WINDOWS:
-        cross_section = get_momentum_cross_section(lookback)
-        raw_value = calc_risk_adjusted_momentum(symbol, lookback)
-        percentile = _percentile_rank(raw_value, cross_section)
-        if percentile is None:
-            return None
-        total_score += MOMENTUM_WEIGHTS[lookback] * percentile
-    return total_score
-
-# =========================================================
-# IND-004 Trend Quality Score
-# =========================================================
-@cached("quality_cross_section")
-def get_quality_cross_section():
-    result = [calc_trend_quality_raw(etf) for etf in RISK_ETFS]
-    return result
+        return None
+    return ret / vol
 
 @cached("trend_quality")
-def calc_trend_quality_raw(symbol, lookback=QUALITY_LOOKBACK):
+def calc_trend_quality_raw(symbol: str, lookback: int = Config.QUALITY_LOOKBACK) -> Optional[float]:
     close = get_close(symbol, lookback)
-    if len(close) < lookback:
+    if len(close) < lookback or min(close) <= 0:
         return None
-    if min(close) <= 0:
-        return None
-    log_prices = [math.log(price) for price in close]
-    x = list(range(len(log_prices)))
-    n = len(x)
+    log_prices = [math.log(p) for p in close]
+    n = len(log_prices)
+    x = list(range(n))
     x_mean = sum(x) / n
     y_mean = sum(log_prices) / n
-    numerator = sum((x[i] - x_mean) * (log_prices[i] - y_mean) for i in range(n))
-    denominator = sum((x[i] - x_mean) ** 2 for i in range(n))
-    if denominator == 0:
+    num = sum((x[i] - x_mean) * (log_prices[i] - y_mean) for i in range(n))
+    den = sum((x[i] - x_mean) ** 2 for i in range(n))
+    if den == 0:
         return None
-    slope = numerator / denominator
+    slope = num / den
     ss_total = sum((y - y_mean) ** 2 for y in log_prices)
     if ss_total <= 0:
         return None
-    ss_residual = sum((log_prices[i] - (y_mean + slope*(x[i]-x_mean))) ** 2 for i in range(n))
-    r_squared = 1.0 - ss_residual / ss_total
-    result = slope * r_squared
-    return result
-
-def calc_quality_score(symbol):
-    cross_section = get_quality_cross_section()
-    raw_value = calc_trend_quality_raw(symbol)
-    return _percentile_rank(raw_value, cross_section)
-
-# =========================================================
-# IND-005 Liquidity Score
-# =========================================================
-@cached("liquidity_cross_section")
-def get_liquidity_cross_section():
-    result = [calc_adv60(etf) for etf in RISK_ETFS]
-    return result
+    ss_res = sum((log_prices[i] - (y_mean + slope * (x[i] - x_mean))) ** 2 for i in range(n))
+    r_sq = 1.0 - ss_res / ss_total
+    return slope * r_sq
 
 @cached("adv")
-def calc_adv60(symbol, lookback=LIQUIDITY_LOOKBACK):
+def calc_adv60(symbol: str, lookback: int = Config.LIQUIDITY_LOOKBACK) -> Optional[float]:
     turnover = get_turnover(symbol, lookback)
-    if turnover is None:
+    if not turnover or len(turnover) < lookback:
         return None
-    if len(turnover) < lookback:
-        return None
-    result = sum(turnover) / len(turnover)
-    return result
-
-def calc_liquidity_score(symbol):
-    cross_section = get_liquidity_cross_section()
-    raw_value = calc_adv60(symbol)
-    return _percentile_rank(raw_value, cross_section)
-
-# =========================================================
-# IND-006 ATR20
-# =========================================================
-def calc_true_range(high, low, prev_close):
-    """
-    True Range.
-
-    Returns
-    -------
-    float
-    """
-    return max(high - low, abs(high - prev_close), abs(low - prev_close))
+    return sum(turnover) / len(turnover)
 
 @cached("atr")
-def calc_atr(symbol, lookback=ATR_LOOKBACK):
+def calc_atr(symbol: str, lookback: int = Config.ATR_LOOKBACK) -> Optional[float]:
     high = get_high(symbol, lookback + 1)
     low = get_low(symbol, lookback + 1)
     close = get_close(symbol, lookback + 1)
     if len(high) < lookback + 1 or len(low) < lookback + 1 or len(close) < lookback + 1:
         return None
-    tr_values = [calc_true_range(high[i], low[i], close[i - 1]) for i in range(1, len(close))]
-    if len(tr_values) == 0:
-        return None
-    result = sum(tr_values) / len(tr_values)
-    return result
+    tr = [max(high[i] - low[i], abs(high[i] - close[i-1]), abs(low[i] - close[i-1]))
+          for i in range(1, len(close))]
+    return sum(tr) / len(tr) if tr else None
 
-def calc_atr_percent(symbol):
+def calc_atr_percent(symbol: str) -> Optional[float]:
     atr = calc_atr(symbol)
     close = get_close(symbol, 1)
-    if atr is None:
-        return None
-    if len(close) == 0:
-        return None
-    if close[-1] <= 0:
+    if atr is None or not close or close[-1] <= 0:
         return None
     return atr / close[-1]
 
+
 # =========================================================
-# FILTER-001 Market Breadth
+# 宇宙预计算 + 横截面排序 (一次性构建，杜绝重复)
 # =========================================================
-@cached("ma")
-def calc_ma(symbol, period):
-    close = get_close(symbol, period)
-    if len(close) < period:
+def precompute_universe() -> Dict[str, Any]:
+    cache_key = "precomputed_universe"
+    if cache_key in GLOBAL_CACHE:
+        return GLOBAL_CACHE[cache_key]
+
+    # 收集所有原始指标
+    risk_adj_mom = {}
+    trend_q_raw = {}
+    adv60_dict = {}
+
+    for sym in Config.RISK_ETFS:
+        mom_dict = {}
+        for lb in Config.RETURN_WINDOWS:
+            val = calc_risk_adjusted_momentum(sym, lb)
+            if val is not None:
+                mom_dict[lb] = val
+        risk_adj_mom[sym] = mom_dict
+
+        q = calc_trend_quality_raw(sym)
+        if q is not None:
+            trend_q_raw[sym] = q
+
+        adv = calc_adv60(sym)
+        if adv is not None:
+            adv60_dict[sym] = adv
+
+    # 一次性构建所有横截面排序列表
+    momentum_cross = {
+        lb: sorted([v[lb] for v in risk_adj_mom.values() if lb in v])
+        for lb in Config.RETURN_WINDOWS
+    }
+    quality_cross = sorted([v for v in trend_q_raw.values() if v is not None])
+    liquidity_cross = sorted([v for v in adv60_dict.values() if v is not None])
+
+    universe = {
+        "risk_adj_momentum": risk_adj_mom,
+        "trend_quality_raw": trend_q_raw,
+        "adv60": adv60_dict,
+        "momentum_cross_sections": momentum_cross,
+        "quality_cross_section": quality_cross,
+        "liquidity_cross_section": liquidity_cross,
+    }
+    GLOBAL_CACHE[cache_key] = universe
+    return universe
+
+
+def _percentile_rank(value: float, sorted_list: List[float]) -> float:
+    if len(sorted_list) <= 1:
+        return 0.5
+    rank = bisect.bisect_right(sorted_list, value)
+    return (rank - 1) / (len(sorted_list) - 1)
+
+
+# =========================================================
+# 得分计算 (纯读取预计算数据)
+# =========================================================
+def calc_momentum_score(symbol: str, universe: Dict[str, Any]) -> Optional[float]:
+    data = universe["risk_adj_momentum"].get(symbol)
+    if not data:
         return None
-    result = sum(close) / float(period)
-    return result
+    total = 0.0
+    for lb in Config.RETURN_WINDOWS:
+        raw = data.get(lb)
+        cross = universe["momentum_cross_sections"].get(lb)
+        if raw is None or cross is None:
+            return None
+        total += Config.MOMENTUM_WEIGHTS[lb] * _percentile_rank(raw, cross)
+    return total
 
-def is_bull_trend(symbol):
-    close = get_close(symbol, MA_LONG)
-    if len(close) < MA_LONG:
-        return False
-    latest_close = close[-1]
-    ma_short = calc_ma(symbol, MA_SHORT)
-    ma_mid = calc_ma(symbol, MA_MID)
-    ma_long = calc_ma(symbol, MA_LONG)
-    if ma_short is None or ma_mid is None or ma_long is None:
-        return False
-    return latest_close > ma_short and ma_short > ma_mid and ma_mid > ma_long
-
-def calc_market_score():
-    score = 0
-    for symbol in MARKET_FILTER_INDEXES:
-        if is_bull_trend(symbol):
-            score += 1
-    return score
-
-# =========================================================
-# FILTER-002 Market Exposure
-# =========================================================
-def calc_market_exposure():
-    return 1.0
-
-# def calc_market_exposure():
-#     score = calc_market_score()
-#     if score in MARKET_SCORE_STATS:
-#         MARKET_SCORE_STATS[score] += 1
-#     return MARKET_EXPOSURE_MAP.get(score, 0.0)
-
-@cached("market_exposure")
-def get_market_exposure():
-    result = calc_market_exposure()
-    return result
-
-# =========================================================
-# RANK-001 Final Score
-# =========================================================
-def calc_final_score(symbol):
-    momentum_score = calc_momentum_score(symbol)
-    quality_score = calc_quality_score(symbol)
-    liquidity_score = calc_liquidity_score(symbol)
-    if momentum_score is None or quality_score is None or liquidity_score is None:
+def calc_quality_score(symbol: str, universe: Dict[str, Any]) -> Optional[float]:
+    raw = universe["trend_quality_raw"].get(symbol)
+    cross = universe.get("quality_cross_section")
+    if raw is None or not cross:
         return None
-    return MOMENTUM_SCORE_WEIGHT * momentum_score + QUALITY_SCORE_WEIGHT * quality_score + LIQUIDITY_SCORE_WEIGHT * liquidity_score
+    return _percentile_rank(raw, cross)
 
-@cached("ranking_table")
-def build_ranking_table():
-    candidates = []
-    for symbol in RISK_ETFS:
-        score = calc_final_score(symbol)
-        if score is None:
-            continue
-        candidates.append((symbol, score))
-    candidates.sort(key=lambda x: x[1], reverse=True)
-    return candidates
+def calc_liquidity_score(symbol: str, universe: Dict[str, Any]) -> Optional[float]:
+    raw = universe["adv60"].get(symbol)
+    cross = universe.get("liquidity_cross_section")
+    if raw is None or not cross:
+        return None
+    return _percentile_rank(raw, cross)
+
+def calc_final_score(symbol: str, universe: Dict[str, Any]) -> Optional[float]:
+    m = calc_momentum_score(symbol, universe)
+    q = calc_quality_score(symbol, universe)
+    l = calc_liquidity_score(symbol, universe)
+    if None in (m, q, l):
+        return None
+    return (Config.MOMENTUM_SCORE_WEIGHT * m +
+            Config.QUALITY_SCORE_WEIGHT * q +
+            Config.LIQUIDITY_SCORE_WEIGHT * l)
+
 
 # =========================================================
-# RANK-002 ETF Selection
+# 排名与选股
 # =========================================================
-def passes_ranking_filter(symbol):
-    close = get_close(symbol, RANKING_TREND_MA)
-    if len(close) < RANKING_TREND_MA:
+def build_ranking_table(universe: Dict[str, Any]) -> List[Tuple[str, float]]:
+    scored = [(s, calc_final_score(s, universe)) for s in Config.RISK_ETFS]
+    scored = [(s, sc) for s, sc in scored if sc is not None]
+    scored.sort(key=lambda x: x[1], reverse=True)
+    return scored
+
+def passes_ranking_filter(symbol: str) -> bool:
+    close = get_close(symbol, Config.RANKING_TREND_MA)
+    if len(close) < Config.RANKING_TREND_MA:
         return False
-    ma200 = sum(close) / float(RANKING_TREND_MA)
-    return close[-1] > ma200
+    return close[-1] > (sum(close) / Config.RANKING_TREND_MA)
 
-def get_selected_etfs():
-    candidates = []
-    for symbol, score in build_ranking_table():
-        if passes_ranking_filter(symbol):
-            candidates.append((symbol, score))
-    return [symbol for symbol, score in candidates[:MAX_PORTFOLIO_SIZE]]
+def get_selected_etfs(universe: Dict[str, Any]) -> List[str]:
+    candidates = [(s, sc) for s, sc in build_ranking_table(universe) if passes_ranking_filter(s)]
+    return [s for s, _ in candidates[:Config.MAX_PORTFOLIO_SIZE]]
+
 
 # =========================================================
-# PORT-001 Position Sizing
+# 权重生成与约束
 # =========================================================
-def calc_inverse_volatility_weights(symbols):
-    risk_values = {}
-    for symbol in symbols:
-        atr_pct = calc_atr_percent(symbol)
-        if atr_pct is None:
-            continue
-        if atr_pct <= 0:
-            continue
-        risk_values[symbol] = 1.0 / atr_pct
-    if len(risk_values) == 0:
+def calc_inverse_volatility_weights(symbols: List[str]) -> Dict[str, float]:
+    risk_vals = {}
+    for s in symbols:
+        atr_pct = calc_atr_percent(s)
+        if atr_pct and atr_pct > 0:
+            risk_vals[s] = 1.0 / atr_pct
+    if not risk_vals:
         return {}
-    total_risk = sum(risk_values.values())
-    return {symbol: value / total_risk for symbol, value in risk_values.items()}
+    total = sum(risk_vals.values())
+    return {s: v / total for s, v in risk_vals.items()}
 
-def calc_weights():
-    selected = get_selected_etfs()
-    if len(selected) == 0:
-        return {}
+def calc_initial_weights(universe: Dict[str, Any]) -> Dict[str, float]:
+    selected = get_selected_etfs(universe)
     return calc_inverse_volatility_weights(selected)
 
-# =========================================================
-# PORT-002 Portfolio Constraints
-# =========================================================
-def normalize_weights(weights):
-    if len(weights) == 0:
-        return {}
-    total = sum(weights.values())
-    if total <= 0:
-        return {}
-    return {symbol: weight / total for symbol, weight in weights.items()}
+def normalize_weights(w: Dict[str, float]) -> Dict[str, float]:
+    t = sum(w.values())
+    return {s: v / t for s, v in w.items()} if t > 0 else {}
 
-def apply_max_position_constraint(weights):
-    if len(weights) == 0:
-        return {}
-    adjusted = weights.copy()
-    max_iterations = 20
-    for _ in range(max_iterations):
-        excess_weight = 0.0
-        # Step 1
-        # Cap overweight positions
-        for symbol in adjusted:
-            weight = adjusted[symbol]
-            if weight > MAX_SINGLE_POSITION_WEIGHT:
-                excess_weight += (weight - MAX_SINGLE_POSITION_WEIGHT)
-                adjusted[symbol] = MAX_SINGLE_POSITION_WEIGHT
-        # Finished
-        if excess_weight <= 1e-8:
+def apply_max_position_constraint(w: Dict[str, float]) -> Dict[str, float]:
+    adj = w.copy()
+    for _ in range(20):
+        excess = sum(max(0, adj[s] - Config.MAX_SINGLE_POSITION_WEIGHT) for s in adj)
+        for s in adj:
+            if adj[s] > Config.MAX_SINGLE_POSITION_WEIGHT:
+                adj[s] = Config.MAX_SINGLE_POSITION_WEIGHT
+        if excess <= Config.EPSILON:
             break
-        # Step 2
-        # Find positions that can absorb weight
-        eligible_symbols = []
-        for symbol, weight in adjusted.items():
-            if weight < MAX_SINGLE_POSITION_WEIGHT:
-                eligible_symbols.append(symbol)
-        # Safety check
-        if len(eligible_symbols) == 0:
+        eligible = [s for s, wt in adj.items() if wt < Config.MAX_SINGLE_POSITION_WEIGHT]
+        if not eligible:
             break
-        eligible_total = sum(adjusted[symbol] for symbol in eligible_symbols)
-        if eligible_total <= 0:
-            equal_share = excess_weight / len(eligible_symbols)
-            for symbol in eligible_symbols:
-                adjusted[symbol] += equal_share
-        else:
-            for symbol in eligible_symbols:
-                proportion = adjusted[symbol] / eligible_total
-                adjusted[symbol] += excess_weight * proportion
-    return adjusted
+        total_el = sum(adj[s] for s in eligible)
+        for s in eligible:
+            adj[s] += excess * (adj[s] / total_el) if total_el > 0 else excess / len(eligible)
+    return adj
 
-def apply_min_position_constraint(weights):
-    adjusted = {}
-    for symbol, weight in weights.items():
-        if weight >= MIN_SINGLE_POSITION_WEIGHT:
-            adjusted[symbol] = weight
-    return adjusted
+def apply_min_position_constraint(w: Dict[str, float]) -> Dict[str, float]:
+    return {s: wt for s, wt in w.items() if wt >= Config.MIN_SINGLE_POSITION_WEIGHT}
 
-def apply_position_constraints(weights):
-    if len(weights) == 0:
+def apply_position_constraints(w: Dict[str, float]) -> Dict[str, float]:
+    if not w:
         return {}
-    adjusted = weights.copy()
-    max_iterations = 10
-    for _ in range(max_iterations):
-        previous = adjusted.copy()
-        # Max position constraint
-        adjusted = apply_max_position_constraint(adjusted)
-        adjusted = normalize_weights(adjusted)
-        # Min position constraint
-        adjusted = apply_min_position_constraint(adjusted)
-        adjusted = normalize_weights(adjusted)
-        # Converged
-        if all(abs(adjusted.get(symbol, 0) - previous.get(symbol, 0)) < 1e-8 for symbol in set(adjusted) | set(previous)):
+    adj = w.copy()
+    for _ in range(Config.MAX_WEIGHT_ITER):
+        prev = adj.copy()
+        adj = apply_max_position_constraint(adj)
+        adj = normalize_weights(adj)
+        adj = apply_min_position_constraint(adj)
+        adj = normalize_weights(adj)
+        if all(abs(adj.get(s, 0) - prev.get(s, 0)) < Config.EPSILON for s in set(adj) | set(prev)):
             break
-    return adjusted
+    return adj
 
-def calc_target_weights():
-    weights = calc_weights()
-    if len(weights) == 0:
-        return {}
-    weights = apply_position_constraints(weights)
-    return weights
+def get_target_weights(universe: Dict[str, Any]) -> Dict[str, float]:
+    return apply_position_constraints(calc_initial_weights(universe))
 
-@cached("target_weights")
-def get_target_weights():
-    result = calc_target_weights()
-    return result
 
 # =========================================================
-# RISK-001 Portfolio Risk Engine
+# 风险度量与调整
 # =========================================================
-def calc_portfolio_atr():
-    weights = get_target_weights()
-    if len(weights) == 0:
-        return None
-    total_risk = 0.0
-    total_weight = 0.0
-    for symbol, weight in weights.items():
-        atr_pct = calc_atr_percent(symbol)
-        if atr_pct is None:
-            continue
-        total_risk += atr_pct * weight
-        total_weight += weight
-    if total_weight <= 0:
-        return None
-    return total_risk / total_weight
+def calc_portfolio_atr(weights: Dict[str, float]) -> Optional[float]:
+    total_risk, total_w = 0.0, 0.0
+    for s, w in weights.items():
+        atr_pct = calc_atr_percent(s)
+        if atr_pct is not None:
+            total_risk += atr_pct * w
+            total_w += w
+    return total_risk / total_w if total_w > 0 else None
 
-def calc_weighted_average_volatility():
-    weights = get_target_weights()
-    if len(weights) == 0:
-        return None
-    total_vol = 0.0
-    total_weight = 0.0
-    for symbol, weight in weights.items():
-        vol = calc_volatility(symbol)
-        if vol is None:
-            continue
-        total_vol += vol * weight
-        total_weight += weight
-    if total_weight <= 0:
-        return None
-    return total_vol / total_weight
+def calc_weighted_average_volatility(weights: Dict[str, float]) -> Optional[float]:
+    total_vol, total_w = 0.0, 0.0
+    for s, w in weights.items():
+        vol = calc_volatility(s)
+        if vol is not None:
+            total_vol += vol * w
+            total_w += w
+    return total_vol / total_w if total_w > 0 else None
 
-def get_portfolio_statistics():
-    weights = get_target_weights()
-    return {"position_count": len(weights), "portfolio_atr": calc_portfolio_atr(), "weighted_average_volatility": calc_weighted_average_volatility()}
-
-def calc_risk_budget_usage():
-    stats = get_portfolio_statistics()
-    portfolio_vol = stats.get("weighted_average_volatility")
-    if portfolio_vol is None:
+def calc_risk_budget_usage(weights: Dict[str, float]) -> Optional[float]:
+    pvol = calc_weighted_average_volatility(weights)
+    if pvol is None or Config.TARGET_PORTFOLIO_RISK <= 0:
         return None
-    if TARGET_PORTFOLIO_RISK <= 0:
-        return None
-    return portfolio_vol / TARGET_PORTFOLIO_RISK
+    return pvol / Config.TARGET_PORTFOLIO_RISK
 
-def get_risk_state():
-    usage = calc_risk_budget_usage()
-    if usage is None:
-        return "UNKNOWN"
-    if usage < 0.8:
-        return "LOW"
-    if usage < 1.0:
-        return "NORMAL"
-    return "HIGH"
-
-# =========================================================
-# RISK-002 Portfolio Risk Control
-# =========================================================
-def get_risk_scaling_factor():
-    usage = calc_risk_budget_usage()
+def get_risk_scaling_factor(weights: Dict[str, float]) -> float:
+    usage = calc_risk_budget_usage(weights)
     if usage is None:
         return 1.0
-    if usage < LOW_RISK_THRESHOLD:
-        return LOW_RISK_EXPOSURE
-    if usage < HIGH_RISK_THRESHOLD:
-        return HIGH_RISK_EXPOSURE
-    if usage < EXTREME_RISK_THRESHOLD:
-        return EXTREME_RISK_EXPOSURE
-    return DEFENSIVE_EXPOSURE
+    if usage < Config.LOW_RISK_THRESHOLD:
+        return Config.LOW_RISK_EXPOSURE
+    if usage < Config.HIGH_RISK_THRESHOLD:
+        return Config.HIGH_RISK_EXPOSURE
+    if usage < Config.EXTREME_RISK_THRESHOLD:
+        return Config.EXTREME_RISK_EXPOSURE
+    return Config.DEFENSIVE_EXPOSURE
 
-def get_risk_control_state():
-    factor = get_risk_scaling_factor()
-    if factor >= 1.0:
-        return "FULL"
-    if factor >= 0.90:
-        return "REDUCED"
-    if factor >= 0.75:
-        return "HIGH_RISK"
-    return "DEFENSIVE"
+def calc_market_exposure() -> float:
+    return 1.0
 
-def calc_risk_adjusted_weights():
-    weights = get_target_weights()
-    if len(weights) == 0:
+def get_risk_adjusted_weights(target_weights: Dict[str, float], risk_factor: float) -> Dict[str, float]:
+    if not target_weights:
         return {}
-    risk_factor = get_risk_scaling_factor()
-    market_factor = get_market_exposure()
-    final_factor = risk_factor * market_factor
-    adjusted = {symbol: weight * final_factor for symbol, weight in weights.items()}
-    return adjusted
+    factor = risk_factor * calc_market_exposure()
+    return {s: w * factor for s, w in target_weights.items()}
 
-@cached("risk_adjusted_weights")
-def get_risk_adjusted_weights():
-    result = calc_risk_adjusted_weights()
-    return result
-
-def get_cash_weight(weights):
+def get_cash_weight(weights: Dict[str, float]) -> float:
     invested = sum(weights.values())
-    cash = max(0.0, min(1.0, 1.0 - invested))
-    if cash < 0.0001:
-        cash = 0.0
-    return cash
+    cash = max(0.0, 1.0 - invested)
+    return cash if cash >= Config.MIN_CASH_WEIGHT else 0.0
+
 
 # =========================================================
-# EXEC-001
-# Order Mapping Layer
+# 订单执行
 # =========================================================
+def get_normalized_positions_live() -> Dict[str, Any]:
+    pos = get_positions()
+    return {normalize_symbol(s): p for s, p in pos.items()} if pos else {}
 
-@cached("positions")
-def get_positions_cached():
-    result = get_positions()
-    return result
-
-@cached("normalized_positions")
-def get_normalized_positions():
-    positions = get_positions_cached()
-    result = {
-        normalize_symbol(symbol): position
-        for symbol, position in positions.items()
-    }
-    return result
-
-def lookup_position(symbol):
-    positions = get_normalized_positions()
-    return positions.get(symbol)
-
-def get_position_value(symbol):
-    position = lookup_position(symbol)
-    if position is None:
+def get_position_value(symbol: str) -> float:
+    p = get_normalized_positions_live().get(symbol)
+    if p is None:
         return 0.0
     try:
-        return (
-            float(position.amount)
-            * float(position.last_sale_price)
-        )
-    except Exception as e:
-        log.info(
-            f"GET_POSITION_VALUE_EXCEPTION={repr(e)}"
-        )
+        return float(p.amount) * float(p.last_sale_price)
+    except Exception:
         return 0.0
 
-def order_target_percent(
-    context,
-    symbol,
-    target_percent
-):
+def order_target_percent(context, symbol: str, target_pct: float):
     try:
-        total_equity = float(
-            context.portfolio.portfolio_value
-        )
-        # EXEC-001
-        # 留出手续费和滑点缓冲
-        target_value = (
-            total_equity
-            * target_percent
-            * COMMISSION_BUFFER
-        )
-        current_value = get_position_value(symbol)
-        delta_value = (
-            target_value
-            - current_value
-        )
-        log.info(
-            f"ORDER_DEBUG "
-            f"{symbol} "
-            f"target={target_percent:.4f} "
-            f"current={current_value:.2f} "
-            f"target_value={target_value:.2f} "
-            f"delta={delta_value:.2f}"
-        )
-        # EXEC-001
-        # 仅过滤买入小单
-        if delta_value > 0:
-            if symbol == CASH_ETF:
-                threshold = max(
-                    total_equity * 0.005,
-                    12000
-                )
+        total_eq = float(context.portfolio.portfolio_value)
+        target_val = total_eq * target_pct * Config.COMMISSION_BUFFER
+        delta = target_val - get_position_value(symbol)
+        if delta > 0:
+            if symbol == Config.CASH_ETF:
+                threshold = max(total_eq * Config.CASH_MIN_TRADE_PCT, Config.CASH_MIN_TRADE_ABS)
             else:
-                threshold = 1000
-            if delta_value < threshold:
-                log.info(
-                    f"ORDER_SKIPPED "
-                    f"{symbol} "
-                    f"delta={delta_value:.2f} "
-                    f"threshold={threshold:.2f}"
-                )
+                threshold = Config.STOCK_MIN_TRADE_ABS
+            if delta < threshold:
+                log.info(f"ORDER_SKIPPED {symbol} delta={delta:.2f} < threshold={threshold:.2f}")
                 return None
-        return order_value(
-            symbol,
-            delta_value
-        )
+        return order_value(symbol, delta)
     except Exception as e:
-        log.info(
-            f"ORDER_TARGET_PERCENT_EXCEPTION={repr(e)}"
-        )
+        log.info(f"ORDER_TARGET_EXCEPTION {symbol}: {e}")
         return None
 
+
 # =========================================================
-# EXEC-002
-# Rebalance Engine
+# 再平衡引擎
 # =========================================================
-
-def get_current_symbols():
-    positions = get_positions_cached()
-    if positions is None:
-        return set()
-    return {
-        normalize_symbol(symbol)
-        for symbol in positions.keys()
-    }
-
-def get_target_symbols(
-    weights,
-    cash_weight
-):
-    symbols = set()
-    for symbol, weight in weights.items():
-        if weight > 0:
-            symbols.add(symbol)
+def rebalance(context, risk_weights: Dict[str, float], cash_weight: float):
+    """传入已计算的权重，内部不再重复计算"""
+    all_targets = dict(risk_weights)
     if cash_weight > 0:
-        symbols.add(CASH_ETF)
-    return symbols
+        all_targets[Config.CASH_ETF] = cash_weight
 
-def sell_removed_positions(
-    context,
-    target_symbols
-):
-    current_symbols = get_current_symbols()
-    symbols_to_sell = (
-        current_symbols
-        - target_symbols
-    )
-    log.info(
-        f"CURRENT={current_symbols}"
-    )
-    log.info(
-        f"TARGET={target_symbols}"
-    )
-    log.info(
-        f"REMOVE={symbols_to_sell}"
-    )
-    for symbol in symbols_to_sell:
-        log.info(
-            f"SELL_REMOVED {symbol}"
-        )
-        order_target_percent(
-            context,
-            symbol,
-            0.0
-        )
-    return symbols_to_sell
+    target_symbols = set(all_targets.keys())
+    current_pos = get_positions()
+    current_symbols = {normalize_symbol(s) for s in current_pos.keys()} if current_pos else set()
 
-def get_current_weight(
-    context,
-    symbol
-):
-    total_equity = float(
-        context.portfolio.portfolio_value
-    )
-    if total_equity <= 0:
-        return 0.0
-    value = get_position_value(symbol)
-    return value / total_equity
+    # 阶段1：清仓不在目标中的持仓
+    for sym in current_symbols - target_symbols:
+        log.info(f"SELL_REMOVED {sym}")
+        order_target_percent(context, sym, 0.0)
 
-def rebalance_portfolio(
-    context,
-    weights,
-    cash_weight
-):
-    target_weights = weights.copy()
-    if cash_weight > 0:
-        target_weights[CASH_ETF] = cash_weight
-    all_symbols = set(
-        target_weights.keys()
-    )
-    sell_orders = []
-    buy_orders = []
-    for symbol in sorted(all_symbols):
-        current_weight = get_current_weight(
-            context,
-            symbol
-        )
-        target_weight = (
-            target_weights.get(
-                symbol,
-                0.0
-            )
-        )
-        difference = (
-            target_weight
-            - current_weight
-        )
-        if abs(difference) < REBALANCE_TOLERANCE:
+    # 阶段2：调整至目标权重
+    positions_map = get_normalized_positions_live()
+    total_eq = float(context.portfolio.portfolio_value)
+
+    def current_weight(sym: str) -> float:
+        p = positions_map.get(sym)
+        if p is None or total_eq <= 0:
+            return 0.0
+        try:
+            return float(p.amount) * float(p.last_sale_price) / total_eq
+        except Exception:
+            return 0.0
+
+    sell_orders, buy_orders = [], []
+    for sym in sorted(all_targets.keys()):
+        diff = all_targets[sym] - current_weight(sym)
+        if abs(diff) < Config.REBALANCE_TOLERANCE:
             continue
-        if difference < 0:
-            sell_orders.append(
-                (
-                    symbol,
-                    target_weight
-                )
-            )
+        if diff < 0:
+            sell_orders.append((sym, all_targets[sym]))
         else:
-            buy_orders.append(
-                (
-                    symbol,
-                    target_weight
-                )
-            )
-    # ====================================
-    # Phase 1
-    # Sell First
-    # ====================================
-    for symbol, target_weight in sell_orders:
-        log.info(
-            f"SELL {symbol} "
-            f"target={target_weight:.4f}"
-        )
-        order_target_percent(
-            context,
-            symbol,
-            target_weight
-        )
-    # ====================================
-    # Phase 2
-    # Buy Second
-    # ====================================
-    for symbol, target_weight in buy_orders:
-        log.info(
-            f"BUY {symbol} "
-            f"target={target_weight:.4f}"
-        )
-        order_target_percent(
-            context,
-            symbol,
-            target_weight
-        )
-    return True
+            buy_orders.append((sym, all_targets[sym]))
 
-def rebalance(context):
-    try:
-        risk_weights = (
-            get_risk_adjusted_weights()
-        )
-        cash_weight = (
-            get_cash_weight(
-                risk_weights
-            )
-        )
-        target_symbols = (
-            get_target_symbols(
-                risk_weights,
-                cash_weight
-            )
-        )
-        sell_removed_positions(
-            context,
-            target_symbols
-        )
-        rebalance_portfolio(
-            context,
-            risk_weights,
-            cash_weight
-        )
-        return True
-    except Exception as e:
-        log.error(
-            "REBALANCE_EXCEPTION="
-            + repr(e)
-        )
-        return False
+    for sym, tw in sell_orders:
+        log.info(f"SELL {sym} target={tw:.4f}")
+        order_target_percent(context, sym, tw)
+    for sym, tw in buy_orders:
+        log.info(f"BUY {sym} target={tw:.4f}")
+        order_target_percent(context, sym, tw)
+
 
 # =========================================================
-# MIG-001A PTrade Lifecycle
+# PTrade 生命周期
 # =========================================================
 def initialize(context):
-    log.info("LIFECYCLE initialize")
+    log.info("INIT")
     run_daily(context, strategy_main, time='14:50')
 
 def before_trading_start(context, data):
-    log.info("LIFECYCLE before_trading_start")
+    log.info("BEFORE_TRADING")
 
 def after_trading_end(context, data):
-    log.info("LIFECYCLE after_trading_end")
-
-    if AUDIT_DAYS % 100 == 0:
-        print_audit_summary()
+    log.info("AFTER_TRADING")
 
 def strategy_main(context):
-    log.info("LIFECYCLE strategy_main")
+    log.info("STRATEGY_MAIN")
     clear_cache()
 
-    audit_portfolio_state()
-    
-    rebalance(context)
+    # 1. 一次性预计算所有资产的指标与横截面排序
+    universe = precompute_universe()
+
+    # 2. 排名与目标权重（仅计算一次）
+    target_weights = get_target_weights(universe)
+
+    # 3. 风险控制（风险因子计算一次，全链路复用）
+    risk_factor = get_risk_scaling_factor(target_weights)
+    risk_weights = get_risk_adjusted_weights(target_weights, risk_factor)
+    cash_w = get_cash_weight(risk_weights)
+
+    # 4. 日志记录
+    log.info(f"STATE selected={list(target_weights.keys())} "
+             f"risk_factor={risk_factor:.2f} cash={cash_w:.2f}")
+
+    # 5. 执行再平衡
+    rebalance(context, risk_weights, cash_w)
     return True
-
-@cached("history")
-def _get_history_field(symbol, field, count):
-    try:
-        data = get_history(count, '1d', field, symbol, fq='post', include=False)
-        if data is None:
-            result = []
-            return result
-        if hasattr(data, "values") and hasattr(data, "columns"):
-            if field in data.columns:
-                result = list(data[field].values)
-                return result
-            if len(data.columns) == 1:
-                result = list(data.iloc[:, 0].values)
-                return result
-        if hasattr(data, "tolist"):
-            result = data.tolist()
-            return result
-        result = list(data)
-        return result
-    except Exception as e:
-        log.error(f"GET_HISTORY_FAILED symbol={symbol} field={field} count={count} error={repr(e)}")
-        return []
-
-def get_close(symbol, count):
-    return _get_history_field(symbol, 'close', count)
-
-def get_high(symbol, count):
-    return _get_history_field(symbol, 'high', count)
-
-def get_low(symbol, count):
-    return _get_history_field(symbol, 'low', count)
-
-def get_volume(symbol, count):
-    return _get_history_field(symbol, 'volume', count)
-
-def get_turnover(symbol, count):
-    return _get_history_field(symbol, 'money', count)
-
-# =========================================================
-# DEBUG Portfolio Audit
-# =========================================================
-
-# =========================================================
-# AUDIT Portfolio Exposure Audit
-# =========================================================
-
-def audit_portfolio_state():
-
-    global AUDIT_DAYS
-
-    global AUDIT_CASH_SUM
-
-    global AUDIT_CASH_GT_50
-
-    global AUDIT_CASH_GT_80
-
-    global AUDIT_RISK_FACTOR_SUM
-
-    global AUDIT_MARKET_FACTOR_SUM
-
-    global AUDIT_FINAL_FACTOR_SUM
-
-    global AUDIT_VOL_SUM
-
-    global AUDIT_USAGE_SUM
-
-    global AUDIT_VOL_COUNT
-
-    global AUDIT_USAGE_COUNT
-
-    try:
-
-        risk_factor = get_risk_scaling_factor()
-
-        market_factor = get_market_exposure()
-
-        final_factor = (
-            risk_factor
-            * market_factor
-        )
-
-        adjusted_weights = (
-            get_risk_adjusted_weights()
-        )
-
-        cash_weight = get_cash_weight(
-            adjusted_weights
-        )
-
-        AUDIT_DAYS += 1
-
-        AUDIT_CASH_SUM += cash_weight
-
-        AUDIT_RISK_FACTOR_SUM += risk_factor
-
-        AUDIT_MARKET_FACTOR_SUM += market_factor
-
-        AUDIT_FINAL_FACTOR_SUM += final_factor
-
-        if cash_weight > 0.50:
-            AUDIT_CASH_GT_50 += 1
-
-        if cash_weight > 0.80:
-            AUDIT_CASH_GT_80 += 1
-
-        portfolio_vol = (
-            calc_weighted_average_volatility()
-        )
-
-        usage = (
-            calc_risk_budget_usage()
-        )
-
-        if portfolio_vol is not None:
-            AUDIT_VOL_SUM += portfolio_vol
-            AUDIT_VOL_COUNT += 1
-
-        if usage is not None:
-            AUDIT_USAGE_SUM += usage
-            AUDIT_USAGE_COUNT += 1
-
-    except Exception as e:
-
-        log.info(
-            f"AUDIT_EXCEPTION={repr(e)}"
-        )
-
-def print_audit_summary():
-
-    if AUDIT_DAYS <= 0:
-        return
-
-    avg_cash = (
-        AUDIT_CASH_SUM
-        / AUDIT_DAYS
-    )
-
-    avg_risk_factor = (
-        AUDIT_RISK_FACTOR_SUM
-        / AUDIT_DAYS
-    )
-
-    avg_market_factor = (
-        AUDIT_MARKET_FACTOR_SUM
-        / AUDIT_DAYS
-    )
-
-    avg_final_factor = (
-        AUDIT_FINAL_FACTOR_SUM
-        / AUDIT_DAYS
-    )
-
-    pct_cash_gt_50 = (
-        AUDIT_CASH_GT_50
-        / AUDIT_DAYS
-        * 100
-    )
-
-    pct_cash_gt_80 = (
-        AUDIT_CASH_GT_80
-        / AUDIT_DAYS
-        * 100
-    )
-
-    log.info(
-        "========== AUDIT SUMMARY =========="
-    )
-
-    log.info(
-        f"AUDIT_DAYS={AUDIT_DAYS}"
-    )
-
-    log.info(
-        f"AVG_CASH_WEIGHT={avg_cash:.4f}"
-    )
-
-    log.info(
-        f"CASH_GT_50_PCT={pct_cash_gt_50:.2f}"
-    )
-
-    log.info(
-        f"CASH_GT_80_PCT={pct_cash_gt_80:.2f}"
-    )
-
-    log.info(
-        f"AVG_RISK_FACTOR={avg_risk_factor:.4f}"
-    )
-
-    log.info(
-        f"AVG_MARKET_FACTOR={avg_market_factor:.4f}"
-    )
-
-    log.info(
-        f"AVG_FINAL_FACTOR={avg_final_factor:.4f}"
-    )
-
-    log.info(
-        "==================================="
-    )
-
-    avg_vol = (
-        AUDIT_VOL_SUM
-        / AUDIT_VOL_COUNT
-        if AUDIT_VOL_COUNT > 0
-        else 0
-    )
-
-    avg_usage = (
-        AUDIT_USAGE_SUM
-        / AUDIT_USAGE_COUNT
-        if AUDIT_USAGE_COUNT > 0
-        else 0
-    )
-
-    log.info(
-        f"AVG_PORTFOLIO_VOL={avg_vol:.4f}"
-    )
-
-    log.info(
-        f"AVG_RISK_USAGE={avg_usage:.4f}"
-    )

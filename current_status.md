@@ -1,74 +1,27 @@
-# Current Phase
+Current Phase: P3 - Ranking Engine Enhancement
 
-P2 - ETF Selection Audit
-
-Status:
-Ready to Start
-
----
-
-Completed
+Completed:
 
 P0 - Execution Layer Stabilization
-
-P1-A Exposure Audit
-
-P1-B Risk Budget Engine Audit
-
-P1-C Market Exposure Review
-
-P1-D Market Filter Redesign
-
-P1-E Risk Budget Engine Review
-
----
-
-Validated Decisions
-
-1.
-
-Remove Market Exposure Engine
-
-Current:
-
-def calc_market_exposure():
-return 1.0
-
-2.
-
-TARGET_PORTFOLIO_RISK = 0.15
-
-3.
-
-Keep Risk Budget Engine
-
-4.
-
-Keep ETF MA200 Trend Filter
-
----
-
-Current Best Backtest
-
-Period:
-
-2024-06-01 ~ 2026-06-01
-
-Annual Return:
-13.65%
-
-Sharpe:
-0.79
-
-Max Drawdown:
-8.82%
-
----
-
-Next Task
-
+P1 - Portfolio Exposure Reconstruction
 P2 - ETF Selection Audit
 
-Objective:
+Latest Result:
 
-Determine which ETFs create positive expectancy and which ETFs consistently reduce portfolio performance.
+* Removed 588000.SS from ETF universe
+* Annualized return improved from 13.72% to 15.58%
+* Sharpe improved from 0.80 to 0.96
+
+Next Objective:
+
+P3 - Ranking Engine Enhancement
+
+Focus Areas:
+
+* Momentum factor evaluation
+* Quality factor evaluation
+* Liquidity factor evaluation
+* Ranking score attribution
+* ETF selection effectiveness
+
+
