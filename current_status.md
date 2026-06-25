@@ -16,6 +16,18 @@ Next Objective:
 
 P3 - Ranking Engine Enhancement
 
+## P3-A
+COMPLETED
+KEEP = TRUE
+
+## P3-B
+COMPLETED
+KEEP = TRUE
+
+## P3-C
+
+Status: ready
+
 Focus Areas:
 
 * Momentum factor evaluation

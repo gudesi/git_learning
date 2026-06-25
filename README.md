@@ -6,7 +6,25 @@ Multi-factor ETF rotation strategy for PTrade.
 
 Core idea:
 
-Select the strongest ETFs from a diversified ETF universe using trend, momentum, quality, liquidity and risk controls.
+Select the strongest ETFs from a diversified ETF universe using:
+
+* Multi-horizon risk-adjusted momentum
+* Trend quality (slope × R²)
+* Trend persistence
+* Drawdown quality
+* Liquidity filters
+* ATR-based risk parity sizing
+* Portfolio risk budgeting
+
+The strategy is designed to:
+
+* Participate in major market trends
+* Avoid prolonged bear markets
+* Rotate into stronger sectors
+* Prefer smoother and more persistent trends
+* Penalize high-drawdown assets
+* Maintain controlled portfolio volatility
+
 
 The strategy is designed to:
 
@@ -21,28 +39,58 @@ The strategy is designed to:
 
 Version:
 
-P2 ETF Selection Audit Complete
+P3 Ranking Engine Enhancement Complete
 
-Backtest Period:
+Completed Modules:
 
-2024-06-01 ~ 2026-06-01
+* P0 Execution Layer Stabilization
+* P1 Exposure Reconstruction
+* P2 ETF Selection Audit
+* P3-A Trend Persistence Factor
+* P3-B Drawdown Quality Factor
 
-Current Best Configuration:
+Current Ranking Model:
 
-Market Exposure Engine:
-Removed
+```python
+Final Score =
 
-Target Portfolio Risk:
-15%
+0.55 * Momentum
++ 0.15 * Trend Quality
++ 0.15 * Trend Persistence
++ 0.05 * Drawdown Quality
++ 0.10 * Liquidity
+```
 
-ETF Trend Filter:
-MA200
+Key Features:
 
-Position Count:
-5
+* Multi-horizon risk-adjusted momentum (20/60/120/250 days)
+* Trend quality (slope × R²)
+* Trend persistence (percentage of days above MA20)
+* Drawdown quality (1 − maximum drawdown)
+* Cross-sectional percentile normalization
+* Inverse ATR position sizing
+* Portfolio risk budgeting
+* Position constraints
+* Cash ETF fallback mechanism
 
-ETF Universe:
-588000.SS Removed
+Latest Backtest (2024-06 ~ 2026-06):
+
+| Metric                 | Strategy   |
+| ---------------------- | ---------- |
+| Total Return           | 35.87%     |
+| Annual Return          | 17.19%     |
+| Alpha                  | 0.06       |
+| Beta                   | 0.54       |
+| Sharpe                 | 1.11       |
+| Sortino                | 1.59       |
+| Max Drawdown           | 7.68%      |
+| Excess Return          | 1.97%      |
+| Annual Excess Return   | 1.01%      |
+| Information Ratio      | 0.08       |
+| Win Rate               | 56.62%     |
+| Profit Factor          | 245.94     |
+| Average Holding Period | 23.88 days |
+
 
 ---
 

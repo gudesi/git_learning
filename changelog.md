@@ -1,3 +1,116 @@
+
+# 2026-06-25
+
+## P3-A Trend Persistence Factor
+
+Status:
+Completed
+
+### Changes
+
+Added a new Trend Persistence factor to improve ranking stability.
+
+Implementation:
+
+* Added `calc_trend_persistence_raw()`
+* Measured the percentage of days above MA20 over the last 120 trading days
+* Added cross-sectional percentile ranking
+* Updated final ranking weights:
+
+```python
+Momentum      60%
+Quality       15%
+Persistence   15%
+Liquidity     10%
+```
+
+### Backtest Results
+
+Compared with P2 baseline:
+
+| Metric            | P2     | P3-A   |
+| ----------------- | ------ | ------ |
+| Total Return      | 32.27% | 32.27% |
+| Annual Return     | 15.58% | 15.57% |
+| Sharpe            | 0.96   | 0.97   |
+| Max Drawdown      | 8.93%  | 7.78%  |
+| Excess Return     | -1.98% | -1.63% |
+| Information Ratio | -0.09  | -0.07  |
+| Win Rate          | 53.67% | 55.24% |
+| Profit Factor     | 204.39 | 229.84 |
+| Avg Holding Days  | 21.05  | 22.84  |
+
+### Conclusion
+
+Trend Persistence improved portfolio quality and reduced drawdowns without sacrificing returns.
+
+Decision:
+
+## KEEP
+
+## P3-B Drawdown Quality Factor
+
+Date:
+2026-06-25
+
+Status:
+Completed
+
+### Changes
+
+Added a Drawdown Quality factor to penalize high-drawdown ETFs.
+
+Implementation:
+
+* Added `calc_max_drawdown_raw()`
+* Used:
+
+```python
+drawdown_score = 1.0 - max_drawdown
+```
+
+* Added cross-sectional percentile ranking
+* Updated final ranking weights:
+
+```python
+Momentum      55%
+Quality       15%
+Persistence   15%
+Drawdown       5%
+Liquidity     10%
+```
+
+### Backtest Results
+
+Compared with P2 baseline:
+
+| Metric               | P2     | P3-B   |
+| -------------------- | ------ | ------ |
+| Total Return         | 32.27% | 35.87% |
+| Annual Return        | 15.58% | 17.19% |
+| Excess Return        | -1.98% | 1.97%  |
+| Annual Excess Return | -1.03% | 1.01%  |
+| Alpha                | 0.05   | 0.06   |
+| Beta                 | 0.55   | 0.54   |
+| Sharpe               | 0.96   | 1.11   |
+| Sortino              | 1.38   | 1.59   |
+| Max Drawdown         | 8.93%  | 7.68%  |
+| Information Ratio    | -0.09  | 0.08   |
+| Win Rate             | 53.67% | 56.62% |
+| Profit Factor        | 204.39 | 245.94 |
+| Avg Holding Days     | 21.05  | 23.88  |
+
+### Conclusion
+
+The Drawdown Quality factor significantly improved risk-adjusted returns and turned excess returns positive while maintaining a low beta profile.
+
+Decision:
+
+KEEP
+
+P3-A + P3-B are now part of the production ranking engine.
+
+
 ## 2026-06-24
 
 ## P2 ETF Selection Audit Completed

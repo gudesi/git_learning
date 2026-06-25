@@ -349,6 +349,53 @@ Potential Work:
 
 * Recalibrate ranking weights
 
+## P3-A
+
+增加：
+
+Trend Persistence
+
+回测
+
+Status:
+
+COMPLETED
+KEEP = TRUE
+
+## P3-B
+
+如果有效：
+
+增加：
+
+Drawdown Penalty
+
+再回测
+
+P3-B Drawdown Penalty
+
+Status:
+
+COMPLETED
+
+Result:
+
+KEEP
+
+## P3-C
+
+如果有效：
+
+增加：
+
+Slope Stability
+
+再回测
+
+## P3-D
+
+最后统一调权重
+
 ---
 
 # P4 - Walk-Forward Validation
