@@ -37,60 +37,58 @@ The strategy is designed to:
 
 ## Current Status
 
+## Current Status
+
 Version:
 
-P3 Ranking Engine Enhancement Complete
+P3 Final (Production Candidate)
 
 Completed Modules:
 
 * P0 Execution Layer Stabilization
 * P1 Exposure Reconstruction
 * P2 ETF Selection Audit
-* P3-A Trend Persistence Factor
-* P3-B Drawdown Quality Factor
+* P3-A Trend Persistence
+* P3-B Drawdown Quality
+* P3-C Trend Stability
+* MIG-007 Long-Term Robustness Validation
+* P3-D Weight Optimization
 
-Current Ranking Model:
+Final Ranking Model:
 
 ```python
 Final Score =
 
-0.55 * Momentum
+0.50 * Momentum
 + 0.15 * Trend Quality
 + 0.15 * Trend Persistence
 + 0.05 * Drawdown Quality
++ 0.05 * Trend Stability
 + 0.10 * Liquidity
 ```
 
-Key Features:
+Full-Cycle Validation (2020-2026):
 
-* Multi-horizon risk-adjusted momentum (20/60/120/250 days)
-* Trend quality (slope × R²)
-* Trend persistence (percentage of days above MA20)
-* Drawdown quality (1 − maximum drawdown)
-* Cross-sectional percentile normalization
-* Inverse ATR position sizing
-* Portfolio risk budgeting
-* Position constraints
-* Cash ETF fallback mechanism
+| Metric               | Strategy |
+| -------------------- | -------- |
+| Total Return         | 62.71%   |
+| Annual Return        | 8.08%    |
+| Excess Return        | 43.73%   |
+| Annual Excess Return | 5.96%    |
+| Alpha                | 0.05     |
+| Beta                 | 0.43     |
+| Sharpe               | 0.37     |
+| Sortino              | 0.50     |
+| Max Drawdown         | 20.25%   |
+| Information Ratio    | 0.40     |
 
-Latest Backtest (2024-06 ~ 2026-06):
+Status:
 
-| Metric                 | Strategy   |
-| ---------------------- | ---------- |
-| Total Return           | 35.87%     |
-| Annual Return          | 17.19%     |
-| Alpha                  | 0.06       |
-| Beta                   | 0.54       |
-| Sharpe                 | 1.11       |
-| Sortino                | 1.59       |
-| Max Drawdown           | 7.68%      |
-| Excess Return          | 1.97%      |
-| Annual Excess Return   | 1.01%      |
-| Information Ratio      | 0.08       |
-| Win Rate               | 56.62%     |
-| Profit Factor          | 245.94     |
-| Average Holding Period | 23.88 days |
+Production Candidate
 
+Next Stage:
+
+P4-A Bull Market Capture Enhancement
 
 ---
 

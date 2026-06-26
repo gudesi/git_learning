@@ -51,12 +51,14 @@ class Config:
     PERSISTENCE_MA_WINDOW = 20
 
     DRAWDOWN_LOOKBACK = 120
+    STABILITY_LOOKBACK = 120
 
     MOMENTUM_WEIGHTS = {20: 0.05, 60: 0.15, 120: 0.30, 250: 0.50}
-    MOMENTUM_SCORE_WEIGHT = 0.55
+    MOMENTUM_SCORE_WEIGHT = 0.50
     QUALITY_SCORE_WEIGHT = 0.15
     PERSISTENCE_SCORE_WEIGHT = 0.15
     DRAWDOWN_SCORE_WEIGHT = 0.05
+    STABILITY_SCORE_WEIGHT = 0.05
     LIQUIDITY_SCORE_WEIGHT = 0.10
 
     # 组合构建
@@ -258,6 +260,45 @@ def calc_max_drawdown_raw(
     # 回撤越小越接近1
     return 1.0 - max_dd
 
+@cached("trend_stability")
+def calc_trend_stability_raw(
+    symbol: str,
+    lookback: int = Config.STABILITY_LOOKBACK
+) -> Optional[float]:
+
+    close = get_close(symbol, lookback + 1)
+
+    if len(close) < lookback + 1:
+        return None
+
+    returns = []
+
+    for i in range(1, len(close)):
+
+        if close[i - 1] <= 0:
+            return None
+
+        returns.append(
+            close[i] / close[i - 1] - 1
+        )
+
+    if len(returns) < 2:
+        return None
+
+    mean_ret = sum(returns) / len(returns)
+
+    variance = sum(
+        (r - mean_ret) ** 2
+        for r in returns
+    ) / (len(returns) - 1)
+
+    std = math.sqrt(variance)
+
+    if std <= 0:
+        return None
+
+    return 1.0 / std
+
 @cached("adv")
 def calc_adv60(symbol: str, lookback: int = Config.LIQUIDITY_LOOKBACK) -> Optional[float]:
     turnover = get_turnover(symbol, lookback)
@@ -296,6 +337,7 @@ def precompute_universe() -> Dict[str, Any]:
     trend_q_raw = {}
     trend_persistence_raw = {}
     drawdown_raw = {}
+    stability_raw = {}
     adv60_dict = {}
 
     for sym in Config.RISK_ETFS:
@@ -318,6 +360,10 @@ def precompute_universe() -> Dict[str, Any]:
         if dd is not None:
             drawdown_raw[sym] = dd
 
+        st = calc_trend_stability_raw(sym)
+        if st is not None:
+            stability_raw[sym] = st
+
         adv = calc_adv60(sym)
         if adv is not None:
             adv60_dict[sym] = adv
@@ -339,6 +385,11 @@ def precompute_universe() -> Dict[str, Any]:
         [v for v in drawdown_raw.values() if v is not None]
     )
 
+    stability_cross = sorted(
+        v for v in stability_raw.values()
+        if v is not None
+    )
+
     liquidity_cross = sorted(
         [v for v in adv60_dict.values() if v is not None]
     )
@@ -348,12 +399,14 @@ def precompute_universe() -> Dict[str, Any]:
         "trend_quality_raw": trend_q_raw,
         "trend_persistence_raw": trend_persistence_raw,
         "drawdown_raw": drawdown_raw,
+        "stability_raw": stability_raw,
         "adv60": adv60_dict,
 
         "momentum_cross_sections": momentum_cross,
         "quality_cross_section": quality_cross,
         "persistence_cross_section": persistence_cross,
         "drawdown_cross_section": drawdown_cross,
+        "stability_cross_section": stability_cross,
         "liquidity_cross_section": liquidity_cross,
     }
     GLOBAL_CACHE[cache_key] = universe
@@ -418,6 +471,22 @@ def calc_drawdown_score(
 
     return _percentile_rank(raw, cross)
 
+def calc_stability_score(
+    symbol: str,
+    universe: Dict[str, Any]
+) -> Optional[float]:
+
+    raw = universe["stability_raw"].get(symbol)
+
+    cross = universe.get(
+        "stability_cross_section"
+    )
+
+    if raw is None or not cross:
+        return None
+
+    return _percentile_rank(raw, cross)
+
 def calc_liquidity_score(symbol: str, universe: Dict[str, Any]) -> Optional[float]:
     raw = universe["adv60"].get(symbol)
     cross = universe.get("liquidity_cross_section")
@@ -426,9 +495,9 @@ def calc_liquidity_score(symbol: str, universe: Dict[str, Any]) -> Optional[floa
     return _percentile_rank(raw, cross)
 
 def calc_final_score(
-    symbol: str,
-    universe: Dict[str, Any]
-) -> Optional[float]:
+    symbol,
+    universe
+):
 
     m = calc_momentum_score(symbol, universe)
 
@@ -438,9 +507,11 @@ def calc_final_score(
 
     d = calc_drawdown_score(symbol, universe)
 
+    s = calc_stability_score(symbol, universe)
+
     l = calc_liquidity_score(symbol, universe)
 
-    if None in (m, q, p, d, l):
+    if None in (m, q, p, d, s, l):
         return None
 
     return (
@@ -452,6 +523,8 @@ def calc_final_score(
         Config.PERSISTENCE_SCORE_WEIGHT * p +
 
         Config.DRAWDOWN_SCORE_WEIGHT * d +
+
+        Config.STABILITY_SCORE_WEIGHT * s +
 
         Config.LIQUIDITY_SCORE_WEIGHT * l
 
@@ -739,4 +812,3 @@ def strategy_main(context):
     # 5. 执行再平衡
     rebalance(context, risk_weights, cash_w)
     return True
-

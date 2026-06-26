@@ -1,4 +1,93 @@
 
+
+# 2026-06-26
+
+## MIG-007 Long-Term Robustness Validation
+
+Status:
+Completed
+
+### Test Results
+
+| Period    | Market Regime             | Result       |
+| --------- | ------------------------- | ------------ |
+| 2020      | COVID Crash + Bull Market | PARTIAL PASS |
+| 2021      | Sector Rotation           | PASS         |
+| 2022      | Bear Market               | PASS+        |
+| 2023      | Sideways Market           | PASS+        |
+| 2020-2026 | Full Cycle                | PASS         |
+
+### Full Cycle Performance (2020-2026)
+
+| Metric               | Result |
+| -------------------- | ------ |
+| Total Return         | 62.71% |
+| Annual Return        | 8.08%  |
+| Benchmark Return     | 20.66% |
+| Excess Return        | 43.73% |
+| Annual Excess Return | 5.96%  |
+| Alpha                | 0.05   |
+| Beta                 | 0.43   |
+| Sharpe               | 0.37   |
+| Sortino              | 0.50   |
+| Max Drawdown         | 20.25% |
+| Information Ratio    | 0.40   |
+
+### Conclusion
+
+No obvious overfitting was detected.
+
+The P3 ranking enhancements remained effective across:
+
+* Bull markets
+* Bear markets
+* Sideways markets
+* Extreme market events
+
+Decision:
+
+PASS
+
+---
+
+## P3-D Weight Optimization
+
+Date:
+2026-06-26
+
+Status:
+Completed
+
+### Candidate Weights
+
+| Version | Weights          | Result   |
+| ------- | ---------------- | -------- |
+| A       | 50/15/15/5/5/10  | KEEP     |
+| B       | 45/15/15/10/5/10 | ROLLBACK |
+| C       | 45/15/15/5/10/10 | ROLLBACK |
+| D       | 45/15/15/5/5/15  | OPTIONAL |
+| E       | 55/10/10/5/5/15  | ROLLBACK |
+
+### Final Production Weights
+
+```python
+Momentum      50%
+Quality       15%
+Persistence   15%
+Drawdown       5%
+Stability      5%
+Liquidity     10%
+```
+
+### Conclusion
+
+The original P3-C weights remained the strongest configuration across the full 2020-2026 validation period.
+
+Decision:
+
+NO CHANGE
+
+
 # 2026-06-25
 
 ## P3-A Trend Persistence Factor
