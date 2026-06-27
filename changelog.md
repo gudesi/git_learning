@@ -1,4 +1,51 @@
 
+# 2026-06-27
+
+## P4-C1 Bull Allocation Audit (In Progress)
+
+### Bull Market Filter Validation
+
+Backtests completed:
+
+2020:
+
+15.47% → 26.87%
+
+Sharpe:
+
+0.93 → 1.03
+
+2022:
+
+-12.02% → -10.73%
+
+Max drawdown:
+
+13.57% → 11.49%
+
+2024-2025:
+
+40.87% → 38.79%
+
+Sharpe:
+
+1.40 → 0.91
+
+Findings:
+
+Bull regime improvements significantly enhanced
+2020 and 2022 robustness,
+but reduced performance during the 2024-2025 AI-driven market.
+
+Preliminary observations:
+
+* Technology ETF (159819) exposure decreased.
+* Broad-market ETFs (510300, 510500) received larger allocations.
+* Gold ETF (518880) remained in bull allocations.
+
+P4-C1 remains open pending
+detailed allocation attribution analysis.
+
 
 # 2026-06-26
 

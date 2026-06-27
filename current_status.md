@@ -2,45 +2,45 @@
 
 Version:
 
-P3 Final (Production Candidate)
-
-Status:
-
-READY FOR P4 DEVELOPMENT
+P4-C1 Bull Allocation Audit (In Progress)
 
 Completed:
 
-✓ P0 Execution Layer Stabilization
+✓ P4-A Bull Market Filter
 
-✓ P1 Exposure Reconstruction
+✓ P4-B Bull Risk Scaling
 
-✓ P2 ETF Selection Audit
+Current Findings:
 
-✓ P3-A Trend Persistence
+2020 Bull Market:
 
-✓ P3-B Drawdown Quality
+Strategy return improved:
 
-✓ P3-C Trend Stability
+15.47% → 26.87%
 
-✓ MIG-007 Long-Term Robustness Validation
+2022 Bear Market:
 
-✓ P3-D Weight Optimization
+Strategy drawdown reduced:
 
-Final Ranking Weights:
+-12.02% → -10.73%
 
-Momentum      50%
-Quality       15%
-Persistence   15%
-Drawdown       5%
-Stability      5%
-Liquidity     10%
+2024-2025 Mixed Market:
 
-P3 Final Decision:
+Strategy performance deteriorated:
 
-KEEP
+40.87% → 38.79%
 
-Next Stage:
+Preliminary hypothesis:
 
-P4-A Bull Market Capture Enhancement
+Broad-market ETFs (510300/510500) and gold allocation (518880)
+may dilute high-growth technology exposure (159819)
+during strong bull markets.
+
+Next step:
+
+P4-C1 Bull Allocation Audit:
+
+Identify which assets reduce long-term bull-market alpha
+before considering allocation tilts (P4-C2).
 
 
