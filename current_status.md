@@ -2,45 +2,68 @@
 
 Version:
 
-P4-C1 Bull Allocation Audit (In Progress)
+P4-C1 Bull Allocation Audit Complete
 
-Completed:
+Current Baseline:
 
-✓ P4-A Bull Market Filter
+P4-B Bull Risk Scaling
 
-✓ P4-B Bull Risk Scaling
+Bull Market:
+risk_factor = 1.0
 
-Current Findings:
+Non-Bull Market:
+risk_factor = 0.5
 
-2020 Bull Market:
+No allocation tilt has been implemented yet.
 
-Strategy return improved:
+---
 
-15.47% → 26.87%
+Validated Periods:
 
-2022 Bear Market:
+2020:
+26.87%
 
-Strategy drawdown reduced:
+2022:
+-10.73%
 
--12.02% → -10.73%
+2024-2025:
+38.79%
 
-2024-2025 Mixed Market:
+---
 
-Strategy performance deteriorated:
+P4-C1 Findings:
 
-40.87% → 38.79%
+518880:
+Regime-dependent diversifier.
 
-Preliminary hypothesis:
+510500:
+Neutral broad-market exposure.
 
-Broad-market ETFs (510300/510500) and gold allocation (518880)
-may dilute high-growth technology exposure (159819)
-during strong bull markets.
+510300:
+Confirmed bull-market alpha drag.
 
-Next step:
+Tech-only portfolios:
+Failed across all validation periods.
 
-P4-C1 Bull Allocation Audit:
+---
 
-Identify which assets reduce long-term bull-market alpha
-before considering allocation tilts (P4-C2).
+Current Hypothesis:
+
+Large-cap value exposure
+may dilute returns during
+technology-led bull markets.
+
+The next step is:
+
+Reduce HS300 exposure
+during confirmed bull regimes
+without introducing
+technology concentration risk.
+
+---
+
+Next Task:
+
+P4-C2 Bull Large-Cap De-emphasis
 
 

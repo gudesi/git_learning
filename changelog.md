@@ -1,4 +1,162 @@
 
+# 2026-06-28
+
+## P4-C1 Bull Allocation Audit (Completed)
+
+Objective:
+
+Determine whether specific ETFs dilute returns during bull markets
+before implementing P4-C2 Bull Allocation Tilt.
+
+---
+
+### P4-C1-001 Remove Gold (518880)
+
+Results:
+
+2020:
+26.87% → 34.95%
+
+2022:
+-10.73% → -8.84%
+
+2024-2025:
+38.79% → 35.20%
+
+Conclusion:
+
+518880 is NOT a confirmed alpha drag.
+
+Gold behaves as a regime-dependent diversifier:
+
+- Dilutes some equity bull markets
+- Improves other market environments
+- Provides drawdown diversification
+
+Decision:
+
+Keep 518880 in the ETF universe.
+
+---
+
+### P4-C1-002 Remove HS300 (510300)
+
+Results:
+
+2020:
+26.87% → 25.53%
+
+2022:
+-10.73% → -10.73%
+
+2024-2025:
+38.79% → 45.67%
+
+Conclusion:
+
+510300 is a confirmed bull-market alpha drag.
+
+Evidence:
+
+- Minimal impact on 2020
+- No impact on 2022
+- Significant improvement during 2024-2025
+- Higher Sharpe, Sortino and Information Ratio
+- Lower maximum drawdown
+
+Decision:
+
+Mark 510300 as a candidate for reduced exposure
+during confirmed bull regimes.
+
+---
+
+### P4-C1-003 Remove CSI500 (510500)
+
+Results:
+
+2020:
+26.87% → 32.36%
+
+2022:
+-10.73% → -11.28%
+
+2024-2025:
+38.79% → 38.38%
+
+Conclusion:
+
+510500 is not a confirmed alpha drag.
+
+It acts as a neutral broad-market diversifier:
+
+- Helps some market environments
+- Hurts others
+- No material impact during 2024-2025
+
+Decision:
+
+Keep 510500 in the ETF universe.
+
+---
+
+### P4-C1-004 Tech Only Portfolio
+
+Configuration:
+
+RISK_ETFS = TECH_ETFS
+
+Results:
+
+2020:
+26.87% → -5.23%
+
+2022:
+-10.73% → -8.81%
+
+2024-2025:
+38.79% → 31.78%
+
+Conclusion:
+
+Technology concentration does not improve robustness.
+
+The strategy alpha comes from:
+
+Cross-sector rotation
+
+rather than
+
+pure technology exposure.
+
+Decision:
+
+Reject Tech Tilt as a future optimization direction.
+
+---
+
+P4-C1 Status:
+
+COMPLETED
+
+Key Findings:
+
+518880:
+Regime-dependent diversifier.
+
+510500:
+Neutral diversifier.
+
+510300:
+Confirmed bull-market alpha drag.
+
+Tech-only portfolios:
+Failed across all validation periods.
+
+Next Stage:
+
+P4-C2 Bull Large-Cap De-emphasis
+
 # 2026-06-27
 
 ## P4-C1 Bull Allocation Audit (In Progress)
