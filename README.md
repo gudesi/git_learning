@@ -486,13 +486,73 @@ ETF Attribution Analysis identified persistent negative contribution.
 
 ---
 
-### Current Phase
+### Current Phase:
 
-**P4-C2 Bull Large-Cap De-emphasis**
+P4-D Forward Stability Validation
 
-Objective:
+Recent Improvements:
 
-Reduce HS300 exposure during confirmed bull markets while preserving cross-sector diversification.
+- Bull-market broad ETF preference
+- Soft broad diversification penalties
+- Better support for multi-theme bull markets
+- Increased sector participation
+- Improved full-cycle risk-adjusted returns
+
+Latest Validation Results:
+
+2020:
+
+Return:
+
+28.55%
+
+Sharpe:
+
+1.11
+
+Max Drawdown:
+
+14.87%
+
+---
+
+2024-2025:
+
+Return:
+
+41.74%
+
+Sharpe:
+
+0.97
+
+Max Drawdown:
+
+11.08%
+
+---
+
+2020-2026:
+
+Return:
+
+99.74%
+
+Annualized:
+
+11.67%
+
+Sharpe:
+
+0.43
+
+Information Ratio:
+
+0.63
+
+Max Drawdown:
+
+23.48%
 
 ---
 

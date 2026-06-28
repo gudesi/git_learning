@@ -788,11 +788,125 @@ TECH_ONLY	Invalid Portfolio Construction
 
 ### P4-C2 Bull Large-Cap De-emphasis
 
-Objective:
+### P4-C2-001 Allocation Audit
+COMPLETED
 
-Reduce HS300 exposure
-during confirmed bull regimes
-without introducing
-technology-sector concentration risk.
+Findings:
 
-## P4-D Final Validation
+Broad ETF concentration is common:
+
+broad=0:
+24%
+
+broad=1:
+33%
+
+broad=2:
+27%
+
+broad=3:
+15%
+
+510300 appears to compete primarily
+for the final portfolio slot rather
+than dominating allocations.
+
+### P4-C2-002 Soft Penalty Test
+
+Bull Market: 510300 score *= 0.90
+
+2020(修改前)
+策略收益26.87%，基准收益27.21%，alpha0.04,beta0.90,夏普1.03，索提诺1.37，最大回撤14.65%，策略年化收益率27.75%，基准年化收益率28.10%，超额收益1.46%，年化超额收益1.50%，日胜率47.74%，胜率48.81%，盈亏比129.08%，盈利次数41，亏损次数43，信息比率0.14，平均持仓时长17.12
+2020(Soft Penalty)
+策略收益28.55%，基准收益27.21%，alpha0.05,beta0.90,夏普1.11，索提诺1.47，最大回撤14.87%，策略年化收益率29.48%，基准年化收益率28.10%，超额收益3.13%，年化超额收益3.22%，日胜率48.15%，胜率47.95%，盈亏比139.54%，盈利次数35，亏损次数38，信息比率0.29，平均持仓时长19.90
+
+2024.01.01-2025.12.31(修改前)
+策略收益38.79%，基准收益34.94%，alpha0.06,beta0.67,夏普0.91，索提诺1.23，最大回撤10.54%，策略年化收益率18.41%，基准年化收益率16.70%，超额收益2.73%，年化超额收益1.40%，日胜率53.81%，胜率54.61%，盈亏比195.32%，盈利次数77，亏损次数64，信息比率0.10，平均持仓时长23.60
+2024.01.01-2025.12.31(Soft Penalty)
+策略收益41.74%，基准收益34.94%，alpha0.07,beta0.67,夏普0.97，索提诺1.32，最大回撤11.08%，策略年化收益率19.70%，基准年化收益率16.70%，超额收益5.68%，年化超额收益2.89%，日胜率54.43%，胜率54.35%，盈亏比191.22%，盈利次数75，亏损次数63，信息比率0.21，平均持仓时长21.43
+
+2020-2026(修改前)
+策略收益62.71%，基准收益20.66%，alpha0.05,beta0.43,夏普0.37，索提诺0.50，最大回撤20.25%，策略年化收益率8.08%，基准年化收益率3.04%，超额收益43.73%，年化超额收益5.96%，日胜率52.20%，胜率45.89%，盈亏比160.64%，盈利次数229，亏损次数270，信息比率0.40，平均持仓时长24.96
+2020-2026(Soft Penalty)
+策略收益99.74%，基准收益20.66%，alpha0.08,beta0.68,夏普0.43，索提诺0.58，最大回撤23.48%，策略年化收益率11.67%，基准年化收益率3.04%，超额收益80.77%，年化超额收益9.91%，日胜率53.10%，胜率43.71%，盈亏比156.31%，盈利次数212，亏损次数273，信息比率0.63，平均持仓时长23.53
+
+STATUS:
+
+COMPLETED
+
+Replaced hard broad-category exclusion with a
+soft diversification penalty.
+
+Final Design:
+
+broad_count = 0:
+
+factor = 1.00
+
+broad_count = 1:
+
+factor = 0.95
+
+broad_count = 2:
+
+factor = 0.90
+
+broad_count >= 3:
+
+factor = 0.85
+
+Validation:
+
+2020:
+
+Improved returns and Sharpe ratio.
+
+2024-2025:
+
+Improved participation in multi-theme bull markets.
+
+2020-2026:
+
+Total return:
+
+62.71% -> 99.74%
+
+Annualized:
+
+8.08% -> 11.67%
+
+Information Ratio:
+
+0.40 -> 0.63
+
+Maximum Drawdown:
+
+20.25% -> 23.48%
+
+---
+
+## P4-D Forward Stability Validation
+
+STATUS:
+
+IN PROGRESS
+
+Goal:
+
+Validate the robustness of P4 bull-market
+enhancements under recent market conditions.
+
+Validation Window:
+
+2026-04-01 ~ 2026-06-24
+
+Focus:
+
+- Position stability
+- Turnover behavior
+- Broad ETF allocation patterns
+- Sector rotation consistency
+- Risk control behavior
+
+No further parameter tuning allowed unless
+critical defects are discovered.

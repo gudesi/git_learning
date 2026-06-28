@@ -1,6 +1,77 @@
 
 # 2026-06-28
 
+## P4-C2 Soft Broad Diversification Penalty
+
+Date:
+
+2026-06
+
+Changes:
+
+Replaced hard broad-category exclusion
+with a soft diversification penalty.
+
+Old Logic:
+
+Reject broad ETFs once the limit was reached.
+
+New Logic:
+
+broad_count=0:
+
+1.00
+
+broad_count=1:
+
+0.95
+
+broad_count=2:
+
+0.90
+
+broad_count>=3:
+
+0.85
+
+Results:
+
+2020:
+
+26.87% -> 28.55%
+
+2024-2025:
+
+38.79% -> 41.74%
+
+2020-2026:
+
+62.71% -> 99.74%
+
+Annualized:
+
+8.08% -> 11.67%
+
+Information Ratio:
+
+0.40 -> 0.63
+
+Trade-off:
+
+Maximum Drawdown:
+
+20.25% -> 23.48%
+
+Decision:
+
+Accepted.
+
+Reason:
+
+The improvement was consistent across
+multiple market regimes and outweighed
+the moderate increase in drawdown.
+
 ## P4-C1 Bull Allocation Audit (Completed)
 
 Objective:

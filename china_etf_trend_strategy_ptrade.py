@@ -321,9 +321,20 @@ def calc_final_score(symbol, universe):
     s = calc_stability_score(symbol, universe)
     l = calc_liquidity_score(symbol, universe)
     if None in (m, q, p, d, s, l): return None
-    return (Config.MOMENTUM_SCORE_WEIGHT * m + Config.QUALITY_SCORE_WEIGHT * q +
-            Config.PERSISTENCE_SCORE_WEIGHT * p + Config.DRAWDOWN_SCORE_WEIGHT * d +
-            Config.STABILITY_SCORE_WEIGHT * s + Config.LIQUIDITY_SCORE_WEIGHT * l)
+
+    score = (
+        Config.MOMENTUM_SCORE_WEIGHT * m
+        + Config.QUALITY_SCORE_WEIGHT * q
+        + Config.PERSISTENCE_SCORE_WEIGHT * p
+        + Config.DRAWDOWN_SCORE_WEIGHT * d
+        + Config.STABILITY_SCORE_WEIGHT * s
+        + Config.LIQUIDITY_SCORE_WEIGHT * l
+    )
+
+    if symbol == "510300.SS" and is_bull_market():
+        score *= 0.90
+
+    return score
 
 def get_etf_category(symbol):
 
@@ -355,25 +366,71 @@ def get_etf_category(symbol):
 # =========================================================
 def build_ranking_table(universe: Dict[str, Any]) -> List[Tuple[str, float]]:
     scored = []
+
     for sym in Config.RISK_ETFS:
+
         m = calc_momentum_score(sym, universe)
         q = calc_quality_score(sym, universe)
         p = calc_persistence_score(sym, universe)
         d = calc_drawdown_score(sym, universe)
         l = calc_liquidity_score(sym, universe)
+
         final = calc_final_score(sym, universe)
-        if final is None: continue
+
+        if final is None:
+            continue
+
         scored.append((sym, final))
+
     scored.sort(key=lambda x: x[1], reverse=True)
+
+    # =====================================================
+    # P4-C2 AUDIT Top Ranking Table
+    # =====================================================
+
+    top5_log = []
+
+    for rank, (sym, score) in enumerate(scored[:5], start=1):
+
+        top5_log.append(
+            f"{rank}:{sym}:{get_etf_category(sym)}:{score:.4f}"
+        )
+
+    log.info(
+        f"P4-C2 TOP5 "
+        f"{' | '.join(top5_log)}"
+    )
+
     return scored
 
 def passes_ranking_filter(symbol: str) -> bool:
     close = get_close(symbol, Config.RANKING_TREND_MA)
     return len(close) >= Config.RANKING_TREND_MA and close[-1] > (sum(close) / Config.RANKING_TREND_MA)
 
-def get_selected_etfs(universe: Dict[str, Any]) -> List[str]:
-    candidates = [(s, sc) for s, sc in build_ranking_table(universe) if passes_ranking_filter(s)]
-    return [s for s, _ in candidates[:Config.MAX_PORTFOLIO_SIZE]]
+def get_selected_etfs(universe):
+
+    candidates = [
+        (s, sc)
+        for s, sc in build_ranking_table(universe)
+        if passes_ranking_filter(s)
+    ]
+
+    selected = [s for s, _ in candidates[:Config.MAX_PORTFOLIO_SIZE]]
+
+    broad_count = 0
+
+    for s in selected:
+
+        if get_etf_category(s) == "BROAD":
+            broad_count += 1
+
+    log.info(
+        f"P4-C2 OCCUPANCY "
+        f"broad={broad_count} "
+        f"selected={selected}"
+    )
+
+    return selected
 
 # =========================================================
 # 权重生成与约束
@@ -575,6 +632,10 @@ def strategy_main(context):
     log.info("STRATEGY_MAIN")
     clear_cache()
     bull_market = is_bull_market()
+    log.info(
+        f"P4-C2 REGIME "
+        f"bull={bull_market}"
+    )    
     universe = precompute_universe()
     target_weights = get_target_weights(universe)
     # P4-C Bull Asset Allocation
@@ -595,3 +656,5 @@ def strategy_main(context):
     )
     rebalance(context, risk_weights, cash_w)
     return True
+
+calc_final_score
